@@ -422,6 +422,13 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   .reg-steps i { display: none; }
   .reg-steps i.ok { display: inline; }
 }
+.dl-box { display: flex; gap: 14px; align-items: center; justify-content: space-between; flex-wrap: wrap; padding: 14px 16px; border-radius: var(--r-md, 12px); border: 1.5px solid color-mix(in srgb, var(--teal) 35%, var(--line)); background: color-mix(in srgb, var(--teal) 6%, var(--surface)); }
+.dl-box > div { display: grid; gap: 3px; flex: 1; min-width: 220px; }
+.dl-box b { font-size: .98rem; }
+.dl-box span { font-size: .86rem; color: var(--ink-2); }
+.dl-box.ok { justify-content: flex-start; border-color: var(--teal); }
+.dl-badge { width: 34px; height: 34px; border-radius: 50%; background: var(--teal); color: #fff !important; display: grid; place-items: center; font-weight: 800; font-size: 1.05rem !important; flex: none; }
+.dl-warn { color: #b42318 !important; }
 </style>
 </head>
 <body>
@@ -498,6 +505,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 
 <script type="module">
 const FB = {"apiKey": "AIzaSyDjHI3lnffcl5Gi57Mu7Ctkk0ohv-VHOpU", "authDomain": "propmithra.firebaseapp.com", "projectId": "propmithra", "storageBucket": "propmithra.firebasestorage.app", "messagingSenderId": "984054022166", "appId": "1:984054022166:web:6f7bbeabbd1203e0fdf537"};
+const DIGILOCKER = false;
 const V = 'https://www.gstatic.com/firebasejs/10.12.2/';
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -557,6 +565,7 @@ const SECTIONS = [
   ]},
   {id: 'identity', title: 'Identification information', short: 'Identification', groups: [
     {title: 'Aadhaar card', note: 'For your privacy we only keep the last 4 digits. You can upload a masked Aadhaar (first 8 digits hidden) from the UIDAI website.', fields: [
+      {k: '_digilocker', label: 'Verify Aadhaar with DigiLocker', type: 'digilocker'},
       {k: 'identity.aadhaarLast4', label: 'Aadhaar — last 4 digits', req: 1, rx: 'last4', digits: 4},
       {k: 'docs.aadhaar', label: 'Upload Aadhaar (front & back in one photo or PDF)', type: 'doc', req: 1},
     ]},
@@ -653,6 +662,7 @@ const SECTIONS = [
   ]},
   {id: 'review', title: 'Review & submit', short: 'Review', groups: []},
 ];
+if (!DIGILOCKER) SECTIONS.forEach(s => s.groups.forEach(g => { g.fields = g.fields.filter(f => f.type !== 'digilocker'); }));
 const FIELDS = SECTIONS.flatMap(s => s.groups.flatMap(g => g.fields.map(f => ({...f, section: s.id, group: g}))));
 const FIELD = Object.fromEntries(FIELDS.map(f => [f.k, f]));
 const DOC_LABEL = {aadhaar: 'Aadhaar', pan: 'PAN card', rera: 'RERA certificate', gst: 'GST certificate', incorporation: 'Incorporation certificate', voter: 'Voter ID', licence: 'Driving licence', passport: 'Passport', photo: 'Photo', bank: 'Cheque / passbook'};
@@ -669,9 +679,11 @@ function valueOf(k) {
 let confirmAccount = '';
 const filled = (v) => !(v === undefined || v === null || v === '' || (typeof v === 'object' && !v.url && !(v.toDate)));
 
+const aadhaarOk = () => data.aadhaarVerified?.ok === true;
 function fieldError(f) {
   const v = valueOf(f.k);
-  if (f.admin || f.locked) return '';
+  if (f.admin || f.locked || f.type === 'digilocker') return '';
+  if (aadhaarOk() && (f.k === 'docs.aadhaar' || f.k === 'identity.aadhaarLast4')) return '';
   if (f.type === 'yesno') {
     if (f.req && v !== 'yes' && v !== 'no') return 'Please answer Yes or No';
     if (v === 'yes' && !String(get(data, f.details) || '').trim()) return 'Please add the details';
@@ -774,11 +786,66 @@ async function previewUrl(key) {
   previews.set(key, url); return url;
 }
 
+// ── DigiLocker (Aadhaar verification) ───────────────────────────────────
+let dlMsg = '';
+function digilockerHtml() {
+  const v = data.aadhaarVerified;
+  if (v?.ok) {
+    return `<div class="field wide"><div class="dl-box ok"><span class="dl-badge">✓</span><div>
+      <b>Aadhaar verified with DigiLocker</b>
+      <span>${esc(v.name || '')}${v.last4 ? ' · Aadhaar ending ' + esc(v.last4) : ''}</span>
+      ${v.nameMatch === false ? '<span class="dl-warn">The name on your Aadhaar is different from the name you entered. Please make sure your first and last name match your Aadhaar.</span>' : ''}
+    </div></div></div>`;
+  }
+  return `<div class="field wide"><div class="dl-box"><div>
+      <b>Verify instantly with DigiLocker</b>
+      <span>Sign in to DigiLocker with the OTP sent to your Aadhaar-linked mobile. We receive your verified name and address — no upload needed.</span>
+      ${dlMsg ? `<span class="dl-warn">${esc(dlMsg)}</span>` : ''}
+    </div>${locked ? '' : '<button type="button" class="btn btn-primary btn-sm" id="r-dl">Verify with DigiLocker</button>'}</div>
+    <span class="hint">Or enter the last 4 digits and upload your Aadhaar below.</span></div>`;
+}
+async function callFn(name, payload) {
+  const fns = await import(V + 'firebase-functions.js');
+  const f = fns.httpsCallable(fns.getFunctions(fb.appInst, 'asia-south1'), name);
+  return (await f(payload || {})).data;
+}
+function fnError(e) {
+  const m = e?.message || '';
+  if ((e?.code || '').includes('not-found') || (e?.code || '').includes('internal')) return 'DigiLocker verification is not available right now. Please upload your Aadhaar instead.';
+  return m.replace(/^FirebaseError:\s*/, '') || 'DigiLocker verification failed. Please try again.';
+}
+async function startDigilocker(btn) {
+  btn.disabled = true; btn.textContent = 'Opening DigiLocker…'; dlMsg = '';
+  try {
+    await flush();
+    const ret = location.origin + location.pathname + '?digilocker=1';
+    const {url} = await callFn('startDigilocker', {returnUrl: ret});
+    location.href = url;
+  } catch (e) { console.error(e); dlMsg = fnError(e); render(); }
+}
+async function finishDigilocker() {
+  history.replaceState(null, '', location.pathname);
+  current = SECTIONS.findIndex(s => s.id === 'identity'); dlMsg = 'Checking your DigiLocker verification…'; render();
+  try {
+    const r = await callFn('finishDigilocker');
+    if (r.status === 'VERIFIED') {
+      const snap = await fb.fs.getDoc(fb.fs.doc(fb.db, 'mithras', uid)); data = snap.data() || data; dlMsg = '';
+    } else {
+      dlMsg = {PENDING: 'DigiLocker was not completed. Please try again.', EXPIRED: 'The DigiLocker link expired (10 minutes). Please try again.',
+        CONSENT_DENIED: 'You chose not to share your Aadhaar. You can try again, or upload your Aadhaar below.',
+        AADHAAR_NOT_LINKED: 'Your DigiLocker account is not linked to an Aadhaar. Please upload your Aadhaar below.'}[r.status] || 'DigiLocker verification did not complete. Please try again or upload your Aadhaar.';
+    }
+  } catch (e) { console.error(e); dlMsg = fnError(e); }
+  render();
+}
+
 // ── Rendering ───────────────────────────────────────────────────────────
 function inputHtml(f) {
   const id = 'f-' + f.k.replace(/\./g, '-'), v = valueOf(f.k);
-  const dis = (locked || f.admin || f.locked) ? ' disabled' : '';
-  const req = f.req && !f.group.optional ? '<span class="req" aria-hidden="true">*</span>' : '';
+  if (f.type === 'digilocker') return digilockerHtml();
+  const dis = (locked || f.admin || f.locked || (aadhaarOk() && f.k === 'identity.aadhaarLast4')) ? ' disabled' : '';
+  const viaDl = aadhaarOk() && (f.k === 'docs.aadhaar' || f.k === 'identity.aadhaarLast4');
+  const req = f.req && !f.group.optional && !viaDl ? '<span class="req" aria-hidden="true">*</span>' : (viaDl && f.type === 'doc' ? ' <span class="opt">Optional — verified</span>' : '');
   const label = `<label for="${id}">${esc(f.label)}${req}</label>`;
   const err = `<span class="err" id="${id}-err"></span>`;
   const help = f.help ? `<span class="hint">${esc(f.help)}</span>` : '';
@@ -890,6 +957,7 @@ function bindFields() {
     catch (e) { console.error(e); docErrors.set(f.k.slice(5), /^(This|Please)/.test(e.message || '') ? e.message : 'Upload failed. Please check your internet and try again.'); }
     render();
   }));
+  const dl = $('r-dl'); if (dl) dl.onclick = () => startDigilocker(dl);
   form.querySelectorAll('[data-view]').forEach(b => b.onclick = async () => {
     b.disabled = true; try { const u = await previewUrl(b.dataset.view); if (u) window.open(u, '_blank'); } finally { b.disabled = false; } });
   form.querySelectorAll('[data-show]').forEach(b => b.onclick = () => { const g = form.querySelector(`[data-group="${b.dataset.show}"]`); g.hidden = false; b.remove(); g.querySelector('input,select')?.focus(); });
@@ -995,7 +1063,7 @@ function show(id) { ['r-loading', 'r-signedout', 'r-error', 'r-app'].forEach(x =
   try {
     const [app, auth, fs] = await Promise.all([import(V + 'firebase-app.js'), import(V + 'firebase-auth.js'), import(V + 'firebase-firestore.js')]);
     const a = app.initializeApp(FB);
-    fb = {app, auth, fs, au: auth.getAuth(a), db: fs.getFirestore(a)};
+    fb = {app, auth, fs, appInst: a, au: auth.getAuth(a), db: fs.getFirestore(a)};
   } catch (e) { console.error(e); $('r-error-text').textContent = 'The registration form could not load. Please check your internet connection and refresh.'; show('r-error'); return; }
   $('r-signout').onclick = async () => { await flush(); await fb.auth.signOut(fb.au); location.href = 'join.html'; };
   fb.auth.onAuthStateChanged(fb.au, async (user) => {
@@ -1021,6 +1089,7 @@ function show(id) { ['r-loading', 'r-signedout', 'r-error', 'r-app'].forEach(x =
       applyStatus();
       if (data.status === 'submitted' || data.status === 'approved') current = SECTIONS.length - 1;
       show('r-app'); render(); setSave('All changes saved', 'ok');
+      if (DIGILOCKER && new URLSearchParams(location.search).has('digilocker') && !locked) finishDigilocker();
       // Live: show the admin's decision the moment it is made.
       fs.onSnapshot(ref, (s) => {
         const d = s.data() || {}; const changed = d.status !== data.status || d.mithraId !== data.mithraId;

@@ -422,6 +422,13 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
   .reg-steps i { display: none; }
   .reg-steps i.ok { display: inline; }
 }
+.dl-box { display: flex; gap: 14px; align-items: center; justify-content: space-between; flex-wrap: wrap; padding: 14px 16px; border-radius: var(--r-md, 12px); border: 1.5px solid color-mix(in srgb, var(--teal) 35%, var(--line)); background: color-mix(in srgb, var(--teal) 6%, var(--surface)); }
+.dl-box > div { display: grid; gap: 3px; flex: 1; min-width: 220px; }
+.dl-box b { font-size: .98rem; }
+.dl-box span { font-size: .86rem; color: var(--ink-2); }
+.dl-box.ok { justify-content: flex-start; border-color: var(--teal); }
+.dl-badge { width: 34px; height: 34px; border-radius: 50%; background: var(--teal); color: #fff !important; display: grid; place-items: center; font-weight: 800; font-size: 1.05rem !important; flex: none; }
+.dl-warn { color: #b42318 !important; }
 </style>
 </head>
 <body>
