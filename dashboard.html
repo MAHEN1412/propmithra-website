@@ -502,6 +502,32 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .pbox.add span { font-size: 1.6rem; font-weight: 700; line-height: 1; }
 .pbox.add small { font-size: .78rem; font-weight: 600; }
 #l-photo-err { color: #b42318; font-size: .84rem; display: block; margin-top: 6px; }
+
+.acct-btn { gap: 8px; padding-left: 6px !important; }
+.acct-btn .av { width: 28px; height: 28px; border-radius: 50%; background: var(--teal); color: #fff; display: grid; place-items: center; font-size: .82rem; font-weight: 700; }
+.dash-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-bottom: 22px; }
+@media (max-width: 620px) { .dash-actions { grid-template-columns: 1fr; } }
+.action-tile { display: flex; align-items: center; gap: 14px; padding: 18px 20px; border-radius: var(--r-lg); border: 0; background: var(--teal); color: #fff; text-align: left; cursor: pointer; font: inherit; transition: transform .15s, box-shadow .15s; }
+.action-tile:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(0, 80, 60, .18); }
+.action-tile.alt { background: #0b2b2a; }
+.action-tile .ai { width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,.18); display: grid; place-items: center; font-size: 1.6rem; font-weight: 700; flex: none; }
+.action-tile b { display: block; font-size: 1.08rem; }
+.action-tile small { color: rgba(255,255,255,.82); font-size: .86rem; }
+.tabs { display: flex; gap: 6px; border-bottom: 1px solid var(--line); margin-bottom: 14px; overflow-x: auto; }
+.tab { border: 0; background: none; font: 600 .98rem var(--font); color: var(--ink-3); padding: 10px 14px; border-bottom: 3px solid transparent; cursor: pointer; white-space: nowrap; }
+.tab span { display: inline-grid; place-items: center; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 99px; background: var(--canvas); border: 1px solid var(--line); font-size: .76rem; margin-left: 4px; }
+.tab.on { color: var(--teal); border-bottom-color: var(--teal); }
+.tab.on span { background: var(--teal); color: #fff; border-color: var(--teal); }
+[data-pane][hidden] { display: none; }
+[data-pane] > p { margin: 0 0 12px; }
+.rcard .lbody { padding: 16px; }
+.rwant { font-size: .74rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--teal); }
+.price-input .unit { border-left: 1px solid var(--line); background: var(--surface); font-weight: 600; font-size: .9rem; padding: 0 14px; }
+.vis-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 620px) { .vis-2 { grid-template-columns: 1fr; } }
+.dash { grid-template-columns: minmax(0, 1fr); }
+.dash > *, .id-card > div { min-width: 0; }
+@media (max-width: 480px) { .id-no { font-size: 1.1rem; letter-spacing: .03em; } .id-actions { margin-left: 0; width: 100%; } .id-actions .btn { flex: 1; } }
 </style>
 </head>
 <body>
@@ -512,7 +538,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
     </button>
     <ul class="nav-links"><li><a href="index.html">Home</a></li><li><a href="brokers.html">For Brokers</a></li><li><a href="developers.html">For Developers</a></li><li><a href="clients.html">Clients</a></li><li><a href="contact.html">Contact</a></li><li><a href="blog/index.html">Blog</a></li></ul>
-    <div class="nav-cta">
+    <div class="nav-cta" data-root="">
       <a class="btn btn-ghost" href="join.html?signin=1&amp;next=dashboard">Log in</a>
       <a class="btn btn-primary" href="join.html">Join free</a>
     </div>
@@ -524,7 +550,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
     <span class="crumb"><a href="index.html">Home</a> / My account</span>
     <span class="eyebrow">My PropMithra</span>
     <h1 id="d-hello">My account</h1>
-    <p class="lead" id="d-lead">Your Mithra registration and your property listings.</p>
+    <p class="lead" id="d-lead">Your Mithra registration, listings and customer requirements.</p>
   </div>
 </section>
 
@@ -548,14 +574,66 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
       <!-- Status -->
       <div class="dash-status" id="d-status"></div>
 
-      <!-- Listings (approved Mithras) -->
+      <!-- Approved Mithras: actions + my listings / requirements -->
       <div id="d-listings-wrap" hidden>
-        <div class="dash-head">
-          <div><h2>My listings</h2><p class="muted" id="d-count">Your properties on the PropMithra network.</p></div>
-          <button class="btn btn-primary" type="button" id="d-add">+ Add listing</button>
+        <div class="dash-actions">
+          <button class="action-tile" type="button" id="d-add"><span class="ai">+</span><span><b>Add listing</b><small>A property you have — sale, rent or lease</small></span></button>
+          <button class="action-tile alt" type="button" id="d-add-req"><span class="ai">+</span><span><b>Customer requirement</b><small>A customer looking for a property</small></span></button>
         </div>
-        <div class="listing-grid" id="d-listings"></div>
+        <div class="tabs" role="tablist">
+          <button type="button" role="tab" class="tab on" data-tab="listings">My listings <span id="t-listings">0</span></button>
+          <button type="button" role="tab" class="tab" data-tab="reqs">Customer requirements <span id="t-reqs">0</span></button>
+        </div>
+        <div data-pane="listings">
+          <p class="muted" id="d-count">Your properties on the PropMithra network.</p>
+          <div class="listing-grid" id="d-listings"></div>
+        </div>
+        <div data-pane="reqs" hidden>
+          <p class="muted" id="r-count">Customers you are finding a property for. Brokers with a matching property can contact you.</p>
+          <div class="listing-grid" id="d-reqs"></div>
+        </div>
       </div>
+
+      <!-- Customer requirement form -->
+      <form class="listing-form" id="q-form" hidden novalidate>
+        <div class="dash-head">
+          <div><h2>Customer requirement</h2><p class="muted">Brokers see what your customer needs — never who the customer is.</p></div>
+          <button class="btn btn-ghost" type="button" data-q-cancel>Cancel</button>
+        </div>
+        <fieldset class="reg-group"><legend>Customer <span class="opt">Private — only you</span></legend>
+          <div class="reg-fields">
+            <div class="field"><label for="q-cname">Customer name</label><input id="q-cname" placeholder="e.g. Suresh"></div>
+            <div class="field"><label for="q-cphone">Customer mobile</label><input id="q-cphone" inputmode="tel"></div>
+          </div>
+        </fieldset>
+        <fieldset class="reg-group"><legend>Looking for</legend>
+          <div class="reg-fields">
+            <div class="field"><label for="q-transaction">Wants to<span class="req">*</span></label><select id="q-transaction"><option value="sale">Buy</option><option value="rent">Rent</option><option value="lease">Lease</option></select></div>
+            <div class="field"><label for="q-type">Property type<span class="req">*</span></label><select id="q-type"></select></div>
+            <div class="field" data-qbhk><label for="q-bhk">Bedrooms (BHK)</label><select id="q-bhk"><option value="">Any</option><option value="1">1 BHK</option><option value="2">2 BHK</option><option value="3" selected>3 BHK</option><option value="4">4 BHK</option><option value="5">5+ BHK</option></select></div>
+            <div class="field"><label for="q-furnishing">Furnishing</label><select id="q-furnishing"><option value="">Any</option><option value="unfurnished">Unfurnished</option><option value="semi">Semi-furnished</option><option value="full">Fully furnished</option></select></div>
+            <div class="field wide"><span class="q">Preferred localities<span class="req">*</span> <small class="muted">— pick one or more</small></span><div class="chips" id="q-localities"></div><span class="err" data-err-for="q-localities"></span></div>
+            <div class="field"><label for="q-bmin">Budget from<span class="req">*</span></label>
+              <div class="price-input"><span>₹</span><input id="q-bmin" inputmode="decimal" placeholder="e.g. 90"><select id="q-unit" aria-label="Budget unit"><option value="10000000">Crore</option><option value="100000" selected>Lakh</option><option value="1">Rupees</option></select></div><span class="err" data-err-for="q-bmin"></span></div>
+            <div class="field"><label for="q-bmax">Budget up to<span class="req">*</span></label>
+              <div class="price-input"><span>₹</span><input id="q-bmax" inputmode="decimal" placeholder="e.g. 130"><span class="unit" id="q-unit-label">Lakh</span></div><span class="hint" id="q-budget-hint"></span><span class="err" data-err-for="q-bmax"></span></div>
+            <div class="field"><label for="q-amin">Area from (sq.ft)</label><input id="q-amin" inputmode="numeric" placeholder="e.g. 1500"></div>
+            <div class="field"><label for="q-amax">Area up to (sq.ft)</label><input id="q-amax" inputmode="numeric" placeholder="e.g. 2200"></div>
+            <div class="field"><label for="q-purpose">Purpose</label><select id="q-purpose"><option value="residential">To live in</option><option value="investment">Investment</option><option value="commercial">Commercial</option><option value="office">Office</option><option value="retail">Retail</option></select></div>
+            <div class="field"><label for="q-urgency">How soon</label><select id="q-urgency"><option value="immediate">Immediately</option><option value="days30" selected>Within 30 days</option><option value="months3">Within 3 months</option><option value="flexible">Flexible</option></select></div>
+            <label class="check wide"><input type="checkbox" id="q-ready"><span>Ready to move in only</span></label>
+            <div class="field wide"><label for="q-notes">Notes for brokers</label><textarea id="q-notes" rows="3" maxlength="800" placeholder="e.g. East facing preferred, near a good school, high floor"></textarea></div>
+          </div>
+        </fieldset>
+        <fieldset class="reg-group"><legend>Who can see it</legend>
+          <div class="vis vis-2">
+            <label class="vis-opt"><input type="radio" name="qvis" value="network" checked><b>My network</b><small>Brokers with a matching property can reach you</small></label>
+            <label class="vis-opt"><input type="radio" name="qvis" value="private"><b>Private</b><small>Only you — for your own tracking</small></label>
+          </div>
+        </fieldset>
+        <p class="form-msg" id="q-msg" role="alert"></p>
+        <div class="reg-foot"><button class="btn btn-ghost" type="button" data-q-cancel>Cancel</button><button class="btn btn-primary" type="submit" id="q-save">Post requirement</button></div>
+      </form>
 
       <!-- Add listing form -->
       <form class="listing-form" id="d-form" hidden novalidate>
@@ -661,7 +739,10 @@ const AVAIL = {available: 'Available', hold: 'On hold', sold: 'Sold', rented: 'R
 const VIS = {network: 'My network', collaboration: 'On collaboration', private: 'Private', selected: 'Selected brokers'};
 const MAX_PHOTOS = 5, MAX_BYTES = 900 * 1024;
 
-let fb, uid, user, mithra = {}, broker = {}, listings = [], photos = [];
+let fb, uid, user, mithra = {}, broker = {}, listings = [], photos = [], reqs = [];
+const PURPOSE = {residential: 'To live in', investment: 'Investment', commercial: 'Commercial', office: 'Office', retail: 'Retail'};
+const URGENCY = {immediate: 'Immediately', days30: 'Within 30 days', months3: 'Within 3 months', flexible: 'Flexible'};
+const WANTS = {sale: 'buy', rent: 'rent', lease: 'lease'};
 
 function inr(v) {
   if (!v) return '₹0';
@@ -696,9 +777,9 @@ function renderStatus() {
     $('d-status').innerHTML = `<div class="status-card ${card[0]}"><div><b>${card[1]}</b><span>${card[2]}</span></div>
       <div class="btn-row">${card[3]}<button class="btn btn-ghost" type="button" id="d-signout">Log out</button></div></div>`;
   }
-  $('d-signout').onclick = async () => { await fb.auth.signOut(fb.au); location.href = 'index.html'; };
+  $('d-signout').onclick = async () => { await fb.auth.signOut(fb.au); window.pmSession?.(null); location.href = 'index.html'; };
   $('d-listings-wrap').hidden = !approved();
-  $('d-lead').textContent = approved() ? 'Manage your property listings. They appear to brokers across the PropMithra network.' : 'Your Mithra registration status.';
+  $('d-lead').textContent = approved() ? 'Post properties you have and customers you are finding properties for — both reach brokers across the PropMithra network.' : 'Your Mithra registration status.';
 }
 async function loadPhoto() {
   const url = mithra.docs?.photo?.url; if (!url) return;
@@ -715,7 +796,12 @@ async function blobUrl(url) {
 }
 
 // ── My listings ─────────────────────────────────────────────────────────
+function tab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.tab === name));
+  document.querySelectorAll('[data-pane]').forEach(p => p.hidden = p.dataset.pane !== name);
+}
 function renderListings() {
+  $('t-listings').textContent = listings.length;
   const box = $('d-listings');
   $('d-count').textContent = listings.length ? `${listings.length} listing${listings.length > 1 ? 's' : ''} · visible in the PropMithra app too.` : 'Your properties on the PropMithra network.';
   if (!listings.length) {
@@ -798,8 +884,8 @@ function setupForm() {
   renderPhotos();
 }
 function priceRupees() { const v = parseFloat(String($('l-price').value).replace(/,/g, '')); return isNaN(v) || v <= 0 ? 0 : Math.round(v * Number($('l-unit').value)); }
-function openForm() { $('d-form').hidden = false; $('d-listings-wrap').hidden = true; $('d-form').scrollIntoView({behavior: 'smooth'}); }
-function closeForm() { $('d-form').reset(); photos = []; renderPhotos(); $('l-other-wrap').hidden = true; $('l-msg').textContent = ''; $('d-form').hidden = true; $('d-listings-wrap').hidden = false; $('l-type').onchange(); }
+function openForm() { $('q-form').hidden = true; $('d-form').hidden = false; $('d-listings-wrap').hidden = true; $('d-form').scrollIntoView({behavior: 'smooth'}); }
+function closeForm() { $('d-form').reset(); photos = []; renderPhotos(); $('l-other-wrap').hidden = true; $('l-msg').textContent = ''; $('d-form').hidden = true; $('d-listings-wrap').hidden = false; $('l-type').onchange(); tab('listings'); }
 
 function renderPhotos() {
   const row = $('l-photos');
@@ -891,6 +977,117 @@ async function save(ev) {
   } finally { btn.disabled = false; btn.textContent = 'Publish listing'; }
 }
 
+// ── Customer requirements ───────────────────────────────────────────────
+function budgetText(r) { return r.budgetMin && r.budgetMin !== r.budgetMax ? `${inr(r.budgetMin)} – ${inr(r.budgetMax)}` : `up to ${inr(r.budgetMax)}`; }
+function renderReqs() {
+  $('t-reqs').textContent = reqs.length;
+  const box = $('d-reqs');
+  if (!reqs.length) {
+    box.innerHTML = `<div class="empty-card"><b>No customer requirements yet</b><span>Have a customer looking to buy or rent? Post what they need — brokers with a matching property can reach you.</span><button class="btn btn-primary" type="button" data-addreq>+ Customer requirement</button></div>`;
+    box.querySelector('[data-addreq]').onclick = openReq; return;
+  }
+  box.innerHTML = reqs.map(r => `<article class="lcard rcard" data-id="${esc(r.id)}">
+      <div class="lbody">
+        <span class="rwant">${esc(r.transaction === 'sale' ? 'Wants to buy' : 'Wants to ' + (WANTS[r.transaction] || r.transaction))}</span>
+        <b>${esc(r.title)}</b>
+        <div class="lprice">${esc(budgetText(r))}${r.transaction !== 'sale' ? '<small>/mo</small>' : ''}</div>
+        <span class="muted">${esc((r.localities || []).join(', '))}</span>
+        ${r.customer?.name ? `<span class="muted">Customer: ${esc(r.customer.name)}${r.customer.phone ? ' · ' + esc(r.customer.phone) : ''}</span>` : ''}
+        <div class="tags"><span class="tag ${r.active ? 'ok' : ''}">${r.active ? 'Active' : 'Closed'}</span><span class="tag">${esc(URGENCY[r.urgency] || '')}</span><span class="tag">${esc(VIS[r.visibility] || r.visibility)}</span></div>
+        <div class="lactions"><button type="button" class="link-btn" data-toggle>${r.active ? 'Mark closed' : 'Reopen'}</button><button type="button" class="link-btn danger" data-del>Delete</button></div>
+      </div></article>`).join('');
+  box.querySelectorAll('.rcard').forEach(card => {
+    const r = reqs.find(x => x.id === card.dataset.id);
+    card.querySelector('[data-toggle]').onclick = () => toggleReq(r);
+    card.querySelector('[data-del]').onclick = () => removeReq(r, card);
+  });
+}
+async function loadReqs() {
+  const {fs, db} = fb;
+  const snap = await fs.getDocs(fs.query(fs.collection(db, 'requirements'), fs.where('brokerId', '==', uid)));
+  reqs = snap.docs.map(d => ({id: d.id, ...d.data()})).sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0));
+  await Promise.all(reqs.map(async r => { try { const c = await fs.getDoc(fs.doc(db, 'requirements', r.id, 'private', 'customer')); r.customer = c.exists() ? c.data() : null; } catch (_) {} }));
+  renderReqs();
+}
+async function toggleReq(r) {
+  try {
+    const {fs, db} = fb, active = !r.active;
+    await fs.updateDoc(fs.doc(db, 'requirements', r.id), {active, listed: active && r.visibility !== 'private', updatedAt: fs.serverTimestamp()});
+    r.active = active; r.listed = active && r.visibility !== 'private'; renderReqs();
+  } catch (e) { console.error(e); $('r-count').textContent = 'Could not update. Please try again.'; }
+}
+async function removeReq(r, card) {
+  if (!confirm(`Delete "${r.title}"?`)) return;
+  card.style.opacity = .5;
+  try {
+    const {fs, db} = fb;
+    await fs.deleteDoc(fs.doc(db, 'requirements', r.id, 'private', 'customer')).catch(() => {});
+    await fs.deleteDoc(fs.doc(db, 'requirements', r.id));
+    reqs = reqs.filter(x => x.id !== r.id); renderReqs();
+  } catch (e) { console.error(e); card.style.opacity = 1; }
+}
+function setupReqForm() {
+  $('q-type').innerHTML = TYPES.map(t => `<option value="${t[0]}">${t[1]}</option>`).join('');
+  $('q-localities').innerHTML = LOCALITIES.map(l => `<label class="chip"><input type="checkbox" value="${esc(l[0])}"><span>${esc(l[0])}</span></label>`).join('');
+  const syncType = () => document.querySelectorAll('[data-qbhk]').forEach(e => e.hidden = !HAS_BHK.has($('q-type').value));
+  $('q-type').onchange = syncType; syncType();
+  const unitName = () => ({10000000: 'Crore', 100000: 'Lakh', 1: 'Rupees'})[$('q-unit').value];
+  const hint = () => { $('q-unit-label').textContent = unitName(); const [a, b] = budget(); $('q-budget-hint').textContent = b ? (a ? `${inr(a)} – ${inr(b)}` : `up to ${inr(b)}`) + ($('q-transaction').value !== 'sale' ? ' per month' : '') : ''; };
+  ['q-bmin', 'q-bmax'].forEach(id => $(id).addEventListener('input', () => { hint(); fieldErr(id, ''); }));
+  $('q-unit').onchange = hint;
+  $('q-transaction').onchange = () => { if ($('q-transaction').value !== 'sale') $('q-unit').value = '1'; hint(); };
+  ['q-amin', 'q-amax'].forEach(id => $(id).addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g, ''); }));
+  $('q-localities').addEventListener('change', () => fieldErr('q-localities', ''));
+  document.querySelectorAll('[data-q-cancel]').forEach(b => b.onclick = closeReq);
+  $('d-add-req').onclick = openReq;
+  $('q-form').onsubmit = saveReq;
+}
+function budget() {
+  const u = Number($('q-unit').value), n = (id) => { const v = parseFloat(String($(id).value).replace(/,/g, '')); return isNaN(v) || v <= 0 ? 0 : Math.round(v * u); };
+  return [n('q-bmin'), n('q-bmax')];
+}
+function openReq() { $('d-form').hidden = true; $('q-form').hidden = false; $('d-listings-wrap').hidden = true; $('q-form').scrollIntoView({behavior: 'smooth'}); }
+function closeReq() { $('q-form').reset(); $('q-msg').textContent = ''; $('q-form').querySelectorAll('.err').forEach(e => e.textContent = ''); $('q-form').hidden = true; $('d-listings-wrap').hidden = false; $('q-type').onchange(); $('q-unit-label').textContent = 'Lakh'; $('q-budget-hint').textContent = ''; }
+async function saveReq(ev) {
+  ev.preventDefault();
+  const [bmin, bmax] = budget(), locs = [...document.querySelectorAll('#q-localities input:checked')].map(i => i.value);
+  let ok = true;
+  fieldErr('q-localities', locs.length ? '' : 'Choose at least one locality'); ok = ok && locs.length > 0;
+  fieldErr('q-bmax', bmax > 0 ? '' : 'Enter the maximum budget'); ok = ok && bmax > 0;
+  fieldErr('q-bmin', bmin <= bmax || !bmax ? '' : '"From" should be less than "up to"'); ok = ok && (bmin <= bmax || !bmax);
+  if (!ok) { $('q-msg').textContent = 'Please fill in the highlighted fields.'; $('q-form').querySelector('.err:not(:empty)')?.closest('.field')?.scrollIntoView({behavior: 'smooth', block: 'center'}); return; }
+  const btn = $('q-save'); btn.disabled = true; btn.textContent = 'Posting…'; $('q-msg').textContent = '';
+  try {
+    const {fs, db} = fb, ref = fs.doc(fs.collection(db, 'requirements'));
+    const type = $('q-type').value, transaction = $('q-transaction').value;
+    const bhk = HAS_BHK.has(type) && $('q-bhk').value ? Number($('q-bhk').value) : null;
+    const visibility = document.querySelector('input[name="qvis"]:checked').value;
+    const where = locs.length > 2 ? `${locs.slice(0, 2).join(', ')} +${locs.length - 2}` : locs.join(', ');
+    const title = `${bhk ? bhk + ' BHK ' : ''}${TYPE_LABEL[type]} to ${WANTS[transaction]} in ${where}`;
+    const int = (id) => { const v = parseInt($(id).value, 10); return isNaN(v) ? null : v; };
+    const doc = {
+      brokerId: uid, title, customerRef: 'CUST-' + Math.random().toString(36).slice(2, 6).toUpperCase(),
+      type, transaction, city: 'Hyderabad', localities: locs, budgetMin: bmin || 0, budgetMax: bmax,
+      purpose: $('q-purpose').value, urgency: $('q-urgency').value, bhk, areaMin: int('q-amin'), areaMax: int('q-amax'),
+      furnishing: $('q-furnishing').value || null, readyToMove: $('q-ready').checked, notes: $('q-notes').value.trim(),
+      visibility, active: true, listed: visibility !== 'private', source: 'website',
+      createdAt: fs.serverTimestamp(), updatedAt: fs.serverTimestamp(),
+    };
+    await fs.setDoc(ref, doc);
+    const customer = {name: $('q-cname').value.trim() || null, phone: $('q-cphone').value.trim() || null};
+    if (customer.name || customer.phone) await fs.setDoc(fs.doc(db, 'requirements', ref.id, 'private', 'customer'), customer);
+    const who = broker.name || user.displayName || 'A broker';
+    fs.addDoc(fs.collection(db, 'activity'), {type: 'requirement_posted', actorId: uid, actorName: who, summary: `${who} posted a requirement: ${title} (website)`, targetId: ref.id, targetType: 'requirement', at: fs.serverTimestamp()}).catch(() => {});
+    reqs.unshift({id: ref.id, ...doc, customer, createdAt: null});
+    closeReq(); tab('reqs'); renderReqs();
+    $('r-count').textContent = '✓ Requirement posted — brokers with a matching property can reach you.';
+    window.scrollTo({top: $('d-listings-wrap').offsetTop - 90, behavior: 'smooth'});
+  } catch (e) {
+    console.error(e);
+    $('q-msg').textContent = (e.code || '').includes('permission') ? 'Posting requirements is not unlocked for your account yet. Please contact PropMithra.' : 'Could not post the requirement. Please check your internet and try again.';
+  } finally { btn.disabled = false; btn.textContent = 'Post requirement'; }
+}
+
 // ── Start ───────────────────────────────────────────────────────────────
 (async () => {
   try {
@@ -899,18 +1096,23 @@ async function save(ev) {
     fb = {app, auth, fs, au: auth.getAuth(a), db: fs.getFirestore(a)};
   } catch (e) { console.error(e); show('d-error'); return; }
   fb.auth.onAuthStateChanged(fb.au, async (u) => {
-    if (!u) { show('d-signedout'); return; }
+    if (!u) { window.pmSession?.(null); show('d-signedout'); return; }
     user = u; uid = u.uid;
     try {
       const {fs, db} = fb;
       const [m, b] = await Promise.all([fs.getDoc(fs.doc(db, 'mithras', uid)), fs.getDoc(fs.doc(db, 'brokers', uid))]);
       mithra = m.exists() ? m.data() : {}; broker = b.exists() ? b.data() : {};
-      show('d-app'); setupForm(); renderStatus();
-      if (approved()) { await loadListings(); if (location.hash === '#add') openForm(); }
+      window.pmSession?.({name: [mithra.personal?.firstName, mithra.personal?.lastName].filter(Boolean).join(' ') || broker.name || u.displayName || ''});
+      show('d-app'); setupForm(); setupReqForm(); renderStatus();
+      document.querySelectorAll('.tab').forEach(t => t.onclick = () => tab(t.dataset.tab));
+      if (approved()) {
+        await Promise.all([loadListings(), loadReqs().catch(e => console.warn('requirements', e))]);
+        if (location.hash === '#add') openForm(); else if (location.hash === '#requirement') openReq(); else if (location.hash === '#requirements') tab('reqs');
+      }
       // Live: approval appears the moment the admin approves.
       fs.onSnapshot(fs.doc(db, 'mithras', uid), async (s) => {
         const was = approved(); mithra = s.exists() ? s.data() : {};
-        renderStatus(); if (!was && approved()) await loadListings();
+        renderStatus(); if (!was && approved()) { await loadListings(); loadReqs().catch(() => {}); }
       });
     } catch (e) { console.error(e); show('d-error'); }
   });
@@ -949,6 +1151,29 @@ async function save(ev) {
   </div>
 </footer>
 <script>(function () {
+  // Signed-in top bar. Pages that know the Firebase user call
+  // window.pmSession({name}) on sign-in and window.pmSession(null) on sign-out.
+  var cta = document.querySelector('.nav-cta');
+  var esc = function (t) { return String(t || '').replace(/[&<>"']/g, function (c) { return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); };
+  function applySession() {
+    if (!cta) return;
+    if (!cta.dataset.orig) cta.dataset.orig = cta.innerHTML;
+    var s = null;
+    try { s = JSON.parse(localStorage.getItem('pm-session') || 'null'); } catch (e) { s = null; }
+    if (s) {
+      var root = cta.dataset.root || '', name = (s.name || 'My account').split(' ')[0];
+      cta.innerHTML = '<a class="btn btn-ghost acct-btn" href="' + root + 'dashboard.html"><span class="av">' + esc((s.name || '?').charAt(0).toUpperCase()) + '</span>' + esc(name) + ' · My account</a>'
+        + '<a class="btn btn-primary" href="' + root + 'dashboard.html#add">+ Add listing</a>';
+    } else {
+      cta.innerHTML = cta.dataset.orig;
+    }
+  }
+  window.pmSession = function (u) {
+    try { if (u) localStorage.setItem('pm-session', JSON.stringify({name: u.name || '', at: Date.now()})); else localStorage.removeItem('pm-session'); } catch (e) {}
+    applySession();
+  };
+  applySession();
+
   // Mobile menu
   var nav = document.querySelector('.nav');
   var btn = document.querySelector('.menu-btn');
