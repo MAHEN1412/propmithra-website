@@ -589,6 +589,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
         <div class="tabs" role="tablist">
           <button type="button" role="tab" class="tab on" data-tab="listings">My listings <span id="t-listings">0</span></button>
           <button type="button" role="tab" class="tab" data-tab="reqs">Customer requirements <span id="t-reqs">0</span></button>
+          <button type="button" role="tab" class="tab" data-tab="team">From PropMithra <span id="t-team">0</span></button>
         </div>
         <div data-pane="listings">
           <p class="muted" id="d-count">Your properties on the PropMithra network.</p>
@@ -597,6 +598,10 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
         <div data-pane="reqs" hidden>
           <p class="muted" id="r-count">Customers you are finding a property for. Brokers with a matching property can contact you.</p>
           <div class="listing-grid" id="d-reqs"></div>
+        </div>
+        <div data-pane="team" hidden>
+          <p class="muted" id="tm-count">Properties the PropMithra team has shared with you.</p>
+          <div class="listing-grid" id="d-team"></div>
         </div>
       </div>
 
@@ -842,6 +847,42 @@ async function loadListings() {
   const snap = await fs.getDocs(fs.query(fs.collection(db, 'properties'), fs.where('ownerBrokerId', '==', uid)));
   listings = snap.docs.map(d => ({id: d.id, ...d.data()})).sort((a, b) => (b.listedAt?.toMillis?.() || 0) - (a.listedAt?.toMillis?.() || 0));
   renderListings();
+}
+// ── From PropMithra (team listings sent to me / to all agents) ─────────
+let team = [];
+function renderTeam() {
+  $('t-team').textContent = team.length;
+  const box = $('d-team');
+  $('tm-count').textContent = team.length ? `${team.length} propert${team.length > 1 ? 'ies' : 'y'} shared with you by the PropMithra team.` : 'Properties the PropMithra team has shared with you.';
+  if (!team.length) { box.innerHTML = `<div class="empty-card"><b>Nothing shared yet</b><span>When the PropMithra team sends you a property, it appears here and in the app.</span></div>`; return; }
+  box.innerHTML = team.map(p => {
+    const ph = String(p.contactPhone || '').replace(/[^0-9+]/g, ''), d = ph.replace('+', ''), wa = d.length === 10 ? '91' + d : d;
+    return `<article class="lcard" data-id="${esc(p.id)}">
+      <div class="lthumb">${p.photos?.length ? '<span class="spinner small"></span>' : `<span class="ph">${esc(TYPE_LABEL[p.type] || 'Property')}</span>`}</div>
+      <div class="lbody">
+        <div class="lprice">${esc(inr(p.price))}${p.transaction !== 'sale' ? '<small>/mo</small>' : ''}</div>
+        <b>${esc(p.title)}</b>
+        <span class="muted">${esc(p.locality)}${p.areaSqft ? ' · ' + Number(p.areaSqft).toLocaleString('en-IN') + ' sq.ft' : ''}</span>
+        <div class="tags"><span class="tag ok">PropMithra team</span><span class="tag ${p.availability === 'available' ? 'ok' : ''}">${esc(AVAIL[p.availability] || p.availability)}</span></div>
+        ${p.description ? `<span class="muted">${esc(String(p.description).slice(0, 140))}${String(p.description).length > 140 ? '…' : ''}</span>` : ''}
+        ${ph ? `<div class="lactions"><span class="muted">${esc([p.contactName, p.contactPhone].filter(Boolean).join(' · '))}</span><a class="link-btn" href="tel:${esc(ph)}">Call</a><a class="link-btn" target="_blank" rel="noopener" href="https://wa.me/${esc(wa)}?text=${encodeURIComponent('Hi, about ' + (p.title || 'the property') + ' (PropMithra)')}">WhatsApp</a></div>` : ''}
+      </div></article>`;
+  }).join('');
+  box.querySelectorAll('.lcard').forEach(async (card) => {
+    const p = team.find(x => x.id === card.dataset.id);
+    if (p.photos?.length) { try { const u = await blobUrl(p.photos[0]); card.querySelector('.lthumb').innerHTML = u ? `<img src="${u}" alt="">` : ''; } catch (_) {} }
+  });
+}
+async function loadTeam() {
+  const {fs, db} = fb, col = fs.collection(db, 'properties');
+  const [mine, all] = await Promise.all([
+    fs.getDocs(fs.query(col, fs.where('sharedWith', 'array-contains', uid))).catch(e => { console.warn('team (sent to me)', e); return {docs: []}; }),
+    fs.getDocs(fs.query(col, fs.where('listed', '==', true), fs.where('byTeam', '==', true))).catch(e => { console.warn('team (all)', e); return {docs: []}; }),
+  ]);
+  const byId = new Map();
+  [...mine.docs, ...all.docs].forEach(d => { const x = {id: d.id, ...d.data()}; if (x.byTeam && x.moderation !== 'hidden') byId.set(d.id, x); });
+  team = [...byId.values()].sort((a, b) => (b.listedAt?.toMillis?.() || 0) - (a.listedAt?.toMillis?.() || 0));
+  renderTeam();
 }
 async function setAvailability(p, value, sel) {
   sel.disabled = true;
@@ -1112,13 +1153,13 @@ async function saveReq(ev) {
       show('d-app'); setupForm(); setupReqForm(); renderStatus();
       document.querySelectorAll('.tab').forEach(t => t.onclick = () => tab(t.dataset.tab));
       if (approved()) {
-        await Promise.all([loadListings(), loadReqs().catch(e => console.warn('requirements', e))]);
-        if (location.hash === '#add') openForm(); else if (location.hash === '#requirement') openReq(); else if (location.hash === '#requirements') tab('reqs');
+        await Promise.all([loadListings(), loadReqs().catch(e => console.warn('requirements', e)), loadTeam().catch(e => console.warn('team', e))]);
+        if (location.hash === '#add') openForm(); else if (location.hash === '#requirement') openReq(); else if (location.hash === '#requirements') tab('reqs'); else if (location.hash === '#shared') tab('team');
       }
       // Live: approval appears the moment the admin approves.
       fs.onSnapshot(fs.doc(db, 'mithras', uid), async (s) => {
         const was = approved(); mithra = s.exists() ? s.data() : {};
-        renderStatus(); if (!was && approved()) { await loadListings(); loadReqs().catch(() => {}); }
+        renderStatus(); if (!was && approved()) { await loadListings(); loadReqs().catch(() => {}); loadTeam().catch(() => {}); }
       });
     } catch (e) { console.error(e); show('d-error'); }
   });
