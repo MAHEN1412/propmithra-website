@@ -429,6 +429,11 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .dl-box.ok { justify-content: flex-start; border-color: var(--teal); }
 .dl-badge { width: 34px; height: 34px; border-radius: 50%; background: var(--teal); color: #fff !important; display: grid; place-items: center; font-weight: 800; font-size: 1.05rem !important; flex: none; }
 .dl-warn { color: #b42318 !important; }
+.acct-title { font-size: 1.35rem; margin: 0; }
+.btn-google { background: #fff; color: var(--ink); border: 1.5px solid var(--line); gap: 10px; }
+.btn-google:hover { border-color: var(--ink-3); }
+.or { display: flex; align-items: center; gap: 12px; color: var(--ink-3); font-size: .85rem; }
+.or::before, .or::after { content: ""; flex: 1; height: 1px; background: var(--line); }
 </style>
 </head>
 <body>
@@ -462,9 +467,9 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 
     <!-- Not signed in -->
     <div class="reg-state" id="r-signedout" hidden>
-      <h2>Verify your mobile number first</h2>
-      <p class="muted">Registration opens after OTP verification, so your details stay linked to your number.</p>
-      <a class="btn btn-primary" href="join.html">Verify with OTP</a>
+      <h2>Sign in to continue</h2>
+      <p class="muted">Your registration is saved to your PropMithra account. Sign in, or join free if you're new.</p>
+      <div class="btn-row" style="justify-content:center"><a class="btn btn-primary" href="join.html?signin=1">Sign in</a><a class="btn btn-ghost" href="join.html">Join free</a></div>
     </div>
 
     <!-- Error -->
@@ -528,6 +533,7 @@ const RX = {
   pincode: [/^[1-9]\d{5}$/, 'Enter a 6-digit pin code'],
   email: [/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/, 'Enter a valid email address'],
   mobile: [/^[6-9]\d{9}$/, 'Enter a 10-digit mobile number'],
+  mobile10: [/^(\+91)?[6-9]\d{9}$/, 'Enter a 10-digit Indian mobile number'],
 };
 
 // Every field. k = where it is saved: "bank.*" goes to a private document,
@@ -559,13 +565,14 @@ const SECTIONS = [
       {k: 'personal.address.pincode', label: 'Pin code', req: 1, rx: 'pincode', digits: 6, ac: 'postal-code'},
     ]},
     {title: 'Contact', fields: [
-      {k: 'personal.mobile', label: 'Mobile number', locked: 1, help: 'Verified with OTP'},
+      {k: 'personal.mobile', label: 'Mobile number', req: 1, rx: 'mobile10'},
       {k: 'personal.email', label: 'Business email address', type: 'email', req: 1, rx: 'email', ac: 'email'},
     ]},
   ]},
   {id: 'identity', title: 'Identification information', short: 'Identification', groups: [
     {title: 'Aadhaar card', note: 'For your privacy we only keep the last 4 digits. You can upload a masked Aadhaar (first 8 digits hidden) from the UIDAI website.', fields: [
       {k: '_digilocker', label: 'Verify Aadhaar with DigiLocker', type: 'digilocker'},
+      {k: '_aadhaarqr', label: 'Read Aadhaar QR code', type: 'aadhaarqr'},
       {k: 'identity.aadhaarLast4', label: 'Aadhaar — last 4 digits', req: 1, rx: 'last4', digits: 4},
       {k: 'docs.aadhaar', label: 'Upload Aadhaar (front & back in one photo or PDF)', type: 'doc', req: 1},
     ]},
@@ -682,7 +689,7 @@ const filled = (v) => !(v === undefined || v === null || v === '' || (typeof v =
 const aadhaarOk = () => data.aadhaarVerified?.ok === true;
 function fieldError(f) {
   const v = valueOf(f.k);
-  if (f.admin || f.locked || f.type === 'digilocker') return '';
+  if (f.admin || f.locked || f.type === 'digilocker' || f.type === 'aadhaarqr') return '';
   if (aadhaarOk() && (f.k === 'docs.aadhaar' || f.k === 'identity.aadhaarLast4')) return '';
   if (f.type === 'yesno') {
     if (f.req && v !== 'yes' && v !== 'no') return 'Please answer Yes or No';
@@ -786,6 +793,121 @@ async function previewUrl(key) {
   previews.set(key, url); return url;
 }
 
+// ── Aadhaar QR (free) ───────────────────────────────────────────────────
+// Every Aadhaar card / e-Aadhaar has a UIDAI "Secure QR": a big number that
+// is a gzip of the card details separated by byte 255, then the photo and
+// UIDAI's digital signature. We read it here in the browser.
+let qrMsg = '', qrBusy = false;
+function aadhaarQrHtml() {
+  const q = data.aadhaarQr;
+  if (q?.name) {
+    const typed = [get(data, 'personal.firstName'), get(data, 'personal.lastName')].filter(Boolean).join(' ');
+    const mismatch = typed && !namesMatch(typed, q.name);
+    return `<div class="field wide"><div class="dl-box ok"><span class="dl-badge">✓</span><div>
+      <b>Read from your Aadhaar QR code</b>
+      <span>${esc(q.name)}${q.dob ? ' · born ' + esc(q.dob) : ''}${q.last4 ? ' · Aadhaar ending ' + esc(q.last4) : ''}</span>
+      ${q.address ? `<span>${esc(q.address)}</span>` : ''}
+      ${mismatch ? '<span class="dl-warn">This name is different from the name you entered. Please use the name exactly as on your Aadhaar.</span>' : ''}
+      ${qrMsg ? `<span>${esc(qrMsg)}</span>` : ''}
+    </div>${locked ? '' : '<label class="btn btn-ghost btn-sm">Read again<input type="file" hidden id="r-qr-file" accept="image/*"></label>'}</div></div>`;
+  }
+  return `<div class="field wide"><div class="dl-box"><div>
+      <b>Read your Aadhaar QR code</b>
+      <span>Take or choose a clear photo of the side of your Aadhaar with the large QR code (or a screenshot of your e-Aadhaar). We read the details UIDAI put in the code.</span>
+      ${qrMsg ? `<span class="dl-warn">${esc(qrMsg)}</span>` : ''}
+    </div>${locked ? '' : `<label class="btn btn-primary btn-sm">${qrBusy ? 'Reading…' : 'Scan Aadhaar QR'}<input type="file" hidden id="r-qr-file" accept="image/*" capture="environment"></label>`}</div></div>`;
+}
+function namesMatch(a, b) {
+  const n = (s) => String(s).toLowerCase().replace(/[^a-z\s]/g, ' ').split(/\s+/).filter(w => w.length > 1).sort();
+  const x = n(a), y = n(b); if (!x.length || !y.length) return false;
+  const [small, big] = x.length <= y.length ? [x, y] : [y, x];
+  return small.every(w => big.includes(w));
+}
+// ZXing reads the dense Aadhaar Secure QR reliably (jsQR cannot).
+let zxingLoaded = null;
+function loadZxing() {
+  if (window.ZXing) return Promise.resolve();
+  return zxingLoaded ||= new Promise((ok, bad) => { const sc = document.createElement('script');
+    sc.src = 'https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js'; sc.onload = ok; sc.onerror = () => { zxingLoaded = null; bad(new Error('QR reader could not load')); }; document.head.appendChild(sc); });
+}
+async function findQrText(file) {
+  const bmp = await createImageBitmap(file);
+  if ('BarcodeDetector' in window) {
+    try { const r = await new BarcodeDetector({formats: ['qr_code']}).detect(bmp); if (r[0]?.rawValue) return r[0].rawValue; } catch (_) {}
+  }
+  await loadZxing();
+  const Z = window.ZXing;
+  const hints = new Map([[Z.DecodeHintType.POSSIBLE_FORMATS, [Z.BarcodeFormat.QR_CODE]], [Z.DecodeHintType.TRY_HARDER, true]]);
+  const longest = Math.max(bmp.width, bmp.height);
+  const sizes = [...new Set([Math.min(longest, 1600), 1200, 900, 700, 2000].filter(t => t <= Math.max(longest, 1200)))];
+  for (const target of sizes) {
+    const scale = target / longest;
+    const c = document.createElement('canvas'); c.width = Math.round(bmp.width * scale); c.height = Math.round(bmp.height * scale);
+    const g = c.getContext('2d', {willReadFrequently: true}); g.drawImage(bmp, 0, 0, c.width, c.height);
+    const px = g.getImageData(0, 0, c.width, c.height).data, lum = new Uint8ClampedArray(c.width * c.height);
+    for (let i = 0, j = 0; i < px.length; i += 4, j++) lum[j] = (px[i] * 299 + px[i + 1] * 587 + px[i + 2] * 114) / 1000;
+    for (const Bin of [Z.HybridBinarizer, Z.GlobalHistogramBinarizer]) {
+      try {
+        const r = new Z.QRCodeReader().decode(new Z.BinaryBitmap(new Bin(new Z.RGBLuminanceSource(lum, c.width, c.height))), hints);
+        if (r?.getText()) return r.getText();
+      } catch (_) { /* not found at this size — try the next */ }
+    }
+  }
+  return null;
+}
+async function parseAadhaarQr(text) {
+  text = String(text).trim();
+  if (/^\d{200,}$/.test(text)) {
+    let hex = BigInt(text).toString(16); if (hex.length % 2) hex = '0' + hex;
+    const bytes = new Uint8Array(hex.length / 2); for (let i = 0; i < bytes.length; i++) bytes[i] = parseInt(hex.substr(i * 2, 2), 16);
+    const raw = new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer());
+    const dec = new TextDecoder('iso-8859-1'), fields = []; let start = 0;
+    const versioned = raw[0] === 0x56; // "V2", "V3" …
+    const want = versioned ? 18 : 16;
+    for (let i = 0; i < raw.length && fields.length < want; i++) if (raw[i] === 255) { fields.push(dec.decode(raw.slice(start, i))); start = i + 1; }
+    if (fields.length < want) throw new Error('bad');
+    const f = versioned ? fields.slice(1) : fields;
+    const [, ref, name, dob, gender, careOf, district, landmark, house, location, pincode, po, state, street, subdist, vtc] = f;
+    const ts = ref.slice(4);
+    return {kind: 'secure', version: versioned ? fields[0] : 'V1', name, dob, gender, careOf, last4: ref.slice(0, 4), mobileLast4: versioned ? (f[16] || null) : null,
+      qrDate: /^\d{8}/.test(ts) ? `${ts.slice(6, 8)}-${ts.slice(4, 6)}-${ts.slice(0, 4)}` : null,
+      addr: {house, street, landmark, location, vtc, po, subdist, district, state, pincode}};
+  }
+  if (/PrintLetterBarcodeData/.test(text)) {
+    const el = new DOMParser().parseFromString(text, 'text/xml').querySelector('PrintLetterBarcodeData');
+    const a = (k) => el?.getAttribute(k) || '';
+    return {kind: 'old', version: 'old', name: a('name'), dob: a('dob') || a('yob'), gender: a('gender'), careOf: a('co'), last4: a('uid').replace(/\D/g, '').slice(-4), mobileLast4: null, qrDate: null,
+      addr: {house: a('house'), street: a('street'), landmark: a('lm'), location: a('loc'), vtc: a('vtc'), po: a('po'), subdist: a('subdist'), district: a('dist'), state: a('state'), pincode: a('pc')}};
+  }
+  throw new Error('not-aadhaar');
+}
+function toIsoDate(d) { const m = /^(\d{2})[-\/](\d{2})[-\/](\d{4})$/.exec(d || ''); return m ? `${m[3]}-${m[2]}-${m[1]}` : null; }
+async function readAadhaarQr(file, quiet) {
+  qrBusy = true; qrMsg = ''; if (!quiet) render();
+  try {
+    const text = await findQrText(file);
+    if (!text) { if (!quiet) qrMsg = "We couldn't find the QR code in this photo. Take a closer, sharper photo of just the QR code, in good light."; return; }
+    let q;
+    try { q = await parseAadhaarQr(text); } catch (_) { if (!quiet) qrMsg = 'This QR code is not an Aadhaar QR code. Please use the large QR code on your Aadhaar.'; return; }
+    const a = q.addr, address = [a.house, a.street, a.landmark, a.location, a.vtc, a.po, a.subdist, a.district, a.state, a.pincode].filter(Boolean).join(', ');
+    queue('aadhaarQr', {name: q.name, dob: q.dob || null, gender: q.gender || null, careOf: q.careOf || null, last4: q.last4 || null, mobileLast4: q.mobileLast4,
+      address, addr: a, version: q.version, secureQr: q.kind === 'secure', qrDate: q.qrDate, readAt: new Date().toISOString()});
+    // Fill empty form fields from the Aadhaar (never overwrite what the agent typed).
+    const fill = (k, v) => { if (v && !filled(get(data, k))) queue(k, v); };
+    if (q.last4) queue('identity.aadhaarLast4', q.last4);
+    fill('personal.dob', toIsoDate(q.dob));
+    fill('personal.address.houseNo', a.house); fill('personal.address.street', a.street || a.location);
+    fill('personal.address.locality', a.location || a.po); fill('personal.address.landmark', a.landmark);
+    fill('personal.address.district', a.district); fill('personal.address.mandal', a.subdist);
+    fill('personal.address.village', a.vtc); fill('personal.address.pincode', /^\d{6}$/.test(a.pincode) ? a.pincode : null);
+    fill('personal.address.state', STATES.find(st => st.toLowerCase() === String(a.state).toLowerCase()));
+    if (!get(data, 'personal.firstName') && q.name) { const [fn, ...ln] = q.name.split(/\s+/); fill('personal.firstName', fn); fill('personal.lastName', ln.join(' ')); }
+    await flush();
+    qrMsg = q.kind === 'old' ? 'This is an older Aadhaar QR. Please also upload your Aadhaar so our team can check it.' : '';
+  } catch (e) { console.error(e); if (!quiet) qrMsg = "We couldn't read this photo. Please try another photo."; }
+  finally { qrBusy = false; render(); }
+}
+
 // ── DigiLocker (Aadhaar verification) ───────────────────────────────────
 let dlMsg = '';
 function digilockerHtml() {
@@ -843,6 +965,7 @@ async function finishDigilocker() {
 function inputHtml(f) {
   const id = 'f-' + f.k.replace(/\./g, '-'), v = valueOf(f.k);
   if (f.type === 'digilocker') return digilockerHtml();
+  if (f.type === 'aadhaarqr') return aadhaarQrHtml();
   const dis = (locked || f.admin || f.locked || (aadhaarOk() && f.k === 'identity.aadhaarLast4')) ? ' disabled' : '';
   const viaDl = aadhaarOk() && (f.k === 'docs.aadhaar' || f.k === 'identity.aadhaarLast4');
   const req = f.req && !f.group.optional && !viaDl ? '<span class="req" aria-hidden="true">*</span>' : (viaDl && f.type === 'doc' ? ' <span class="opt">Optional — verified</span>' : '');
@@ -953,11 +1076,15 @@ function bindFields() {
     const file = inp.files[0]; if (!file) return; const f = FIELD[inp.dataset.file];
     const box = inp.closest('.doc'), errEl = box.querySelector('.err');
     box.querySelector('.doc-info').innerHTML = `<b>${esc(file.name)}</b><span>Uploading…</span>`; box.querySelector('.doc-thumb').innerHTML = '<span class="spinner small"></span>'; errEl.textContent = '';
-    try { await uploadDoc(f, file); }
+    try {
+      await uploadDoc(f, file);
+      if (f.k === 'docs.aadhaar' && file.type.startsWith('image/') && !data.aadhaarQr) await readAadhaarQr(file, true);
+    }
     catch (e) { console.error(e); docErrors.set(f.k.slice(5), /^(This|Please)/.test(e.message || '') ? e.message : 'Upload failed. Please check your internet and try again.'); }
     render();
   }));
   const dl = $('r-dl'); if (dl) dl.onclick = () => startDigilocker(dl);
+  const qi = $('r-qr-file'); if (qi) qi.onchange = () => { const f = qi.files[0]; if (f) readAadhaarQr(f, false); };
   form.querySelectorAll('[data-view]').forEach(b => b.onclick = async () => {
     b.disabled = true; try { const u = await previewUrl(b.dataset.view); if (u) window.open(u, '_blank'); } finally { b.disabled = false; } });
   form.querySelectorAll('[data-show]').forEach(b => b.onclick = () => { const g = form.querySelector(`[data-group="${b.dataset.show}"]`); g.hidden = false; b.remove(); g.querySelector('input,select')?.focus(); });
@@ -1078,10 +1205,12 @@ function show(id) { ['r-loading', 'r-signedout', 'r-error', 'r-app'].forEach(x =
         const broker = (await fs.getDoc(fs.doc(db, 'brokers', uid)).catch(() => null))?.data() || {};
         const [first, ...rest] = String(broker.name || '').trim().split(/\s+/);
         await fs.setDoc(ref, {uid, status: 'draft', createdAt: fs.serverTimestamp(), updatedAt: fs.serverTimestamp(),
-          personal: {mobile: user.phoneNumber || '', ...(first ? {firstName: first} : {}), ...(rest.length ? {lastName: rest.join(' ')} : {})}});
+          personal: {mobile: user.phoneNumber || broker.phone || '', ...((user.email || broker.email) ? {email: user.email || broker.email} : {}),
+            ...(first ? {firstName: first} : {}), ...(rest.length ? {lastName: rest.join(' ')} : {})}});
         snap = await fs.getDoc(ref);
       }
       data = snap.data() || {};
+      if (user.phoneNumber) { FIELD['personal.mobile'].locked = 1; FIELD['personal.mobile'].help = 'Verified with OTP'; }
       if (!get(data, 'personal.mobile') && user.phoneNumber) queue('personal.mobile', user.phoneNumber);
       bank = (await fs.getDoc(fs.doc(db, 'mithras', uid, 'private', 'bank')).catch(() => null))?.data() || {};
       confirmAccount = bank.accountNumber || '';
