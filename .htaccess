@@ -1,4 +1,7 @@
 Options -Indexes
+# Hide Git and other hidden files from visitors
+RedirectMatch 404 /\.(git|env)
+RedirectMatch 404 /README\.md$
 ErrorDocument 404 /index.html
 RewriteEngine On
 # Always use the secure https:// address
