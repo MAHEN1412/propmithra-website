@@ -882,6 +882,7 @@ function teamCards() {
         <div class="lprice">${esc(inr(p.price))}${p.transaction !== 'sale' ? '<small>/mo</small>' : ''}</div>
         <b>${esc(p.title)}</b>
         <span class="muted">${esc(p.locality)}${p.areaSqft ? ' · ' + Number(p.areaSqft).toLocaleString('en-IN') + ' sq.ft' : ''}</span>
+        ${p.listingSource ? `<span class="muted">Source: ${esc(p.listingSource)}</span>` : ''}
         <div class="tags"><span class="tag team">From PropMithra</span>${seen.has(p.id) ? '' : '<span class="tag new">New</span>'}<span class="tag ${p.availability === 'available' ? 'ok' : ''}">${esc(AVAIL[p.availability] || p.availability)}</span></div>
         ${p.description ? `<span class="muted">${esc(String(p.description).slice(0, 140))}${String(p.description).length > 140 ? '…' : ''}</span>` : ''}
         ${ph ? `<div class="lactions"><span class="muted">${esc([p.contactName, p.contactPhone].filter(Boolean).join(' · '))}</span><a class="link-btn" href="tel:${esc(ph)}">Call</a><a class="link-btn" target="_blank" rel="noopener" href="https://wa.me/${esc(wa)}?text=${encodeURIComponent('Hi, about ' + (p.title || 'the property') + ' (PropMithra)')}">WhatsApp</a></div>` : ''}
