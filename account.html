@@ -466,6 +466,15 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .tag { font-size: .74rem; font-weight: 600; padding: 3px 9px; border-radius: 99px; background: var(--canvas); border: 1px solid var(--line); color: var(--ink-2); }
 .tag.ok { background: var(--mint); color: var(--teal-dark, #0b5d50); border-color: transparent; }
 .tag.bad { background: #fff4f3; color: #b42318; border-color: #f5c2c0; }
+.tag.team { background: #075E54; color: #fff; border-color: transparent; }
+.tag.new { background: #25D366; color: #0B141A; border-color: transparent; }
+.lcard.team { border-color: #25D366; }
+.team-alert { display: flex; align-items: center; gap: 12px; padding: 12px 14px; margin: 0 0 14px; border: 1px solid #25D366; background: #E7F8EF; border-radius: 14px; }
+.team-alert[hidden] { display: none; }
+.team-alert .ta-ico { font-size: 1.4rem; line-height: 1; }
+.team-alert .ta-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.team-alert .ta-text small { color: #667781; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.team-alert .btn { padding: 8px 16px; }
 .lactions { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; gap: 8px; }
 .lactions select { min-height: 36px; padding: 4px 10px; border: 1px solid var(--line); border-radius: var(--r-sm); font: inherit; font-size: .88rem; background: var(--canvas); }
 .link-btn.danger { color: #b42318; }
@@ -589,9 +598,9 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
         <div class="tabs" role="tablist">
           <button type="button" role="tab" class="tab on" data-tab="listings">My listings <span id="t-listings">0</span></button>
           <button type="button" role="tab" class="tab" data-tab="reqs">Customer requirements <span id="t-reqs">0</span></button>
-          <button type="button" role="tab" class="tab" data-tab="team">From PropMithra <span id="t-team">0</span></button>
         </div>
         <div data-pane="listings">
+          <div class="team-alert" id="d-team-alert" hidden role="status"><span class="ta-ico" aria-hidden="true">📣</span><span class="ta-text"><b id="d-team-title"></b><small id="d-team-sub"></small></span><button class="btn btn-primary" type="button" id="d-team-view">View</button><button class="link-btn" type="button" id="d-team-close" aria-label="Dismiss">✕</button></div>
           <p class="muted" id="d-count">Your properties on the PropMithra network.</p>
           <div class="listing-grid" id="d-listings"></div>
         </div>
@@ -599,10 +608,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
           <p class="muted" id="r-count">Customers you are finding a property for. Brokers with a matching property can contact you.</p>
           <div class="listing-grid" id="d-reqs"></div>
         </div>
-        <div data-pane="team" hidden>
-          <p class="muted" id="tm-count">Properties the PropMithra team has shared with you.</p>
-          <div class="listing-grid" id="d-team"></div>
-        </div>
+
       </div>
 
       <!-- Customer requirement form -->
@@ -812,14 +818,15 @@ function tab(name) {
   document.querySelectorAll('[data-pane]').forEach(p => p.hidden = p.dataset.pane !== name);
 }
 function renderListings() {
-  $('t-listings').textContent = listings.length;
+  $('t-listings').textContent = listings.length + team.length;
   const box = $('d-listings');
-  $('d-count').textContent = listings.length ? `${listings.length} listing${listings.length > 1 ? 's' : ''} · visible in the PropMithra app too.` : 'Your properties on the PropMithra network.';
-  if (!listings.length) {
+  $('d-count').textContent = listings.length || team.length ? [listings.length ? `${listings.length} listing${listings.length > 1 ? 's' : ''} by you` : '', team.length ? `${team.length} from PropMithra` : ''].filter(Boolean).join(' · ') + ' · visible in the PropMithra app too.' : 'Your properties on the PropMithra network.';
+  renderTeamAlert();
+  if (!listings.length && !team.length) {
     box.innerHTML = `<div class="empty-card"><b>No listings yet</b><span>Add your first property — it takes about two minutes.</span><button class="btn btn-primary" type="button" data-add>+ Add listing</button></div>`;
     box.querySelector('[data-add]').onclick = openForm; return;
   }
-  box.innerHTML = listings.map(p => {
+  box.innerHTML = teamCards() + listings.map(p => {
     const hidden = p.moderation === 'hidden';
     return `<article class="lcard" data-id="${esc(p.id)}">
       <div class="lthumb">${p.photos?.length ? '<span class="spinner small"></span>' : `<span class="ph">${esc(TYPE_LABEL[p.type] || 'Property')}</span>`}</div>
@@ -835,7 +842,11 @@ function renderListings() {
         </div>
       </div></article>`;
   }).join('');
-  box.querySelectorAll('.lcard').forEach(async (card) => {
+  box.querySelectorAll('.lcard[data-team]').forEach(async (card) => {
+    const p = team.find(x => x.id === card.dataset.id);
+    if (p?.photos?.length) { try { const u = await blobUrl(p.photos[0]); card.querySelector('.lthumb').innerHTML = u ? `<img src="${u}" alt="">` : ''; } catch (_) {} }
+  });
+  box.querySelectorAll('.lcard:not([data-team])').forEach(async (card) => {
     const p = listings.find(x => x.id === card.dataset.id);
     card.querySelector('[data-avail]').onchange = (e) => setAvailability(p, e.target.value, e.target);
     card.querySelector('[data-del]').onclick = () => removeListing(p, card);
@@ -850,28 +861,32 @@ async function loadListings() {
 }
 // ── From PropMithra (team listings sent to me / to all agents) ─────────
 let team = [];
-function renderTeam() {
-  $('t-team').textContent = team.length;
-  const box = $('d-team');
-  $('tm-count').textContent = team.length ? `${team.length} propert${team.length > 1 ? 'ies' : 'y'} shared with you by the PropMithra team.` : 'Properties the PropMithra team has shared with you.';
-  if (!team.length) { box.innerHTML = `<div class="empty-card"><b>Nothing shared yet</b><span>When the PropMithra team sends you a property, it appears here and in the app.</span></div>`; return; }
-  box.innerHTML = team.map(p => {
+const SEEN_KEY = 'pm-team-seen';
+function seenTeam() { try { return new Set(JSON.parse(localStorage.getItem(SEEN_KEY) || '[]')); } catch (_) { return new Set(); } }
+function markTeamSeen() { try { localStorage.setItem(SEEN_KEY, JSON.stringify([...new Set([...seenTeam(), ...team.map(p => p.id)])])); } catch (_) {} renderListings(); }
+function renderTeamAlert() {
+  const seen = seenTeam(), fresh = team.filter(p => !seen.has(p.id)), box = $('d-team-alert');
+  box.hidden = !fresh.length; if (!fresh.length) return;
+  $('d-team-title').textContent = fresh.length === 1 ? 'New listing from PropMithra' : `${fresh.length} new listings from PropMithra`;
+  $('d-team-sub').textContent = fresh.length === 1 ? fresh[0].title || '' : 'Added to your My listings below';
+  $('d-team-view').onclick = () => { const id = fresh[0].id; markTeamSeen(); tab('listings'); document.querySelector(`.lcard[data-id="${CSS.escape(id)}"]`)?.scrollIntoView({behavior: 'smooth', block: 'center'}); };
+  $('d-team-close').onclick = markTeamSeen;
+}
+function teamCards() {
+  const seen = seenTeam();
+  return team.map(p => {
     const ph = String(p.contactPhone || '').replace(/[^0-9+]/g, ''), d = ph.replace('+', ''), wa = d.length === 10 ? '91' + d : d;
-    return `<article class="lcard" data-id="${esc(p.id)}">
+    return `<article class="lcard team" data-id="${esc(p.id)}" data-team>
       <div class="lthumb">${p.photos?.length ? '<span class="spinner small"></span>' : `<span class="ph">${esc(TYPE_LABEL[p.type] || 'Property')}</span>`}</div>
       <div class="lbody">
         <div class="lprice">${esc(inr(p.price))}${p.transaction !== 'sale' ? '<small>/mo</small>' : ''}</div>
         <b>${esc(p.title)}</b>
         <span class="muted">${esc(p.locality)}${p.areaSqft ? ' · ' + Number(p.areaSqft).toLocaleString('en-IN') + ' sq.ft' : ''}</span>
-        <div class="tags"><span class="tag ok">PropMithra team</span><span class="tag ${p.availability === 'available' ? 'ok' : ''}">${esc(AVAIL[p.availability] || p.availability)}</span></div>
+        <div class="tags"><span class="tag team">From PropMithra</span>${seen.has(p.id) ? '' : '<span class="tag new">New</span>'}<span class="tag ${p.availability === 'available' ? 'ok' : ''}">${esc(AVAIL[p.availability] || p.availability)}</span></div>
         ${p.description ? `<span class="muted">${esc(String(p.description).slice(0, 140))}${String(p.description).length > 140 ? '…' : ''}</span>` : ''}
         ${ph ? `<div class="lactions"><span class="muted">${esc([p.contactName, p.contactPhone].filter(Boolean).join(' · '))}</span><a class="link-btn" href="tel:${esc(ph)}">Call</a><a class="link-btn" target="_blank" rel="noopener" href="https://wa.me/${esc(wa)}?text=${encodeURIComponent('Hi, about ' + (p.title || 'the property') + ' (PropMithra)')}">WhatsApp</a></div>` : ''}
       </div></article>`;
   }).join('');
-  box.querySelectorAll('.lcard').forEach(async (card) => {
-    const p = team.find(x => x.id === card.dataset.id);
-    if (p.photos?.length) { try { const u = await blobUrl(p.photos[0]); card.querySelector('.lthumb').innerHTML = u ? `<img src="${u}" alt="">` : ''; } catch (_) {} }
-  });
 }
 async function loadTeam() {
   const {fs, db} = fb, col = fs.collection(db, 'properties');
@@ -882,7 +897,7 @@ async function loadTeam() {
   const byId = new Map();
   [...mine.docs, ...all.docs].forEach(d => { const x = {id: d.id, ...d.data()}; if (x.byTeam && x.moderation !== 'hidden') byId.set(d.id, x); });
   team = [...byId.values()].sort((a, b) => (b.listedAt?.toMillis?.() || 0) - (a.listedAt?.toMillis?.() || 0));
-  renderTeam();
+  renderListings();
 }
 async function setAvailability(p, value, sel) {
   sel.disabled = true;
@@ -1154,7 +1169,7 @@ async function saveReq(ev) {
       document.querySelectorAll('.tab').forEach(t => t.onclick = () => tab(t.dataset.tab));
       if (approved()) {
         await Promise.all([loadListings(), loadReqs().catch(e => console.warn('requirements', e)), loadTeam().catch(e => console.warn('team', e))]);
-        if (location.hash === '#add') openForm(); else if (location.hash === '#requirement') openReq(); else if (location.hash === '#requirements') tab('reqs'); else if (location.hash === '#shared') tab('team');
+        if (location.hash === '#add') openForm(); else if (location.hash === '#requirement') openReq(); else if (location.hash === '#requirements') tab('reqs');
       }
       // Live: approval appears the moment the admin approves.
       fs.onSnapshot(fs.doc(db, 'mithras', uid), async (s) => {

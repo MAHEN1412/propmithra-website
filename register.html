@@ -466,6 +466,15 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .tag { font-size: .74rem; font-weight: 600; padding: 3px 9px; border-radius: 99px; background: var(--canvas); border: 1px solid var(--line); color: var(--ink-2); }
 .tag.ok { background: var(--mint); color: var(--teal-dark, #0b5d50); border-color: transparent; }
 .tag.bad { background: #fff4f3; color: #b42318; border-color: #f5c2c0; }
+.tag.team { background: #075E54; color: #fff; border-color: transparent; }
+.tag.new { background: #25D366; color: #0B141A; border-color: transparent; }
+.lcard.team { border-color: #25D366; }
+.team-alert { display: flex; align-items: center; gap: 12px; padding: 12px 14px; margin: 0 0 14px; border: 1px solid #25D366; background: #E7F8EF; border-radius: 14px; }
+.team-alert[hidden] { display: none; }
+.team-alert .ta-ico { font-size: 1.4rem; line-height: 1; }
+.team-alert .ta-text { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.team-alert .ta-text small { color: #667781; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.team-alert .btn { padding: 8px 16px; }
 .lactions { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; gap: 8px; }
 .lactions select { min-height: 36px; padding: 4px 10px; border: 1px solid var(--line); border-radius: var(--r-sm); font: inherit; font-size: .88rem; background: var(--canvas); }
 .link-btn.danger { color: #b42318; }
