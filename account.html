@@ -856,7 +856,8 @@ function renderListings() {
 async function loadListings() {
   const {fs, db} = fb;
   const snap = await fs.getDocs(fs.query(fs.collection(db, 'properties'), fs.where('ownerBrokerId', '==', uid)));
-  listings = snap.docs.map(d => ({id: d.id, ...d.data()})).sort((a, b) => (b.listedAt?.toMillis?.() || 0) - (a.listedAt?.toMillis?.() || 0));
+  // PropMithra team listings never count as "my listings" (even for the admin's own account).
+  listings = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(p => !p.byTeam).sort((a, b) => (b.listedAt?.toMillis?.() || 0) - (a.listedAt?.toMillis?.() || 0));
   renderListings();
 }
 // ── From PropMithra (team listings sent to me / to all agents) ─────────
@@ -903,12 +904,13 @@ function teamCards() {
 }
 async function loadTeam() {
   const {fs, db} = fb, col = fs.collection(db, 'properties');
-  const [mine, all] = await Promise.all([
+  const [mine, all, own] = await Promise.all([
     fs.getDocs(fs.query(col, fs.where('sharedWith', 'array-contains', uid))).catch(e => { console.warn('team (sent to me)', e); return {docs: []}; }),
     fs.getDocs(fs.query(col, fs.where('listed', '==', true), fs.where('byTeam', '==', true))).catch(e => { console.warn('team (all)', e); return {docs: []}; }),
+    fs.getDocs(fs.query(col, fs.where('ownerBrokerId', '==', uid))).catch(() => ({docs: []})),
   ]);
   const byId = new Map();
-  [...mine.docs, ...all.docs].forEach(d => { const x = {id: d.id, ...d.data()}; if (x.byTeam && x.moderation !== 'hidden') byId.set(d.id, x); });
+  [...mine.docs, ...all.docs, ...own.docs].forEach(d => { const x = {id: d.id, ...d.data()}; if (x.byTeam && x.moderation !== 'hidden') byId.set(d.id, x); });
   team = [...byId.values()].sort((a, b) => (b.listedAt?.toMillis?.() || 0) - (a.listedAt?.toMillis?.() || 0));
   renderTeam();
 }
