@@ -590,6 +590,10 @@ function err(id, text) {
 function busy(btn, on, label) { btn.disabled = on; if (label) btn.textContent = label; }
 function friendly(e) {
   const c = (e && e.code) || '';
+  const m = friendlyText(c);
+  return c ? `${m} (${c.replace('auth/', '')})` : m;
+}
+function friendlyText(c) {
   if (c.includes('invalid-phone-number')) return 'That mobile number looks wrong. Please check it.';
   if (c.includes('too-many-requests')) return 'Too many attempts. Please wait a while and try again.';
   if (c.includes('invalid-verification-code')) return 'Wrong OTP. Please check the code and try again.';
