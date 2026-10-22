@@ -595,14 +595,19 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
           <button class="action-tile" type="button" id="d-add"><span class="ai">+</span><span><b>Add listing</b><small>A property you have — sale, rent or lease</small></span></button>
           <button class="action-tile alt" type="button" id="d-add-req"><span class="ai">+</span><span><b>Customer requirement</b><small>A customer looking for a property</small></span></button>
         </div>
+        <div class="team-alert" id="d-team-alert" hidden role="status"><span class="ta-ico" aria-hidden="true">📣</span><span class="ta-text"><b id="d-team-title"></b><small id="d-team-sub"></small></span><button class="btn btn-primary" type="button" id="d-team-view">View</button><button class="link-btn" type="button" id="d-team-close" aria-label="Dismiss">✕</button></div>
         <div class="tabs" role="tablist">
           <button type="button" role="tab" class="tab on" data-tab="listings">My listings <span id="t-listings">0</span></button>
+          <button type="button" role="tab" class="tab" data-tab="team">Assigned by PropMithra <span id="t-team">0</span></button>
           <button type="button" role="tab" class="tab" data-tab="reqs">Customer requirements <span id="t-reqs">0</span></button>
         </div>
         <div data-pane="listings">
-          <div class="team-alert" id="d-team-alert" hidden role="status"><span class="ta-ico" aria-hidden="true">📣</span><span class="ta-text"><b id="d-team-title"></b><small id="d-team-sub"></small></span><button class="btn btn-primary" type="button" id="d-team-view">View</button><button class="link-btn" type="button" id="d-team-close" aria-label="Dismiss">✕</button></div>
           <p class="muted" id="d-count">Your properties on the PropMithra network.</p>
           <div class="listing-grid" id="d-listings"></div>
+        </div>
+        <div data-pane="team" hidden>
+          <p class="muted" id="tm-count">Properties the PropMithra team has assigned to you.</p>
+          <div class="listing-grid" id="d-team"></div>
         </div>
         <div data-pane="reqs" hidden>
           <p class="muted" id="r-count">Customers you are finding a property for. Brokers with a matching property can contact you.</p>
@@ -818,15 +823,14 @@ function tab(name) {
   document.querySelectorAll('[data-pane]').forEach(p => p.hidden = p.dataset.pane !== name);
 }
 function renderListings() {
-  $('t-listings').textContent = listings.length + team.length;
+  $('t-listings').textContent = listings.length;
   const box = $('d-listings');
-  $('d-count').textContent = listings.length || team.length ? [listings.length ? `${listings.length} listing${listings.length > 1 ? 's' : ''} by you` : '', team.length ? `${team.length} from PropMithra` : ''].filter(Boolean).join(' · ') + ' · visible in the PropMithra app too.' : 'Your properties on the PropMithra network.';
-  renderTeamAlert();
-  if (!listings.length && !team.length) {
+  $('d-count').textContent = listings.length ? `${listings.length} listing${listings.length > 1 ? 's' : ''} by you · visible in the PropMithra app too.` : 'Your properties on the PropMithra network.';
+  if (!listings.length) {
     box.innerHTML = `<div class="empty-card"><b>No listings yet</b><span>Add your first property — it takes about two minutes.</span><button class="btn btn-primary" type="button" data-add>+ Add listing</button></div>`;
     box.querySelector('[data-add]').onclick = openForm; return;
   }
-  box.innerHTML = teamCards() + listings.map(p => {
+  box.innerHTML = listings.map(p => {
     const hidden = p.moderation === 'hidden';
     return `<article class="lcard" data-id="${esc(p.id)}">
       <div class="lthumb">${p.photos?.length ? '<span class="spinner small"></span>' : `<span class="ph">${esc(TYPE_LABEL[p.type] || 'Property')}</span>`}</div>
@@ -842,11 +846,7 @@ function renderListings() {
         </div>
       </div></article>`;
   }).join('');
-  box.querySelectorAll('.lcard[data-team]').forEach(async (card) => {
-    const p = team.find(x => x.id === card.dataset.id);
-    if (p?.photos?.length) { try { const u = await blobUrl(p.photos[0]); card.querySelector('.lthumb').innerHTML = u ? `<img src="${u}" alt="">` : ''; } catch (_) {} }
-  });
-  box.querySelectorAll('.lcard:not([data-team])').forEach(async (card) => {
+  box.querySelectorAll('.lcard').forEach(async (card) => {
     const p = listings.find(x => x.id === card.dataset.id);
     card.querySelector('[data-avail]').onchange = (e) => setAvailability(p, e.target.value, e.target);
     card.querySelector('[data-del]').onclick = () => removeListing(p, card);
@@ -863,14 +863,26 @@ async function loadListings() {
 let team = [];
 const SEEN_KEY = 'pm-team-seen';
 function seenTeam() { try { return new Set(JSON.parse(localStorage.getItem(SEEN_KEY) || '[]')); } catch (_) { return new Set(); } }
-function markTeamSeen() { try { localStorage.setItem(SEEN_KEY, JSON.stringify([...new Set([...seenTeam(), ...team.map(p => p.id)])])); } catch (_) {} renderListings(); }
+function markTeamSeen() { try { localStorage.setItem(SEEN_KEY, JSON.stringify([...new Set([...seenTeam(), ...team.map(p => p.id)])])); } catch (_) {} renderTeam(); }
 function renderTeamAlert() {
   const seen = seenTeam(), fresh = team.filter(p => !seen.has(p.id)), box = $('d-team-alert');
   box.hidden = !fresh.length; if (!fresh.length) return;
   $('d-team-title').textContent = fresh.length === 1 ? 'New listing from PropMithra' : `${fresh.length} new listings from PropMithra`;
-  $('d-team-sub').textContent = fresh.length === 1 ? fresh[0].title || '' : 'Added to your My listings below';
-  $('d-team-view').onclick = () => { const id = fresh[0].id; markTeamSeen(); tab('listings'); document.querySelector(`.lcard[data-id="${CSS.escape(id)}"]`)?.scrollIntoView({behavior: 'smooth', block: 'center'}); };
+  $('d-team-sub').textContent = fresh.length === 1 ? fresh[0].title || '' : 'See the Assigned by PropMithra tab';
+  $('d-team-view').onclick = () => { const id = fresh[0].id; markTeamSeen(); tab('team'); document.querySelector(`.lcard[data-id="${CSS.escape(id)}"]`)?.scrollIntoView({behavior: 'smooth', block: 'center'}); };
   $('d-team-close').onclick = markTeamSeen;
+}
+function renderTeam() {
+  $('t-team').textContent = team.length;
+  $('tm-count').textContent = team.length ? `${team.length} propert${team.length > 1 ? 'ies' : 'y'} assigned to you by the PropMithra team.` : 'Properties the PropMithra team has assigned to you.';
+  renderTeamAlert();
+  const box = $('d-team');
+  if (!team.length) { box.innerHTML = `<div class="empty-card"><b>Nothing assigned yet</b><span>When the PropMithra team assigns you a property, it appears here and in the app.</span></div>`; return; }
+  box.innerHTML = teamCards();
+  box.querySelectorAll('.lcard').forEach(async (card) => {
+    const p = team.find(x => x.id === card.dataset.id);
+    if (p?.photos?.length) { try { const u = await blobUrl(p.photos[0]); card.querySelector('.lthumb').innerHTML = u ? `<img src="${u}" alt="">` : ''; } catch (_) {} }
+  });
 }
 function teamCards() {
   const seen = seenTeam();
@@ -898,7 +910,7 @@ async function loadTeam() {
   const byId = new Map();
   [...mine.docs, ...all.docs].forEach(d => { const x = {id: d.id, ...d.data()}; if (x.byTeam && x.moderation !== 'hidden') byId.set(d.id, x); });
   team = [...byId.values()].sort((a, b) => (b.listedAt?.toMillis?.() || 0) - (a.listedAt?.toMillis?.() || 0));
-  renderListings();
+  renderTeam();
 }
 async function setAvailability(p, value, sel) {
   sel.disabled = true;
@@ -1170,7 +1182,7 @@ async function saveReq(ev) {
       document.querySelectorAll('.tab').forEach(t => t.onclick = () => tab(t.dataset.tab));
       if (approved()) {
         await Promise.all([loadListings(), loadReqs().catch(e => console.warn('requirements', e)), loadTeam().catch(e => console.warn('team', e))]);
-        if (location.hash === '#add') openForm(); else if (location.hash === '#requirement') openReq(); else if (location.hash === '#requirements') tab('reqs');
+        if (location.hash === '#add') openForm(); else if (location.hash === '#requirement') openReq(); else if (location.hash === '#requirements') tab('reqs'); else if (location.hash === '#assigned') tab('team');
       }
       // Live: approval appears the moment the admin approves.
       fs.onSnapshot(fs.doc(db, 'mithras', uid), async (s) => {
