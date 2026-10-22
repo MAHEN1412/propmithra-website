@@ -7,6 +7,13 @@ RewriteEngine On
 # Always use the secure https:// address
 RewriteCond %{HTTPS} off
 RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [L,R=301]
+# Old /dashboard links -> /account
+RewriteRule ^dashboard(\.html)?$ /account [R=301,L,NE]
+# Show clean addresses: /index.html -> /, /page.html -> /page
+RewriteCond %{THE_REQUEST} \s/+(.*?/)?index(\.html)?[\s?] [NC]
+RewriteRule ^ /%1 [R=301,L,NE]
+RewriteCond %{THE_REQUEST} \s/+(.+?)\.html[\s?] [NC]
+RewriteRule ^ /%1 [R=301,L,NE]
 # /register and /join work without .html
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME}.html -f
