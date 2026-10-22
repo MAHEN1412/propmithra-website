@@ -514,6 +514,9 @@ const RX = {
   passport: [/^[A-Z][0-9]{7}$/, 'Passport number looks like A1234567'],
   ifsc: [/^[A-Z]{4}0[A-Z0-9]{6}$/, 'IFSC looks like SBIN0001234'],
   account: [/^\d{9,18}$/, 'Account number is 9–18 digits'],
+  rera: [/^[A-Z0-9\/-]{6,30}$/, 'Enter the RERA number exactly as on your certificate'],
+  gst: [/^\d{2}[A-Z]{5}\d{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/, 'GSTIN looks like 36ABCDE1234F1Z5'],
+  cin: [/^[LU]\d{5}[A-Z]{2}\d{4}[A-Z]{3}\d{6}$/, 'CIN is 21 characters, e.g. U70100TG2020PTC123456'],
   pincode: [/^[1-9]\d{5}$/, 'Enter a 6-digit pin code'],
   email: [/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/, 'Enter a valid email address'],
   mobile: [/^[6-9]\d{9}$/, 'Enter a 10-digit mobile number'],
@@ -561,6 +564,12 @@ const SECTIONS = [
       {k: 'identity.pan', label: 'PAN number', req: 1, rx: 'pan', upper: 1},
       {k: 'docs.pan', label: 'Upload PAN card', type: 'doc', req: 1},
     ]},
+    {title: 'RERA registration', note: 'Your real estate agent registration with RERA. We check it on the RERA portal before approving.', fields: [
+      {k: 'identity.rera.authority', label: 'Registered with', type: 'select', options: ['Telangana RERA (TG-RERA)', 'Andhra Pradesh RERA', 'Karnataka RERA', 'Maharashtra RERA', 'Tamil Nadu RERA', 'Other state'], req: 1, def: 'Telangana RERA (TG-RERA)'},
+      {k: 'identity.rera.number', label: 'RERA registration number', req: 1, rx: 'rera', upper: 1},
+      {k: 'identity.rera.validTill', label: 'Valid till', type: 'date', req: 1},
+      {k: 'docs.rera', label: 'Upload RERA certificate', type: 'doc', req: 1},
+    ]},
     {title: 'Voter ID card', optional: 1, fields: [
       {k: 'identity.voterId', label: 'Voter ID (EPIC) number', rx: 'voter', upper: 1},
       {k: 'docs.voter', label: 'Upload Voter ID', type: 'doc'},
@@ -574,6 +583,12 @@ const SECTIONS = [
       {k: 'identity.passport.number', label: 'Passport number', rx: 'passport', upper: 1},
       {k: 'identity.passport.validTill', label: 'Valid till', type: 'date'},
       {k: 'docs.passport', label: 'Upload passport (photo page)', type: 'doc'},
+    ]},
+    {title: 'Business documents', optional: 1, note: 'Only if you work as a registered firm or company.', fields: [
+      {k: 'identity.gstin', label: 'GSTIN', rx: 'gst', upper: 1},
+      {k: 'docs.gst', label: 'Upload GST registration certificate', type: 'doc'},
+      {k: 'identity.cin', label: 'Company CIN', rx: 'cin', upper: 1},
+      {k: 'docs.incorporation', label: 'Upload certificate of incorporation', type: 'doc'},
     ]},
     {title: 'Your photo', note: 'A clear, recent passport-size photo. It appears on your Mithra ID card.', fields: [
       {k: 'docs.photo', label: 'Individual photo', type: 'doc', req: 1, imageOnly: 1},
@@ -640,7 +655,7 @@ const SECTIONS = [
 ];
 const FIELDS = SECTIONS.flatMap(s => s.groups.flatMap(g => g.fields.map(f => ({...f, section: s.id, group: g}))));
 const FIELD = Object.fromEntries(FIELDS.map(f => [f.k, f]));
-const DOC_LABEL = {aadhaar: 'Aadhaar', pan: 'PAN card', voter: 'Voter ID', licence: 'Driving licence', passport: 'Passport', photo: 'Photo', bank: 'Cheque / passbook'};
+const DOC_LABEL = {aadhaar: 'Aadhaar', pan: 'PAN card', rera: 'RERA certificate', gst: 'GST certificate', incorporation: 'Incorporation certificate', voter: 'Voter ID', licence: 'Driving licence', passport: 'Passport', photo: 'Photo', bank: 'Cheque / passbook'};
 
 // ── State ───────────────────────────────────────────────────────────────
 let fb, uid, data = {}, bank = {}, current = 0, locked = false;
@@ -674,6 +689,7 @@ function fieldError(f) {
     if (isNaN(age) || age < 18) return 'You must be 18 or older';
     if (age > 100) return 'Please check the date';
   }
+  if (f.k.endsWith('validTill') && String(v) < new Date().toISOString().slice(0, 10)) return f.k.startsWith('identity.rera') ? 'Your RERA registration has expired — please renew it first' : 'This has expired';
   if (f.type === 'number' && (Number(v) < (f.min ?? -Infinity) || Number(v) > (f.max ?? Infinity))) return 'Please check this number';
   return '';
 }
