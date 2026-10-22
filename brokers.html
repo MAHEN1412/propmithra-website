@@ -528,6 +528,12 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .dash { grid-template-columns: minmax(0, 1fr); }
 .dash > *, .id-card > div { min-width: 0; }
 @media (max-width: 480px) { .id-no { font-size: 1.1rem; letter-spacing: .03em; } .id-actions { margin-left: 0; width: 100%; } .id-actions .btn { flex: 1; } }
+
+.nav-links a { white-space: nowrap; }
+.nav-cta .btn { white-space: nowrap; }
+.acct-name { max-width: 110px; overflow: hidden; text-overflow: ellipsis; }
+@media (min-width: 861px) and (max-width: 1180px) { .nav-cta .add-btn { display: none; } .nav { gap: 16px; } .nav-links a { padding: 8px 9px; } }
+@media (max-width: 860px) { .nav.open .acct-name { max-width: none; } }
 </style>
 </head>
 <body>
@@ -665,8 +671,8 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
     try { s = JSON.parse(localStorage.getItem('pm-session') || 'null'); } catch (e) { s = null; }
     if (s) {
       var root = cta.dataset.root || '', name = (s.name || 'My account').split(' ')[0];
-      cta.innerHTML = '<a class="btn btn-ghost acct-btn" href="' + root + 'dashboard.html"><span class="av">' + esc((s.name || '?').charAt(0).toUpperCase()) + '</span>' + esc(name) + ' · My account</a>'
-        + '<a class="btn btn-primary" href="' + root + 'dashboard.html#add">+ Add listing</a>';
+      cta.innerHTML = '<a class="btn btn-ghost acct-btn" href="' + root + 'dashboard.html" title="My account"><span class="av">' + esc((s.name || '?').charAt(0).toUpperCase()) + '</span><span class="acct-name">' + esc(name.charAt(0).toUpperCase() + name.slice(1)) + '</span></a>'
+        + '<a class="btn btn-primary add-btn" href="' + root + 'dashboard.html#add">+ Add listing</a>';
     } else {
       cta.innerHTML = cta.dataset.orig;
     }
