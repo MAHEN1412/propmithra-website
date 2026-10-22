@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://propmithra.iadesigns.in/sitemap.xml
