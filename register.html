@@ -434,6 +434,9 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .btn-google:hover { border-color: var(--ink-3); }
 .or { display: flex; align-items: center; gap: 12px; color: var(--ink-3); font-size: .85rem; }
 .or::before, .or::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.next-card { margin-top: 14px; padding: 16px 18px; border-radius: var(--r-lg); border: 1px solid var(--line); background: var(--surface); display: flex; gap: 14px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+.next-card > div:first-child { display: grid; gap: 4px; flex: 1; min-width: 240px; }
+.next-card span { font-size: .9rem; color: var(--ink-2); }
 </style>
 </head>
 <body>
@@ -1181,7 +1184,13 @@ function idCard() {
   const name = [get(data, 'personal.firstName'), get(data, 'personal.lastName')].filter(Boolean).join(' ');
   return `<div class="id-card"><div class="id-photo" id="r-card-photo">${esc((name || '?')[0])}</div>
     <div><span class="eyebrow">PropMithra · Approved Mithra</span><h3>${esc(name)}</h3>
-    <p class="id-no">${esc(data.mithraId || '')}</p><p class="muted">Valid ${esc(fmtDate(data.validFrom))} – ${esc(fmtDate(data.validTo))}</p></div></div>`;
+    <p class="id-no">${esc(data.mithraId || '')}</p><p class="muted">Valid ${esc(fmtDate(data.validFrom))} – ${esc(fmtDate(data.validTo))}</p></div></div>
+    <div class="next-card">
+      <div><b>You can now post listings</b>
+        <span>Your RERA, PAN and Aadhaar are verified, so listing is unlocked in PropMithra. Sign in with the same Google account or email you used here.</span></div>
+      <div class="btn-row"><a class="btn btn-primary" href="https://propmithra.web.app/#/properties/new" target="_blank" rel="noopener">Post your first listing</a>
+        <a class="btn btn-ghost" href="https://propmithra.web.app" target="_blank" rel="noopener">Open PropMithra</a></div>
+    </div>`;
 }
 
 // ── Start ───────────────────────────────────────────────────────────────
