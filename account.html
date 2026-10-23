@@ -618,7 +618,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
           <button type="button" role="tab" class="tab on" data-tab="listings">My listings <span id="t-listings">0</span></button>
           <button type="button" role="tab" class="tab" data-tab="team">Assigned by PropMithra <span id="t-team">0</span></button>
           <button type="button" role="tab" class="tab" data-tab="reqs">Customer requirements <span id="t-reqs">0</span></button>
-          <button type="button" role="tab" class="tab" data-tab="camps">Developer campaigns <span id="t-camps">0</span></button>
+          <button type="button" role="tab" class="tab" data-tab="camps">My Campaigns <span id="t-camps">0</span></button>
         </div>
         <div data-pane="listings">
           <p class="muted" id="d-count">Your properties on the PropMithra network.</p>
@@ -1235,7 +1235,7 @@ async function assetBlob(cid, a) {
 }
 function renderCamps() {
   $('t-camps').textContent = camps.length;
-  $('c-count').textContent = camps.length ? `${camps.length} developer campaign${camps.length > 1 ? 's' : ''} for you.` : 'Developer projects PropMithra has published for you.';
+  $('c-count').textContent = camps.length ? `${camps.length} campaign${camps.length > 1 ? "s" : ""} for you.` : 'Developer projects PropMithra has published for you.';
   const box = $('d-camps');
   if (!camps.length) { box.innerHTML = `<div class="empty-card"><b>No campaigns for you right now</b><span>When PropMithra publishes a developer campaign for your corridor or profile, it appears here and in the app.</span></div>`; return; }
   box.innerHTML = camps.map(c => {
