@@ -543,6 +543,24 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .acct-name { max-width: 110px; overflow: hidden; text-overflow: ellipsis; }
 @media (min-width: 861px) and (max-width: 1180px) { .nav-cta .add-btn { display: none; } .nav { gap: 16px; } .nav-links a { padding: 8px 9px; } }
 @media (max-width: 860px) { .nav.open .acct-name { max-width: none; } }
+
+/* Developer campaigns (account page) */
+.lcard.camp { cursor: pointer; }
+.lcard.camp:focus-visible { outline: 2px solid #128C7E; outline-offset: 2px; }
+#c-detail { margin-top: 6px; }
+.camp-head { display: flex; flex-wrap: wrap; gap: 16px; justify-content: space-between; align-items: flex-start; margin: 14px 0; }
+.camp-head h2 { margin: 2px 0; }
+.camp-cta { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.camp-cols { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 16px; }
+@media (max-width: 860px) { .camp-cols { grid-template-columns: minmax(0, 1fr); } }
+.kv { margin: 0 0 10px; } .kv span { display: block; font-size: .78rem; color: #667781; } .kv p { margin: 2px 0 0; white-space: pre-line; }
+.kit-row { display: flex; gap: 10px; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #E6EBE8; }
+.kit-row span { display: flex; flex-direction: column; min-width: 0; } .kit-row b { overflow-wrap: anywhere; }
+.modal-back { position: fixed; inset: 0; background: rgba(11, 20, 26, .45); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 100; }
+.modal { background: #fff; border-radius: 16px; padding: 20px; max-width: 560px; width: 100%; max-height: 90vh; overflow: auto; }
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px; }
+.modal .check { display: flex; gap: 8px; align-items: flex-start; margin-top: 10px; }
+.small { font-size: .82rem; }
 </style>
 </head>
 <body>
@@ -600,6 +618,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
           <button type="button" role="tab" class="tab on" data-tab="listings">My listings <span id="t-listings">0</span></button>
           <button type="button" role="tab" class="tab" data-tab="team">Assigned by PropMithra <span id="t-team">0</span></button>
           <button type="button" role="tab" class="tab" data-tab="reqs">Customer requirements <span id="t-reqs">0</span></button>
+          <button type="button" role="tab" class="tab" data-tab="camps">Developer campaigns <span id="t-camps">0</span></button>
         </div>
         <div data-pane="listings">
           <p class="muted" id="d-count">Your properties on the PropMithra network.</p>
@@ -608,6 +627,10 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
         <div data-pane="team" hidden>
           <p class="muted" id="tm-count">Properties the PropMithra team has assigned to you.</p>
           <div class="listing-grid" id="d-team"></div>
+        </div>
+        <div data-pane="camps" hidden>
+          <div id="c-list"><p class="muted" id="c-count">Developer projects PropMithra has published for you.</p><div class="listing-grid" id="d-camps"></div></div>
+          <div id="c-detail" hidden></div>
         </div>
         <div data-pane="reqs" hidden>
           <p class="muted" id="r-count">Customers you are finding a property for. Brokers with a matching property can contact you.</p>
@@ -1167,6 +1190,155 @@ async function saveReq(ev) {
   } finally { btn.disabled = false; btn.textContent = 'Post requirement'; }
 }
 
+
+// ── Developer campaigns (published by PropMithra staff) ────────────────
+let camps = [], myInterests = {};
+const DISCLAIMER = 'PropMithra only connects agents with developers. All commercial terms are provided by the developer. PropMithra does not negotiate commission, guarantee payments, or act as an intermediary in property transactions or disputes.';
+const CAT = {brochure: 'Brochure', priceList: 'Price list', floorPlan: 'Floor plans', image: 'Images', video: 'Videos', banner: 'Promotional banners', social: 'Social media creatives', presentation: 'Presentation', inventory: 'Inventory', locationMap: 'Location map', faq: 'FAQs & marketing copy', other: 'Other documents'};
+const toDate = (v) => v?.toDate ? v.toDate() : (v ? new Date(v) : null);
+function campPrice(c) { const a = c.priceMin || 0, b = c.priceMax || 0; if (!a && !b) return 'Price on request'; if (!b || a === b) return inr(a); if (!a) return 'Up to ' + inr(b); return `${inr(a)} – ${inr(b)}`; }
+function campOpen(c) { const d = toDate(c.requirements?.applicationDeadline); return c.status === 'published' && (!d || d > new Date()); }
+function kitText(c, i) {
+  if (!i || !['pending', 'approved'].includes(i.status)) return c.accessPolicy === 'publicPlus' ? 'Some materials open · more after interest' : 'Kit unlocks after interest';
+  return i.status === 'approved' ? 'Marketing kit unlocked' : 'Kit unlocks after approval';
+}
+const I_LABEL = {pending: 'Waiting for approval', approved: 'Approved', rejected: 'Not approved', withdrawn: 'Withdrawn'};
+async function loadCamps() {
+  const {fs, db} = fb, col = fs.collection(db, 'projectCampaigns');
+  const qs = [fs.where('liveAll', '==', true), fs.where('liveVerified', '==', true), fs.where('liveAudience', 'array-contains', uid)];
+  const res = await Promise.all(qs.map(w => fs.getDocs(fs.query(col, w)).catch(() => ({docs: []}))));
+  const byId = new Map();
+  res.forEach(r => r.docs.forEach(d => byId.set(d.id, {id: d.id, ...d.data()})));
+  camps = [...byId.values()].sort((a, b) => (toDate(b.publishedAt) || 0) - (toDate(a.publishedAt) || 0));
+  const mine = await fs.getDocs(fs.query(fs.collection(db, 'campaignInterests'), fs.where('uid', '==', uid))).catch(() => ({docs: []}));
+  myInterests = {}; mine.docs.forEach(d => { const x = d.data(); myInterests[x.campaignId] = {id: d.id, ...x}; });
+  renderCamps();
+}
+async function campCover(c, el) {
+  try {
+    const {fs, db} = fb;
+    const s = await fs.getDocs(fs.query(fs.collection(db, 'projectCampaigns', c.id, 'assets'), fs.where('access', '==', 'public'), fs.where('superseded', '==', false)));
+    const img = s.docs.map(d => ({id: d.id, ...d.data()})).find(a => String(a.contentType).startsWith('image/'));
+    if (!img) return;
+    const blob = await assetBlob(c.id, img);
+    el.innerHTML = `<img src="${URL.createObjectURL(blob)}" alt="">`;
+  } catch (_) {}
+}
+async function assetBlob(cid, a) {
+  const {fs, db} = fb, parts = [];
+  for (let n = 0; n < (a.chunks || 1); n++) {
+    const d = await fs.getDoc(fs.doc(db, 'campaignChunks', `${a.id}_${n}`));
+    if (!d.exists()) throw new Error('missing part');
+    parts.push(d.data().data.toUint8Array());
+  }
+  return new Blob(parts, {type: a.contentType || 'application/octet-stream'});
+}
+function renderCamps() {
+  $('t-camps').textContent = camps.length;
+  $('c-count').textContent = camps.length ? `${camps.length} developer campaign${camps.length > 1 ? 's' : ''} for you.` : 'Developer projects PropMithra has published for you.';
+  const box = $('d-camps');
+  if (!camps.length) { box.innerHTML = `<div class="empty-card"><b>No campaigns for you right now</b><span>When PropMithra publishes a developer campaign for your corridor or profile, it appears here and in the app.</span></div>`; return; }
+  box.innerHTML = camps.map(c => {
+    const i = myInterests[c.id], dl = toDate(c.requirements?.applicationDeadline);
+    return `<article class="lcard camp" data-id="${esc(c.id)}" tabindex="0" role="button">
+      <div class="lthumb"><span class="ph">${esc(c.propertyType || 'Project')}</span></div>
+      <div class="lbody">
+        <div class="tags"><span class="tag ${campOpen(c) ? 'ok' : ''}">${campOpen(c) ? 'Open' : 'Applications closed'}</span>${i ? `<span class="tag">${esc(I_LABEL[i.status] || i.status)}</span>` : ''}</div>
+        <b>${esc(c.title || 'Campaign')}</b>
+        <span class="muted">${esc(c.developer || '')} · ${esc(c.locality || '')}, ${esc(c.city || 'Hyderabad')}</span>
+        <div class="lprice">${esc(campPrice(c))}</div>
+        ${c.commercial?.commission ? `<span><b>Commission:</b> ${esc(c.commercial.commission)}</span>` : ''}
+        ${c.requirements?.objective ? `<span class="muted">${esc(c.requirements.objective)}</span>` : ''}
+        <span class="muted">${dl ? 'Apply by ' + esc(fmtDate(dl)) + ' · ' : ''}${esc(kitText(c, i))}</span>
+      </div></article>`;
+  }).join('');
+  box.querySelectorAll('.lcard.camp').forEach(card => {
+    const c = camps.find(x => x.id === card.dataset.id);
+    card.onclick = () => openCamp(c); card.onkeydown = (e) => { if (e.key === 'Enter') openCamp(c); };
+    campCover(c, card.querySelector('.lthumb'));
+  });
+}
+function kv(k, v) { return v ? `<div class="kv"><span>${esc(k)}</span><p>${esc(v)}</p></div>` : ''; }
+async function openCamp(c) {
+  const i = myInterests[c.id], active = i && ['pending', 'approved'].includes(i.status), r = c.requirements || {}, m = c.commercial || {};
+  $('c-list').hidden = true; const box = $('c-detail'); box.hidden = false;
+  box.innerHTML = `<button class="btn btn-ghost btn-sm" type="button" id="c-back">← All campaigns</button>
+    <div class="camp-head"><div><span class="eyebrow">${esc(c.code || '')}</span><h2>${esc(c.title || '')}</h2><p class="muted">${esc(c.developer || '')} · ${esc(c.locality || '')}, ${esc(c.city || 'Hyderabad')}</p></div>
+      <div class="camp-cta"><div class="tags"><span class="tag ${campOpen(c) ? 'ok' : ''}">${campOpen(c) ? 'Applications open' : 'Applications closed'}</span>${i ? `<span class="tag">${esc(I_LABEL[i.status] || i.status)}</span>` : ''}<span class="tag">${esc(kitText(c, i))}</span></div>
+      ${active ? '' : `<button class="btn btn-primary" type="button" id="c-interest" ${campOpen(c) ? '' : 'disabled'}>I'm interested</button>`}
+      ${active ? `<button class="link-btn" type="button" id="c-withdraw">Withdraw interest</button>` : ''}</div></div>
+    <div class="camp-cols"><div>
+      <section class="reg-group"><h3>Project</h3>${kv('Project', c.projectName)}${kv('Type & status', [c.propertyType, c.projectStatus].filter(Boolean).join(' · '))}${kv('Price', campPrice(c))}${kv('Address', c.address)}${kv('About', c.description)}
+        ${(c.configurations || []).length ? `<div class="kv"><span>Configurations</span><p>${c.configurations.map(x => esc([x.name, x.area ? x.area + ' sq.ft' : '', x.price, x.units ? x.units + ' available' : ''].filter(Boolean).join(' · '))).join('<br>')}</p></div>` : ''}
+        ${kv('Inventory', c.inventoryNote)}${kv('Amenities', (c.amenities || []).join(', '))}${kv('Selling points', (c.sellingPoints || []).join(' · '))}
+        ${c.reraNumber ? kv('RERA', c.reraNumber + (c.reraStatus === 'verified' ? ' (checked by PropMithra on the RERA website)' : ' (as provided by the developer — not verified by PropMithra)')) : ''}</section>
+      <section class="reg-group"><h3>Commercial terms (from the developer)</h3>${kv('Commission', m.commission)}${kv('Eligibility', m.eligibility)}${kv('Incentives', m.incentives)}${kv('Who pays', m.paymentResponsibility)}${kv('Payment terms', m.paymentTerms)}${kv('Lead attribution', m.leadAttribution)}${kv('Duplicate leads', m.duplicateLeadPolicy)}${kv('Site visits', m.siteVisitProcess)}${kv('Bookings', m.bookingProcess)}<p class="notice">${esc(DISCLAIMER)}</p></section>
+      <section class="reg-group"><h3>Campaign & eligibility</h3>${kv('Objective', r.objective)}${kv('Dates', [toDate(r.startDate) ? 'From ' + fmtDate(toDate(r.startDate)) : '', toDate(r.endDate) ? 'to ' + fmtDate(toDate(r.endDate)) : '', toDate(r.applicationDeadline) ? '· apply by ' + fmtDate(toDate(r.applicationDeadline)) : ''].filter(Boolean).join(' ').replace(/^· /, ''))}${kv('Agents needed', r.agentsRequired ? String(r.agentsRequired) : '')}${kv('Specialisations', (r.specialisations || []).join(', '))}${kv('Languages', (r.languages || []).join(', '))}${kv('Participation', r.participation)}${kv('Approval', r.interestApproval === 'manual' ? 'PropMithra reviews each interest' : 'Interest is accepted automatically')}</section>
+    </div><div>
+      <section class="reg-group"><h3>Marketing kit</h3><p class="muted">${esc({instant: 'Collateral unlocks as soon as you express interest.', approval: 'Collateral unlocks after PropMithra approves you.', publicPlus: 'Some materials are open to all; more unlock after interest.'}[c.accessPolicy || 'instant'])}</p><div id="c-kit"><span class="spinner small"></span></div>
+        <p class="muted small">Always download the latest version here. Files you already downloaded stay on your device — please delete outdated copies yourself.</p></section>
+      ${m.managerName || m.managerPhone ? `<section class="reg-group"><h3>Contact</h3>${kv('Campaign manager', m.managerName)}${m.managerPhone ? `<p><a class="btn btn-ghost btn-sm" href="tel:${esc(String(m.managerPhone).replace(/[^0-9+]/g, ''))}">Call ${esc(m.managerPhone)}</a></p>` : ''}${kv('Email', m.managerEmail)}</section>` : ''}
+    </div></div>`;
+  $('c-back').onclick = () => { box.hidden = true; $('c-list').hidden = false; };
+  if ($('c-interest')) $('c-interest').onclick = () => interestFlow(c);
+  if ($('c-withdraw')) $('c-withdraw').onclick = async () => { await fb.fs.updateDoc(fb.fs.doc(fb.db, 'campaignInterests', i.id), {status: 'withdrawn'}).catch(() => {}); await loadCamps(); openCamp(camps.find(x => x.id === c.id) || c); };
+  renderKit(c, i);
+  box.scrollIntoView({behavior: 'smooth', block: 'start'});
+}
+async function renderKit(c, i) {
+  const {fs, db} = fb, levels = ['public'];
+  if (i && ['pending', 'approved'].includes(i.status)) levels.push('interested');
+  if (i?.status === 'approved') levels.push('approved');
+  const out = [];
+  for (const l of levels) {
+    const s = await fs.getDocs(fs.query(fs.collection(db, 'projectCampaigns', c.id, 'assets'), fs.where('access', '==', l), fs.where('superseded', '==', false))).catch(() => ({docs: []}));
+    s.docs.forEach(d => out.push({id: d.id, ...d.data()}));
+  }
+  const box = $('c-kit'); if (!box) return;
+  if (!out.length) { box.innerHTML = '<p class="muted">No files available to you yet.</p>'; return; }
+  const groups = {}; out.forEach(a => (groups[a.category] = groups[a.category] || []).push(a));
+  const size = (n) => n >= 1048576 ? (n / 1048576).toFixed(1) + ' MB' : Math.ceil(n / 1024) + ' KB';
+  box.innerHTML = Object.keys(CAT).filter(k => groups[k]).map(k => `<h4>${esc(CAT[k])}</h4>` + groups[k].map(a => `<div class="kit-row"><span><b>${esc(a.name)}</b><small class="muted">${esc((a.name.split('.').pop() || '').toUpperCase())} · ${size(a.size || 0)}${a.version > 1 ? ' · v' + a.version : ''}${toDate(a.uploadedAt) ? ' · updated ' + esc(fmtDate(toDate(a.uploadedAt))) : ''}</small></span><button class="btn btn-ghost btn-sm" type="button" data-asset="${esc(a.id)}">Download</button></div>`).join('')).join('');
+  box.querySelectorAll('[data-asset]').forEach(btn => btn.onclick = async () => {
+    const a = out.find(x => x.id === btn.dataset.asset); btn.disabled = true; btn.textContent = 'Downloading…';
+    try {
+      const blob = await assetBlob(c.id, a), url = URL.createObjectURL(blob), link = document.createElement('a');
+      link.href = url; link.download = a.name; document.body.appendChild(link); link.click(); link.remove(); setTimeout(() => URL.revokeObjectURL(url), 5000);
+      fs.addDoc(fs.collection(db, 'campaignDownloads'), {campaignId: c.id, assetId: a.id, assetName: a.name, uid, at: fs.serverTimestamp()}).catch(() => {});
+      btn.textContent = 'Downloaded';
+    } catch (e) { console.warn(e); btn.textContent = 'Not allowed'; }
+  });
+}
+function interestFlow(c) {
+  const m = c.commercial || {}, dlg = document.createElement('div');
+  dlg.className = 'modal-back';
+  dlg.innerHTML = `<div class="modal" role="dialog" aria-modal="true" aria-labelledby="ci-title"><h3 id="ci-title">I'm interested</h3>
+    <p class="muted">Commercial terms · version ${esc(String(c.termsVersion || 0))}</p>
+    ${[['Commission', m.commission], ['Eligibility', m.eligibility], ['Who pays', m.paymentResponsibility], ['Payment terms', m.paymentTerms], ['Lead attribution', m.leadAttribution], ['Duplicate leads', m.duplicateLeadPolicy]].filter(x => x[1]).map(x => `<p><b>${esc(x[0])}:</b> ${esc(x[1])}</p>`).join('')}
+    <p class="muted small">${esc(DISCLAIMER)}</p>
+    <label class="check"><input type="checkbox" id="ci-ok"> <span>I have read these terms (as provided by the developer) and accept them.</span></label>
+    <p class="err" id="ci-err"></p>
+    <div class="modal-actions"><button class="btn btn-ghost" type="button" id="ci-cancel">Cancel</button><button class="btn btn-primary" type="button" id="ci-go" disabled>Confirm interest</button></div></div>`;
+  document.body.appendChild(dlg);
+  const close = () => dlg.remove();
+  dlg.querySelector('#ci-cancel').onclick = close;
+  dlg.querySelector('#ci-ok').onchange = (e) => { dlg.querySelector('#ci-go').disabled = !e.target.checked; };
+  dlg.querySelector('#ci-go').onclick = async () => {
+    const {fs, db} = fb, status = c.requirements?.interestApproval === 'manual' ? 'pending' : 'approved';
+    dlg.querySelector('#ci-go').disabled = true;
+    try {
+      await fs.setDoc(fs.doc(db, 'campaignInterests', `${c.id}_${uid}`), {
+        campaignId: c.id, campaignTitle: c.title || '', uid, agentName: [mithra.personal?.firstName, mithra.personal?.lastName].filter(Boolean).join(' ') || broker.name || user.displayName || 'Agent',
+        ...(broker.phone ? {agentPhone: broker.phone} : {}), status, termsVersion: c.termsVersion || 0,
+        termsAcceptedAt: fs.serverTimestamp(), createdAt: fs.serverTimestamp()});
+      close(); await loadCamps(); openCamp(camps.find(x => x.id === c.id) || c);
+    } catch (e) {
+      console.warn(e); dlg.querySelector('#ci-err').textContent = String(e.code || '').includes('permission') ? 'This campaign is no longer open to you.' : 'Could not save. Please check your internet and try again.';
+      dlg.querySelector('#ci-go').disabled = false;
+    }
+  };
+}
+
 // ── Start ───────────────────────────────────────────────────────────────
 (async () => {
   try {
@@ -1185,13 +1357,13 @@ async function saveReq(ev) {
       show('d-app'); setupForm(); setupReqForm(); renderStatus();
       document.querySelectorAll('.tab').forEach(t => t.onclick = () => tab(t.dataset.tab));
       if (approved()) {
-        await Promise.all([loadListings(), loadReqs().catch(e => console.warn('requirements', e)), loadTeam().catch(e => console.warn('team', e))]);
-        if (location.hash === '#add') openForm(); else if (location.hash === '#requirement') openReq(); else if (location.hash === '#requirements') tab('reqs'); else if (location.hash === '#assigned') tab('team');
+        await Promise.all([loadListings(), loadReqs().catch(e => console.warn('requirements', e)), loadTeam().catch(e => console.warn('team', e)), loadCamps().catch(e => console.warn('campaigns', e))]);
+        if (location.hash === '#add') openForm(); else if (location.hash === '#requirement') openReq(); else if (location.hash === '#requirements') tab('reqs'); else if (location.hash === '#assigned') tab('team'); else if (location.hash === '#campaigns') tab('camps');
       }
       // Live: approval appears the moment the admin approves.
       fs.onSnapshot(fs.doc(db, 'mithras', uid), async (s) => {
         const was = approved(); mithra = s.exists() ? s.data() : {};
-        renderStatus(); if (!was && approved()) { await loadListings(); loadReqs().catch(() => {}); loadTeam().catch(() => {}); }
+        renderStatus(); if (!was && approved()) { await loadListings(); loadReqs().catch(() => {}); loadTeam().catch(() => {}); loadCamps().catch(() => {}); }
       });
     } catch (e) { console.error(e); show('d-error'); }
   });
