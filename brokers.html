@@ -573,6 +573,71 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 12px; }
 .modal .check { display: flex; gap: 8px; align-items: flex-start; margin-top: 10px; }
 .small { font-size: .82rem; }
+
+/* ---------- Phone polish ---------- */
+[hidden] { display: none !important; }
+.rail-dots, .m-cta { display: none; }
+@media (max-width: 620px) {
+  .section { padding-block: 48px; }
+  .section.tight { padding-block: 40px; }
+  .section-head { margin-bottom: 24px; gap: 10px; }
+  .section-head.center { text-align: left; justify-items: start; margin-inline: 0; }
+  h1 { font-size: 2.3rem; letter-spacing: -.03em; }
+  h2 { font-size: 1.6rem; }
+  .lead { font-size: 1.02rem; }
+
+  /* Hero */
+  .hero { padding-top: 28px; }
+  .hero-copy { gap: 18px; }
+  .hero .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .hero .btn-row .btn { padding: 0 10px; font-size: .94rem; min-height: 50px; }
+  .hero-note { gap: 8px; }
+  .hero-note span { background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; font-size: .8rem; color: var(--ink-2); }
+  .scene.team { margin-top: 4px; margin-inline: -16px; }
+
+  /* "Why" cards: icon beside the text, tighter */
+  .why { gap: 12px; }
+  .why .card { grid-template-columns: 44px 1fr; column-gap: 14px; row-gap: 4px; padding: 18px; }
+  .why .card > .icon { grid-row: 1 / span 2; }
+  .why .card h3 { font-size: 1.04rem; align-self: center; }
+  .why .card p { grid-column: 2; font-size: .92rem; margin: 0; }
+
+  /* Swipe rails */
+  .rail { display: grid; grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 84%; gap: 12px;
+          overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scroll-padding-inline: 16px;
+          margin-inline: -16px; padding: 4px 16px 6px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  .rail::-webkit-scrollbar { display: none; }
+  .rail > * { scroll-snap-align: start; }
+  .rail .ph { aspect-ratio: 16 / 10; }
+  .rail.story { grid-auto-columns: 78%; }
+  .rail-dots { display: flex; justify-content: center; gap: 6px; margin-top: 14px; }
+  .rail-dots i { width: 7px; height: 7px; border-radius: 99px; background: var(--line); transition: width .2s, background .2s; }
+  .rail-dots i.on { width: 22px; background: var(--teal); }
+
+  /* Listing filters: tidy 2 × 2 */
+  .filters { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+  .filters select { width: 100%; min-width: 0; font-size: .88rem; }
+  .prop .body { padding: 14px 16px 16px; }
+
+  /* Developers: picture first, then the pitch */
+  .split .media { order: -1; aspect-ratio: 16 / 10; }
+  .split .btn-row .btn { width: 100%; }
+
+  .showcase { border-radius: var(--r-md); }
+  .cta-band { padding: 28px 22px; }
+  .cta-band .btn-row .btn { width: 100%; }
+
+  /* Sticky join bar */
+  .m-cta { display: flex; align-items: center; justify-content: space-between; gap: 12px;
+           position: fixed; left: 10px; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom, 0px)); z-index: 40;
+           padding: 10px 10px 10px 16px; border-radius: 16px; background: var(--night); color: #fff;
+           box-shadow: 0 10px 30px rgba(10, 30, 25, .28); transform: translateY(140%); transition: transform .25s ease; }
+  .m-cta.show { transform: none; }
+  .m-cta div { display: grid; line-height: 1.25; min-width: 0; }
+  .m-cta b { font-size: .92rem; }
+  .m-cta span { font-size: .78rem; color: #b9cdc8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .m-cta .btn { min-height: 42px; padding: 0 18px; flex: none; }
+}
 </style>
 </head>
 <body>
@@ -731,6 +796,54 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
       var open = nav.classList.toggle('open');
       btn.setAttribute('aria-expanded', open ? 'true' : 'false');
     });
+  }
+
+  // Phone carousels: dots under each .rail that follow the swipe.
+  document.querySelectorAll('.rail').forEach(function (rail) {
+    var dots = document.createElement('div');
+    dots.className = 'rail-dots';
+    dots.setAttribute('aria-hidden', 'true');
+    rail.after(dots);
+    var items = function () {
+      return Array.prototype.filter.call(rail.children, function (c) { return !c.hidden; });
+    };
+    var draw = function () {
+      var list = items();
+      if (dots.childElementCount !== list.length) {
+        dots.innerHTML = '';
+        list.forEach(function () { dots.appendChild(document.createElement('i')); });
+      }
+      var start = rail.getBoundingClientRect().left;
+      var best = 0, dist = Infinity;
+      list.forEach(function (c, n) {
+        var d = Math.abs(c.getBoundingClientRect().left - start - 16);
+        if (d < dist) { dist = d; best = n; }
+      });
+      if (rail.scrollLeft + rail.clientWidth >= rail.scrollWidth - 4) best = list.length - 1;
+      Array.prototype.forEach.call(dots.children, function (d, n) { d.className = n === best ? 'on' : ''; });
+    };
+    rail.addEventListener('scroll', function () { window.requestAnimationFrame(draw); }, { passive: true });
+    document.querySelectorAll('[data-filter]').forEach(function (s) {
+      s.addEventListener('change', function () { rail.scrollLeft = 0; draw(); });
+    });
+    window.addEventListener('resize', draw);
+    draw();
+  });
+
+  // Phone: a slim "Join free" bar once the hero has scrolled away.
+  var mcta = document.querySelector('.m-cta');
+  var heroEl = document.querySelector('.hero');
+  if (mcta && heroEl && 'IntersectionObserver' in window) {
+    var heroGone = false, endSeen = false;
+    var sync = function () { mcta.classList.toggle('show', heroGone && !endSeen); };
+    new IntersectionObserver(function (e) { heroGone = !e[0].isIntersecting; sync(); }).observe(heroEl);
+    var ends = document.querySelectorAll('.cta-band, .site-footer');
+    var seen = new Map();
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (x) { seen.set(x.target, x.isIntersecting); });
+      endSeen = Array.from(seen.values()).some(Boolean); sync();
+    });
+    ends.forEach(function (el) { io.observe(el); });
   }
 
   // Property discovery filters (sample listings on the home page)
