@@ -1274,9 +1274,10 @@ function bindReview() {
 
 function applyStatus() {
   const s = data.status || 'draft', b = $('r-banner');
-  locked = s === 'submitted' || s === 'approved' || s === 'rejected';
+  locked = s === 'submitted' || s === 'underReview' || s === 'approved' || s === 'rejected';
   const msg = {
     submitted: `<b>Submitted for approval.</b> Our team is checking your details and documents — usually within 2 working days. You'll get your Mithra ID once approved. Need to change something? <a href="contact">Contact us</a>.`,
+    underReview: `<b>Under review.</b> A PropMithra reviewer is checking your details and documents now. You'll get your Mithra ID once approved. Need to change something? <a href="contact">Contact us</a>.`,
     approved: '',
     rejected: `<b>Registration not approved.</b> ${esc(data.reviewNote || '')} <a href="contact">Contact us</a> if you have questions.`,
     changes: `<b>Changes requested:</b> ${esc(data.reviewNote || 'Please check your details.')} Update the details below and resubmit.`,
@@ -1332,7 +1333,7 @@ function show(id) { ['r-loading', 'r-signedout', 'r-error', 'r-app'].forEach(x =
       window.pmSession?.({name: [get(data, 'personal.firstName'), get(data, 'personal.lastName')].filter(Boolean).join(' ') || user.displayName || ''});
       $('r-who-phone').textContent = user.phoneNumber ? '+91 ' + phone.slice(0, 5) + ' ' + phone.slice(5) : '';
       applyStatus();
-      if (data.status === 'submitted' || data.status === 'approved') current = SECTIONS.length - 1;
+      if (data.status === 'submitted' || data.status === 'underReview' || data.status === 'approved') current = SECTIONS.length - 1;
       show('r-app'); render(); setSave('All changes saved', 'ok');
       if (DIGILOCKER && new URLSearchParams(location.search).has('digilocker') && !locked) finishDigilocker();
       // Live: show the admin's decision the moment it is made.

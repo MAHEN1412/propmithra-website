@@ -785,6 +785,7 @@ function renderStatus() {
     none: ['todo', 'Start your Mithra registration', 'Fill in your details and documents once. After approval you can post listings here.', '<a class="btn btn-primary" href="register">Start registration</a>'],
     draft: ['todo', 'Finish your Mithra registration', 'Your registration is saved but not submitted yet. Complete it and submit it for approval.', '<a class="btn btn-primary" href="register">Continue registration</a>'],
     submitted: ['wait', 'Registration under review', 'Our team is checking your details and documents — usually within 2 working days. You can post listings as soon as you are approved.', '<a class="btn btn-ghost" href="register">View registration</a>'],
+    underReview: ['wait', 'Registration under review', 'A PropMithra reviewer is checking your details and documents now. You can post listings as soon as you are approved.', '<a class="btn btn-ghost" href="register">View registration</a>'],
     changes: ['todo', 'Changes requested', esc(mithra.reviewNote || 'Please update your registration and resubmit.'), '<a class="btn btn-primary" href="register">Update registration</a>'],
     rejected: ['bad', 'Registration not approved', esc(mithra.reviewNote || 'Please contact PropMithra for details.'), '<a class="btn btn-ghost" href="contact">Contact us</a>'],
   }[s];
@@ -838,8 +839,9 @@ function renderListings() {
         <div class="lprice">${esc(inr(p.price))}${p.transaction !== 'sale' ? '<small>/mo</small>' : ''}</div>
         <b>${esc(p.title)}</b>
         <span class="muted">${esc(p.locality)}${p.areaSqft ? ' · ' + Number(p.areaSqft).toLocaleString('en-IN') + ' sq.ft' : ''}</span>
-        <div class="tags"><span class="tag ${p.availability === 'available' ? 'ok' : ''}">${esc(AVAIL[p.availability] || p.availability)}</span><span class="tag">${esc(VIS[p.visibility] || p.visibility)}</span>${hidden ? '<span class="tag bad">Hidden by PropMithra</span>' : ''}</div>
+        <div class="tags"><span class="tag ${p.availability === 'available' ? 'ok' : ''}">${esc(AVAIL[p.availability] || p.availability)}</span><span class="tag">${esc(VIS[p.visibility] || p.visibility)}</span>${hidden ? '<span class="tag bad">Hidden by PropMithra</span>' : ''}${p.review === 'approved' ? '<span class="tag ok">Reviewed ✓</span>' : ''}${p.review === 'changes' ? '<span class="tag warn">Corrections requested</span>' : ''}</div>
         ${hidden && p.moderationNote ? `<span class="dl-warn">${esc(p.moderationNote)}</span>` : ''}
+        ${!hidden && p.review === 'changes' && p.reviewNote ? `<span class="dl-warn">PropMithra: ${esc(p.reviewNote)} — please update it in the app.</span>` : ''}
         <div class="lactions">
           <select data-avail aria-label="Status">${Object.entries(AVAIL).map(([k, v]) => `<option value="${k}"${k === p.availability ? ' selected' : ''}>${v}</option>`).join('')}</select>
           <button type="button" class="link-btn danger" data-del>Delete</button>
