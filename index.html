@@ -123,10 +123,19 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .tag { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; font-size: .76rem; font-weight: 650; background: var(--mint); color: var(--teal-dark); }
 .tag.grey { background: var(--canvas); color: var(--ink-2); }
 .tag.warn { background: #fdf3e2; color: var(--warn); }
+.scene.team { min-height: 540px; }
+.scene .photo.cutout { inset: 0 -4% 14% 0; background: none; border-radius: 0; overflow: visible; }
+.scene.team .float.match { left: -6%; right: auto; top: 2%; width: min(200px, 40%); }
+.scene.team .float.chat { left: -2%; bottom: 0; width: min(270px, 52%); }
+.scene.team .float.deal { right: -2%; bottom: 2%; }
+.scene .photo.cutout img { object-fit: contain; object-position: center top; }
 /* Phones: the moments stack under the photo instead of floating over it. */
 @media (max-width: 620px) {
   .scene { min-height: 0; display: grid; gap: 12px; }
   .scene .photo { position: relative; inset: auto; aspect-ratio: 16 / 10; max-width: 100%; }
+  .scene .photo.cutout { aspect-ratio: 1400 / 953; }
+  .scene.team { min-height: 0; }
+  .scene.team .float.match, .scene.team .float.chat, .scene.team .float.deal { width: auto; }
   .float, .float.match, .float.chat, .float.deal { position: static; width: auto; }
 }
 /* Photos that fail to load show their tint, not their alt text. */
@@ -590,8 +599,8 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
       </div>
       <div class="hero-note"><span>Free for brokers</span><span>Android app &amp; web</span><span>Owner details stay private</span></div>
     </div>
-    <div class="scene" aria-label="Product preview: a match between a customer requirement and a listing, discussed by two brokers">
-      <div class="photo"><img src="img/hero.jpg" alt="A broker showing an apartment to a couple" loading="eager"></div>
+    <div class="scene team" aria-label="Product preview: a match between a customer requirement and a listing, discussed by two brokers">
+      <div class="photo cutout"><img src="img/hero-team.webp" alt="Two PropMithra brokers shaking hands over a new property deal" width="1400" height="953" loading="eager"></div>
       <div class="float match">
         <span class="small muted">Requirement ↔ listing</span>
         <div class="score"><b>94%</b><span class="small">match</span></div>
