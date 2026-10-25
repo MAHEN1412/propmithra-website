@@ -1,4 +1,5 @@
 Options -Indexes
+AddType application/vnd.android.package-archive .apk
 # Hide Git and other hidden files from visitors
 RedirectMatch 404 /\.(git|env)
 RedirectMatch 404 /README\.md$
