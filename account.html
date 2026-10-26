@@ -722,6 +722,38 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .talk-terms { display: flex; gap: 8px; align-items: flex-start; margin-top: 10px; font-size: .9rem; color: var(--ink-2); cursor: pointer; text-align: left; }
 .talk-terms input { width: 18px; height: 18px; margin-top: 2px; accent-color: #22a23a; flex: none; }
 .talk-terms a { font-weight: 700; }
+
+/* Account page: campaign slider in the hero */
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.dash-hero { padding-block: 20px 8px; }
+.cslider { position: relative; margin-top: 14px; }
+.cs-track { display: grid; grid-auto-flow: column; grid-auto-columns: 100%; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; border-radius: 22px; }
+.cs-track::-webkit-scrollbar { display: none; }
+.cs-slide { scroll-snap-align: start; display: grid; grid-template-columns: 1.1fr 1fr; min-height: 300px; background: linear-gradient(135deg, #075e54, #04403a); color: #fff; overflow: hidden; }
+.cs-media { position: relative; background: rgba(255,255,255,.06); display: grid; place-items: center; overflow: hidden; }
+.cs-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.cs-media .ph { color: rgba(255,255,255,.7); font-weight: 700; }
+.cs-body { padding: clamp(20px, 3vw, 36px); display: flex; flex-direction: column; justify-content: center; gap: 10px; align-items: flex-start; }
+.cs-body h2 { color: #fff; font-size: clamp(1.4rem, 2.6vw, 2rem); line-height: 1.15; margin: 0; }
+.cs-sub { margin: 0; color: rgba(255,255,255,.8); }
+.cs-tag { background: rgba(255,255,255,.16); color: #fff; font-size: .78rem; font-weight: 700; padding: 4px 10px; border-radius: 99px; }
+.cs-tag.ok { background: #22a23a; }
+.cs-facts { display: flex; flex-wrap: wrap; gap: 8px 22px; margin: 4px 0 6px; }
+.cs-facts small { display: block; color: rgba(255,255,255,.7); font-size: .76rem; }
+.cs-facts b { font-size: 1.02rem; }
+.cs-body .btn-primary { background: #fff; color: #075e54; border-color: #fff; font-weight: 800; }
+.cs-body .btn-primary:hover { background: #e7f8ef; }
+.cs-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; border-radius: 50%; border: 0; background: rgba(255,255,255,.92); color: #075e54; font-size: 1.6rem; line-height: 1; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,.18); }
+.cs-nav.prev { left: 10px; } .cs-nav.next { right: 10px; }
+.cs-nav[hidden] { display: none; }
+.cs-dots { display: flex; justify-content: center; gap: 6px; margin-top: 10px; }
+.cs-dots button { width: 8px; height: 8px; padding: 0; border: 0; border-radius: 99px; background: var(--line); cursor: pointer; transition: width .2s; }
+.cs-dots button.on { width: 22px; background: #075e54; }
+@media (max-width: 720px) {
+  .cs-slide { grid-template-columns: 1fr; min-height: 0; }
+  .cs-media { aspect-ratio: 16 / 9; }
+  .cs-nav { top: 28%; width: 34px; height: 34px; font-size: 1.3rem; }
+}
 </style>
 <style>@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:700;font-display:swap;src:url(fonts/roboto-condensed-latin-700-italic.woff2) format("woff2")}@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:800;font-display:swap;src:url(fonts/roboto-condensed-latin-800-italic.woff2) format("woff2")}</style>
 </head>
@@ -743,9 +775,14 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 <section class="page-hero dash-hero">
   <div class="wrap">
     <span class="crumb"><a href="./">Home</a> / My account</span>
-    <span class="eyebrow">My PropMithra</span>
-    <h1 id="d-hello">My account</h1>
-    <p class="lead" id="d-lead">Your Mithra registration, listings and customer requirements.</p>
+    <h1 class="sr-only">My account</h1>
+    <!-- Developer campaigns for this agent, as an auto slider -->
+    <div class="cslider" id="d-slider" hidden aria-roledescription="carousel" aria-label="Campaigns for you">
+      <div class="cs-track" id="cs-track"></div>
+      <button class="cs-nav prev" type="button" id="cs-prev" aria-label="Previous campaign">‹</button>
+      <button class="cs-nav next" type="button" id="cs-next" aria-label="Next campaign">›</button>
+      <div class="cs-dots" id="cs-dots"></div>
+    </div>
   </div>
 </section>
 
@@ -773,14 +810,11 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
       <div id="d-listings-wrap" hidden>
         <div class="dash-actions">
           <button class="action-tile" type="button" id="d-add"><span class="ai">+</span><span><b>Add listing</b><small>A property you have — sale, rent or lease</small></span></button>
-          <button class="action-tile alt" type="button" id="d-add-req"><span class="ai">+</span><span><b>Customer requirement</b><small>A customer looking for a property</small></span></button>
         </div>
         <div class="team-alert" id="d-team-alert" hidden role="status"><span class="ta-ico" aria-hidden="true">📣</span><span class="ta-text"><b id="d-team-title"></b><small id="d-team-sub"></small></span><button class="btn btn-primary" type="button" id="d-team-view">View</button><button class="link-btn" type="button" id="d-team-close" aria-label="Dismiss">✕</button></div>
         <div class="tabs" role="tablist">
           <button type="button" role="tab" class="tab on" data-tab="listings">My listings <span id="t-listings">0</span></button>
           <button type="button" role="tab" class="tab" data-tab="team">Assigned by PropMithra <span id="t-team">0</span></button>
-          <button type="button" role="tab" class="tab" data-tab="reqs">Customer requirements <span id="t-reqs">0</span></button>
-          <button type="button" role="tab" class="tab" data-tab="camps">My Campaigns <span id="t-camps">0</span></button>
         </div>
         <div data-pane="listings">
           <p class="muted" id="d-count">Your properties on the PropMithra network.</p>
@@ -966,7 +1000,6 @@ const approved = () => mithra.status === 'approved' || broker.kycVerified === tr
 function renderStatus() {
   const s = mithra.status || (mithra.uid ? 'draft' : 'none');
   const name = [mithra.personal?.firstName, mithra.personal?.lastName].filter(Boolean).join(' ') || broker.name || user.displayName || '';
-  $('d-hello').textContent = name ? `Hello, ${name.split(' ')[0]}` : 'My account';
   const card = {
     none: ['todo', 'Start your Mithra registration', 'Fill in your details and documents once. After approval you can post listings here.', '<a class="btn btn-primary" href="register">Start registration</a>'],
     draft: ['todo', 'Finish your Mithra registration', 'Your registration is saved but not submitted yet. Complete it and submit it for approval.', '<a class="btn btn-primary" href="register">Continue registration</a>'],
@@ -993,7 +1026,6 @@ function renderStatus() {
   $('d-listings-wrap').hidden = !approved() && !campsOnly;
   $('d-listings-wrap').classList.toggle('camps-only', campsOnly);
   if (campsOnly) tab('camps');
-  $('d-lead').textContent = approved() ? 'Post properties you have and customers you are finding properties for — both reach brokers across the PropMithra network.' : 'Your Mithra registration status.';
 }
 async function loadPhoto() {
   const url = mithra.docs?.photo?.url; if (!url) return;
@@ -1352,7 +1384,7 @@ async function save(ev) {
 // ── Customer requirements ───────────────────────────────────────────────
 function budgetText(r) { return r.budgetMin && r.budgetMin !== r.budgetMax ? `${inr(r.budgetMin)} – ${inr(r.budgetMax)}` : `up to ${inr(r.budgetMax)}`; }
 function renderReqs() {
-  $('t-reqs').textContent = reqs.length;
+  if ($('t-reqs')) $('t-reqs').textContent = reqs.length;
   const box = $('d-reqs');
   if (!reqs.length) {
     box.innerHTML = `<div class="empty-card"><b>No customer requirements yet</b><span>Have a customer looking to buy or rent? Post what they need — brokers with a matching property can reach you.</span><button class="btn btn-primary" type="button" data-addreq>+ Customer requirement</button></div>`;
@@ -1411,7 +1443,7 @@ function setupReqForm() {
   ['q-amin', 'q-amax'].forEach(id => $(id).addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g, ''); }));
   $('q-localities').addEventListener('change', () => fieldErr('q-localities', ''));
   document.querySelectorAll('[data-q-cancel]').forEach(b => b.onclick = closeReq);
-  $('d-add-req').onclick = openReq;
+  if ($('d-add-req')) $('d-add-req').onclick = openReq;
   $('q-form').onsubmit = saveReq;
 }
 function budget() {
@@ -1509,8 +1541,44 @@ async function assetBlob(cid, a) {
   }
   return new Blob(parts, {type: a.contentType || 'application/octet-stream'});
 }
+// Campaign slider at the top of the account page.
+let csTimer = null, csIndex = 0;
+function renderSlider() {
+  const wrap = $('d-slider'), track = $('cs-track'), dots = $('cs-dots');
+  clearInterval(csTimer);
+  if (!camps.length) { wrap.hidden = true; return; }
+  wrap.hidden = false;
+  track.innerHTML = camps.map((c, n) => {
+    const m = c.commercial || {}, dl = toDate(c.requirements?.applicationDeadline);
+    return `<article class="cs-slide" data-id="${esc(c.id)}" role="group" aria-label="${n + 1} of ${camps.length}">
+      <div class="cs-media"><span class="ph">${esc(c.propertyType || 'Project')}</span></div>
+      <div class="cs-body">
+        <span class="cs-tag ${campOpen(c) ? 'ok' : ''}">${campOpen(c) ? 'Campaign open' : 'Applications closed'}</span>
+        <h2>${esc(c.title || 'Campaign')}</h2>
+        <p class="cs-sub">${esc([c.developer, [c.locality, c.city || 'Hyderabad'].filter(Boolean).join(', ')].filter(Boolean).join(' · '))}</p>
+        <div class="cs-facts"><span><small>Price</small><b>${esc(campPrice(c))}</b></span>${m.commission ? `<span><small>Commission</small><b>${esc(m.commission)}</b></span>` : ''}${dl ? `<span><small>Apply by</small><b>${esc(fmtDate(dl))}</b></span>` : ''}</div>
+        <button class="btn btn-primary" type="button" data-open="${esc(c.id)}">View campaign</button>
+      </div></article>`;
+  }).join('');
+  dots.innerHTML = camps.length > 1 ? camps.map((_, n) => `<button type="button" aria-label="Campaign ${n + 1}" class="${n ? '' : 'on'}"></button>`).join('') : '';
+  $('cs-prev').hidden = $('cs-next').hidden = camps.length < 2;
+  const go = (n) => { csIndex = (n + camps.length) % camps.length; const el = track.children[csIndex]; track.scrollTo({left: el.offsetLeft - track.offsetLeft, behavior: 'smooth'}); };
+  const restart = () => { clearInterval(csTimer); if (camps.length > 1) csTimer = setInterval(() => go(csIndex + 1), 5000); };
+  track.onscroll = () => { const k = Math.round(track.scrollLeft / (track.clientWidth || 1)); csIndex = k; dots.querySelectorAll('button').forEach((d, n) => d.className = n === k ? 'on' : ''); };
+  dots.querySelectorAll('button').forEach((d, n) => d.onclick = () => { go(n); restart(); });
+  $('cs-prev').onclick = () => { go(csIndex - 1); restart(); };
+  $('cs-next').onclick = () => { go(csIndex + 1); restart(); };
+  wrap.onmouseenter = () => clearInterval(csTimer); wrap.onmouseleave = restart;
+  track.querySelectorAll('.cs-slide').forEach(sl => {
+    const c = camps.find(x => x.id === sl.dataset.id);
+    sl.querySelector('[data-open]').onclick = () => { tab('camps'); openCamp(c); $('d-listings-wrap').scrollIntoView({behavior: 'smooth', block: 'start'}); };
+    campCover(c, sl.querySelector('.cs-media'));
+  });
+  csIndex = 0; restart();
+}
 function renderCamps() {
-  $('t-camps').textContent = camps.length;
+  if ($('t-camps')) $('t-camps').textContent = camps.length;
+  renderSlider();
   $('c-count').textContent = camps.length ? `${camps.length} campaign${camps.length > 1 ? "s" : ""} for you.` : 'Developer projects PropMithra has published for you.';
   const box = $('d-camps');
   if (!camps.length) { box.innerHTML = `<div class="empty-card"><b>No campaigns for you right now</b><span>When PropMithra publishes a developer campaign for your corridor or profile, it appears here and in the app.</span></div>`; return; }
@@ -1555,7 +1623,7 @@ async function openCamp(c) {
         <p class="muted small">Always download the latest version here. Files you already downloaded stay on your device — please delete outdated copies yourself.</p></section>
       ${m.managerName || m.managerPhone ? `<section class="reg-group"><h3>Contact</h3>${kv('Campaign manager', m.managerName)}${m.managerPhone ? `<p><a class="btn btn-ghost btn-sm" href="tel:${esc(String(m.managerPhone).replace(/[^0-9+]/g, ''))}">Call ${esc(m.managerPhone)}</a></p>` : ''}${kv('Email', m.managerEmail)}</section>` : ''}
     </div></div>`;
-  $('c-back').onclick = () => { box.hidden = true; $('c-list').hidden = false; };
+  $('c-back').onclick = () => { box.hidden = true; $('c-list').hidden = false; if (approved()) tab('listings'); };
   if ($('c-interest')) $('c-interest').onclick = () => interestFlow(c);
   if ($('c-withdraw')) $('c-withdraw').onclick = async () => { await fb.fs.updateDoc(fb.fs.doc(fb.db, 'campaignInterests', i.id), {status: 'withdrawn'}).catch(() => {}); await loadCamps(); openCamp(camps.find(x => x.id === c.id) || c); };
   renderKit(c, i);
@@ -1634,13 +1702,13 @@ function interestFlow(c) {
       document.querySelectorAll('.tab').forEach(t => t.onclick = () => tab(t.dataset.tab));
       if (!approved() && broker.uid !== undefined) await loadCamps().catch(e => console.warn('campaigns', e));
       if (approved()) {
-        await Promise.all([loadListings(), loadReqs().catch(e => console.warn('requirements', e)), loadTeam().catch(e => console.warn('team', e)), loadCamps().catch(e => console.warn('campaigns', e))]);
-        if (location.hash === '#add') openForm(); else if (location.hash === '#requirement') openReq(); else if (location.hash === '#requirements') tab('reqs'); else if (location.hash === '#assigned') tab('team'); else if (location.hash === '#campaigns') tab('camps');
+        await Promise.all([loadListings(), loadTeam().catch(e => console.warn('team', e)), loadCamps().catch(e => console.warn('campaigns', e))]);
+        if (location.hash === '#add') openForm(); else if (location.hash === '#requirement') openReq(); else if (location.hash === '#assigned') tab('team'); else if (location.hash === '#campaigns') tab('camps');
       }
       // Live: approval appears the moment the admin approves.
       fs.onSnapshot(fs.doc(db, 'mithras', uid), async (s) => {
         const was = approved(); mithra = s.exists() ? s.data() : {};
-        renderStatus(); if (!was && approved()) { await loadListings(); loadReqs().catch(() => {}); loadTeam().catch(() => {}); loadCamps().catch(() => {}); }
+        renderStatus(); if (!was && approved()) { await loadListings(); loadTeam().catch(() => {}); loadCamps().catch(() => {}); }
       });
     } catch (e) { console.error(e); show('d-error'); }
   });
