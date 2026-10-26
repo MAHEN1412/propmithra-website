@@ -673,6 +673,11 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 }
 
 .install-steps { margin: 0; padding-left: 1.2em; display: grid; gap: 8px; }
+
+/* Registered but not yet approved: only the campaigns tab is shown. */
+#d-listings-wrap.camps-only .dash-actions,
+#d-listings-wrap.camps-only .team-alert,
+#d-listings-wrap.camps-only .tab:not([data-tab="camps"]) { display: none; }
 </style>
 <style>@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:700;font-display:swap;src:url(fonts/roboto-condensed-latin-700-italic.woff2) format("woff2")}@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:800;font-display:swap;src:url(fonts/roboto-condensed-latin-800-italic.woff2) format("woff2")}</style>
 </head>
@@ -937,7 +942,12 @@ function renderStatus() {
       <div class="btn-row">${card[3]}<button class="btn btn-ghost" type="button" id="d-signout">Log out</button></div></div>`;
   }
   $('d-signout').onclick = async () => { await fb.auth.signOut(fb.au); window.pmSession?.(null); location.href = './'; };
-  $('d-listings-wrap').hidden = !approved();
+  // Registered agents without approval/KYC still see campaigns for their
+  // corridors (and can tap "I'm interested"); listings stay locked.
+  const campsOnly = !approved() && broker.uid !== undefined;
+  $('d-listings-wrap').hidden = !approved() && !campsOnly;
+  $('d-listings-wrap').classList.toggle('camps-only', campsOnly);
+  if (campsOnly) tab('camps');
   $('d-lead').textContent = approved() ? 'Post properties you have and customers you are finding properties for — both reach brokers across the PropMithra network.' : 'Your Mithra registration status.';
 }
 async function loadPhoto() {
@@ -1318,10 +1328,16 @@ function kitText(c, i) {
 const I_LABEL = {pending: 'Waiting for approval', approved: 'Approved', rejected: 'Not approved', withdrawn: 'Withdrawn'};
 async function loadCamps() {
   const {fs, db} = fb, col = fs.collection(db, 'projectCampaigns');
-  const qs = [fs.where('liveAll', '==', true), fs.where('liveVerified', '==', true), fs.where('liveAudience', 'array-contains', uid)];
+  const qs = [fs.where('liveAll', '==', true), fs.where('liveVerified', '==', true), fs.where('liveAudience', 'array-contains', uid),
+    fs.where('liveOpen', '==', true), fs.where('liveOpenVerified', '==', true)];
   const res = await Promise.all(qs.map(w => fs.getDocs(fs.query(col, w)).catch(() => ({docs: []}))));
-  const byId = new Map();
-  res.forEach(r => r.docs.forEach(d => byId.set(d.id, {id: d.id, ...d.data()})));
+  const myCorr = broker.corridors || [], byId = new Map();
+  res.forEach((r, n) => r.docs.forEach(d => {
+    const c = {id: d.id, ...d.data()};
+    // Corridor campaigns (last two queries): only the agent's own corridors.
+    if (n >= 3 && !(c.liveCorridors || []).some(k => myCorr.includes(k))) return;
+    byId.set(d.id, c);
+  }));
   camps = [...byId.values()].sort((a, b) => (toDate(b.publishedAt) || 0) - (toDate(a.publishedAt) || 0));
   const mine = await fs.getDocs(fs.query(fs.collection(db, 'campaignInterests'), fs.where('uid', '==', uid))).catch(() => ({docs: []}));
   myInterests = {}; mine.docs.forEach(d => { const x = d.data(); myInterests[x.campaignId] = {id: d.id, ...x}; });
@@ -1469,6 +1485,7 @@ function interestFlow(c) {
       window.pmSession?.({name: [mithra.personal?.firstName, mithra.personal?.lastName].filter(Boolean).join(' ') || broker.name || u.displayName || ''});
       show('d-app'); setupForm(); setupReqForm(); renderStatus();
       document.querySelectorAll('.tab').forEach(t => t.onclick = () => tab(t.dataset.tab));
+      if (!approved() && broker.uid !== undefined) await loadCamps().catch(e => console.warn('campaigns', e));
       if (approved()) {
         await Promise.all([loadListings(), loadReqs().catch(e => console.warn('requirements', e)), loadTeam().catch(e => console.warn('team', e)), loadCamps().catch(e => console.warn('campaigns', e))]);
         if (location.hash === '#add') openForm(); else if (location.hash === '#requirement') openReq(); else if (location.hash === '#requirements') tab('reqs'); else if (location.hash === '#assigned') tab('team'); else if (location.hash === '#campaigns') tab('camps');
