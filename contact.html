@@ -699,7 +699,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 
 /* Team listings: talk to our team, testimonials, FAQ */
 .talk { display: grid; gap: 6px; text-align: center; padding-top: 8px; border-top: 1px solid var(--line); }
-.btn-talk { background: #22a23a; color: #fff; border-color: #22a23a; font-style: italic; font-weight: 800; letter-spacing: .02em; text-transform: uppercase; min-height: 46px; }
+.btn-talk { background: #22a23a; color: #fff; border-color: #22a23a; font-weight: 900; letter-spacing: .02em; text-transform: uppercase; min-height: 46px; }
 .btn-talk:hover { background: #1c8c31; }
 .btn-talk.sent { background: var(--mint); color: var(--teal-dark); border-color: var(--mint); }
 #tm-extra { display: grid; gap: 24px; margin-top: 28px; }
@@ -709,13 +709,19 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .testi-card { scroll-snap-align: start; margin: 0; background: var(--mint); border-radius: 16px; padding: 18px; display: grid; gap: 10px; align-content: start; }
 .testi-hl { justify-self: start; background: #22a23a; color: #fff; font-weight: 700; font-size: .78rem; border-radius: 99px; padding: 3px 10px; }
 .testi-card blockquote { margin: 0; font-style: italic; color: var(--ink-2); }
-.testi-card figcaption { font-size: .88rem; color: var(--ink-3); }
+.testi-card figcaption { font-size: .88rem; color: var(--ink-3); display: flex; align-items: center; gap: 10px; line-height: 1.3; }
+.testi-card figcaption b { color: var(--ink); }
+.testi-av { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; flex: none; background: #fff; display: grid; place-items: center; font-style: normal; font-weight: 800; color: var(--green-700, #075e54); }
 .rail-dots.show { display: flex; justify-content: center; gap: 6px; margin-top: 12px; }
 .rail-dots.show i { width: 7px; height: 7px; border-radius: 99px; background: var(--line); transition: width .2s; }
 .rail-dots.show i.on { width: 22px; background: var(--teal); }
 .tfaq details { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px; margin-bottom: 8px; }
 .tfaq summary { cursor: pointer; font-weight: 650; }
 .tfaq p { margin: 8px 0 0; color: var(--ink-2); }
+
+.talk-terms { display: flex; gap: 8px; align-items: flex-start; margin-top: 10px; font-size: .9rem; color: var(--ink-2); cursor: pointer; text-align: left; }
+.talk-terms input { width: 18px; height: 18px; margin-top: 2px; accent-color: #22a23a; flex: none; }
+.talk-terms a { font-weight: 700; }
 </style>
 <style>@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:700;font-display:swap;src:url(fonts/roboto-condensed-latin-700-italic.woff2) format("woff2")}@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:800;font-display:swap;src:url(fonts/roboto-condensed-latin-800-italic.woff2) format("woff2")}</style>
 </head>

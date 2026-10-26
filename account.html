@@ -699,7 +699,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 
 /* Team listings: talk to our team, testimonials, FAQ */
 .talk { display: grid; gap: 6px; text-align: center; padding-top: 8px; border-top: 1px solid var(--line); }
-.btn-talk { background: #22a23a; color: #fff; border-color: #22a23a; font-style: italic; font-weight: 800; letter-spacing: .02em; text-transform: uppercase; min-height: 46px; }
+.btn-talk { background: #22a23a; color: #fff; border-color: #22a23a; font-weight: 900; letter-spacing: .02em; text-transform: uppercase; min-height: 46px; }
 .btn-talk:hover { background: #1c8c31; }
 .btn-talk.sent { background: var(--mint); color: var(--teal-dark); border-color: var(--mint); }
 #tm-extra { display: grid; gap: 24px; margin-top: 28px; }
@@ -709,13 +709,19 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .testi-card { scroll-snap-align: start; margin: 0; background: var(--mint); border-radius: 16px; padding: 18px; display: grid; gap: 10px; align-content: start; }
 .testi-hl { justify-self: start; background: #22a23a; color: #fff; font-weight: 700; font-size: .78rem; border-radius: 99px; padding: 3px 10px; }
 .testi-card blockquote { margin: 0; font-style: italic; color: var(--ink-2); }
-.testi-card figcaption { font-size: .88rem; color: var(--ink-3); }
+.testi-card figcaption { font-size: .88rem; color: var(--ink-3); display: flex; align-items: center; gap: 10px; line-height: 1.3; }
+.testi-card figcaption b { color: var(--ink); }
+.testi-av { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; flex: none; background: #fff; display: grid; place-items: center; font-style: normal; font-weight: 800; color: var(--green-700, #075e54); }
 .rail-dots.show { display: flex; justify-content: center; gap: 6px; margin-top: 12px; }
 .rail-dots.show i { width: 7px; height: 7px; border-radius: 99px; background: var(--line); transition: width .2s; }
 .rail-dots.show i.on { width: 22px; background: var(--teal); }
 .tfaq details { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px; margin-bottom: 8px; }
 .tfaq summary { cursor: pointer; font-weight: 650; }
 .tfaq p { margin: 8px 0 0; color: var(--ink-2); }
+
+.talk-terms { display: flex; gap: 8px; align-items: flex-start; margin-top: 10px; font-size: .9rem; color: var(--ink-2); cursor: pointer; text-align: left; }
+.talk-terms input { width: 18px; height: 18px; margin-top: 2px; accent-color: #22a23a; flex: none; }
+.talk-terms a { font-weight: 700; }
 </style>
 <style>@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:700;font-display:swap;src:url(fonts/roboto-condensed-latin-700-italic.woff2) format("woff2")}@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:800;font-display:swap;src:url(fonts/roboto-condensed-latin-800-italic.woff2) format("woff2")}</style>
 </head>
@@ -1127,7 +1133,7 @@ function teamCards() {
         ${p.description ? `<span class="muted">${esc(String(p.description).slice(0, 140))}${String(p.description).length > 140 ? '…' : ''}</span>` : ''}
         <div class="talk">
           <span class="muted">${teamStats[p.id] ? `<b>${teamStats[p.id]}</b> agent${teamStats[p.id] > 1 ? 's are' : ' is'} interested in this listing.` : 'Be the first agent to show interest.'}</span>
-          ${myTeamInterest[p.id] ? '<button type="button" class="btn btn-talk sent" disabled>Interest sent ✓</button>' : `<button type="button" class="btn btn-talk" data-talk="${esc(p.id)}">Talk to our team</button>`}
+          ${myTeamInterest[p.id] ? '<button type="button" class="btn btn-talk sent" disabled>Interest sent ✓</button>' : `<button type="button" class="btn btn-talk" data-talk="${esc(p.id)}">Talk to our team</button><label class="talk-terms"><input type="checkbox" data-terms="${esc(p.id)}"> <span>I agree to PropMithra's terms and conditions for selling this property. <a href="/terms" target="_blank" rel="noopener">Read terms</a></span></label>`}
           <small class="muted">${myTeamInterest[p.id] ? 'Our team will contact you to discuss the project details and commission.' : 'Submit your interest, and our team will contact you to discuss the project details and attractive commission opportunities.'}</small>
         </div>
       </div></article>`;
@@ -1148,11 +1154,17 @@ async function loadTeamExtras() {
   renderTeamExtras(rows(ts), rows(fq));
 }
 let slideTimer = null;
+// Agent photo stored with the testimonial (Firestore bytes), else initial.
+function testiPhoto(x) {
+  let src = '';
+  try { if (x.photo?.toBase64) src = 'data:image/png;base64,' + x.photo.toBase64(); } catch (e) {}
+  return src ? `<img class="testi-av" src="${src}" alt="">` : `<i class="testi-av">${esc((x.name || '?')[0].toUpperCase())}</i>`;
+}
 // Testimonials (auto slider) + FAQ under the team listings.
 function renderTeamExtras(ts, fq) {
   const box = $('tm-extra'); if (!box) return;
   let h = '';
-  if (ts.length) h += `<section class="testi"><h3>What agents say</h3><div class="testi-track" id="testi-track">${ts.map(x => `<figure class="testi-card">${x.highlight ? `<span class="testi-hl">${esc(x.highlight)}</span>` : ''}<blockquote>“${esc(x.quote)}”</blockquote><figcaption><b>${esc(x.name)}</b>${x.role ? ' · ' + esc(x.role) : ''}</figcaption></figure>`).join('')}</div>${ts.length > 1 ? `<div class="rail-dots show" id="testi-dots">${ts.map((_, i) => `<i class="${i ? '' : 'on'}"></i>`).join('')}</div>` : ''}</section>`;
+  if (ts.length) h += `<section class="testi"><h3>What agents say</h3><div class="testi-track" id="testi-track">${ts.map(x => `<figure class="testi-card">${x.highlight ? `<span class="testi-hl">${esc(x.highlight)}</span>` : ''}<blockquote>“${esc(x.quote)}”</blockquote><figcaption>${testiPhoto(x)}<span><b>${esc(x.name)}</b>${x.role ? '<br>' + esc(x.role) : ''}</span></figcaption></figure>`).join('')}</div>${ts.length > 1 ? `<div class="rail-dots show" id="testi-dots">${ts.map((_, i) => `<i class="${i ? '' : 'on'}"></i>`).join('')}</div>` : ''}</section>`;
   if (fq.length) h += `<section class="tfaq"><h3>Frequently asked questions</h3>${fq.map(f => `<details><summary>${esc(f.q)}</summary><p>${esc(f.a)}</p></details>`).join('')}</section>`;
   box.innerHTML = h;
   clearInterval(slideTimer);
@@ -1165,6 +1177,8 @@ function renderTeamExtras(ts, fq) {
   }
 }
 async function talkToTeam(p, btn) {
+  const tick = document.querySelector(`[data-terms="${CSS.escape(p.id)}"]`);
+  if (!tick?.checked) { alert('Please tick the box to agree to the terms and conditions first.'); tick?.focus(); return; }
   if (!confirm('PropMithra will contact you about "' + p.title + '" — project details and the commission offered by the developer. Submit your interest?')) return;
   btn.disabled = true;
   try {
@@ -1175,7 +1189,7 @@ async function talkToTeam(p, btn) {
       agentName: broker.name || [mithra.personal?.firstName, mithra.personal?.lastName].filter(Boolean).join(' ') || user.displayName || 'Agent',
       ...((broker.phone || user.phoneNumber) ? {agentPhone: broker.phone || user.phoneNumber} : {}),
       ...(user.email ? {agentEmail: user.email} : {}),
-      status: 'new', at: fs.serverTimestamp(),
+      status: 'new', termsAccepted: true, termsAcceptedAt: fs.serverTimestamp(), at: fs.serverTimestamp(),
     });
     b.set(fs.doc(db, 'listingStats', p.id), {interested: fs.increment(1)}, {merge: true});
     await b.commit();
