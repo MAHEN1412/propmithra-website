@@ -763,6 +763,15 @@ body.sv-open { overflow: hidden; }
 .sv-go { margin-top: 6px; background: #fff; color: #075e54; border-color: #fff; font-weight: 800; justify-content: center; }
 .sv-go:hover { background: #e7f8ef; }
 @media (max-width: 480px) { .sv-card { border-radius: 0; height: 100dvh; } }
+
+/* Homepage testimonials + FAQ */
+.htesti .testi-track { grid-auto-columns: min(380px, 86%); }
+.htesti .testi-card { background: var(--surface); border: 1px solid var(--line); box-shadow: 0 6px 20px rgba(7,94,84,.06); padding: 22px; }
+.htesti .testi-card blockquote { font-size: 1.02rem; line-height: 1.55; }
+.narrow-faq { max-width: 820px; }
+.narrow-faq .tfaq details { padding: 16px 20px; }
+.section[hidden] { display: none; }
+.htesti .testi-av { background: var(--mint); }
 </style>
 <style>@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:700;font-display:swap;src:url(fonts/roboto-condensed-latin-700-italic.woff2) format("woff2")}@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:800;font-display:swap;src:url(fonts/roboto-condensed-latin-800-italic.woff2) format("woff2")}</style>
 </head>
@@ -789,7 +798,7 @@ body.sv-open { overflow: hidden; }
       <p class="lead">Connect with property professionals, find the right inventory for your customers and collaborate on deals. PropMithra keeps your listings, requirements and co-broking terms in one trusted place.</p>
       <div class="btn-row">
         <a class="btn btn-primary" href="join">Join PropMithra</a>
-        <a class="btn btn-ghost" href="#properties"><span class="d-only">Explore properties</span><span class="m-only">Explore Projects</span></a>
+        <a class="btn btn-ghost" href="account"><span class="d-only">Explore properties</span><span class="m-only">Explore Projects</span></a>
       </div>
       <div class="hero-note"><span>Free for brokers</span><span>Android app &amp; web</span><span>Owner details stay private</span></div>
     </div>
@@ -852,101 +861,71 @@ body.sv-open { overflow: hidden; }
   </div>
 </section>
 
-<section class="section" id="properties">
+<section class="section" id="testimonials" hidden>
   <div class="wrap">
     <div class="section-head">
-      <span class="eyebrow">Discover properties</span>
-      <h2>Inventory shared across the network.</h2>
-      <p class="lead">Brokers see full network inventory inside the app. These sample listings show what a listing looks like.</p>
+      <span class="eyebrow">Testimonials</span>
+      <h2>What agents say.</h2>
+      <p class="lead">Feedback from agents who work with PropMithra.</p>
     </div>
-    <div class="filters" role="group" aria-label="Filter sample listings">
-      <select data-filter="locality" aria-label="Locality">
-          <option value="">All localities</option><option>Gachibowli</option><option>Kokapet</option><option>Kondapur</option><option>Jubilee Hills</option><option>Financial District</option>
-      </select>
-      <select data-filter="type" aria-label="Property type">
-        <option value="">All types</option><option value="apartment">Apartment</option><option value="villa">Villa</option><option value="office">Office</option>
-      </select>
-      <select data-filter="deal" aria-label="Buy or rent">
-        <option value="">Buy or rent</option><option value="sale">Buy</option><option value="rent">Rent</option>
-      </select>
-      <select data-filter="budget" aria-label="Budget">
-        <option value="">Any budget</option><option value="0-10000000">Up to ₹1 Cr</option><option value="10000000-20000000">₹1–2 Cr</option><option value="20000000-999999999">Above ₹2 Cr</option>
-      </select>
+    <div class="htesti">
+      <div class="testi-track" id="h-testi"></div>
+      <div class="rail-dots show" id="h-testi-dots"></div>
     </div>
-    <div class="grid-3 rail" id="prop-grid">
-      <article class="prop" data-locality="Gachibowli" data-type="apartment" data-deal="sale" data-price="11500000">
-        <div class="ph"><img src="img/p1.jpg" alt="Apartment towers" loading="lazy"><span class="tag">For sale</span></div>
-        <div class="body"><span class="price">₹1.15 Cr</span><h3>3 BHK in a gated community</h3><span class="muted small">Gachibowli, Hyderabad</span>
-          <div class="facts"><span>Apartment</span><span>3 BHK</span><span>1,980 sq.ft</span></div>
-          <div class="foot"><span class="who small"><span class="av">MR</span>Sample broker</span><button class="save" type="button" data-id="s1" aria-pressed="false">Save</button></div></div>
-      </article>
-      <article class="prop" data-locality="Kokapet" data-type="villa" data-deal="sale" data-price="42000000">
-        <div class="ph"><img src="img/p2.jpg" alt="Villa with a garden" loading="lazy"><span class="tag">For sale</span></div>
-        <div class="body"><span class="price">₹4.2 Cr</span><h3>4 BHK villa with private garden</h3><span class="muted small">Kokapet, Hyderabad</span>
-          <div class="facts"><span>Villa</span><span>4 BHK</span><span>4,200 sq.ft</span></div>
-          <div class="foot"><span class="who small"><span class="av">SP</span>Sample broker</span><button class="save" type="button" data-id="s2" aria-pressed="false">Save</button></div></div>
-      </article>
-      <article class="prop" data-locality="Kondapur" data-type="apartment" data-deal="rent" data-price="38000">
-        <div class="ph"><img src="img/p3.jpg" alt="Furnished living room" loading="lazy"><span class="tag">For rent</span></div>
-        <div class="body"><span class="price">₹38,000<span class="small muted"> /month</span></span><h3>2 BHK, semi-furnished</h3><span class="muted small">Kondapur, Hyderabad</span>
-          <div class="facts"><span>Apartment</span><span>2 BHK</span><span>1,150 sq.ft</span></div>
-          <div class="foot"><span class="who small"><span class="av">AN</span>Sample broker</span><button class="save" type="button" data-id="s3" aria-pressed="false">Save</button></div></div>
-      </article>
-      <article class="prop" data-locality="Financial District" data-type="office" data-deal="sale" data-price="28000000">
-        <div class="ph"><img src="img/p4.jpg" alt="Glass office tower" loading="lazy"><span class="tag">For sale</span></div>
-        <div class="body"><span class="price">₹2.8 Cr</span><h3>Grade-A office floor plate</h3><span class="muted small">Financial District, Hyderabad</span>
-          <div class="facts"><span>Office</span><span>3,200 sq.ft</span><span>4 parking</span></div>
-          <div class="foot"><span class="who small"><span class="av">VR</span>Sample broker</span><button class="save" type="button" data-id="s4" aria-pressed="false">Save</button></div></div>
-      </article>
-      <article class="prop" data-locality="Jubilee Hills" data-type="villa" data-deal="sale" data-price="78000000">
-        <div class="ph"><img src="img/p5.jpg" alt="Independent house exterior" loading="lazy"><span class="tag">For sale</span></div>
-        <div class="body"><span class="price">₹7.8 Cr</span><h3>Independent house, 4 BHK</h3><span class="muted small">Jubilee Hills, Hyderabad</span>
-          <div class="facts"><span>Villa</span><span>4 BHK</span><span>6,000 sq.ft</span></div>
-          <div class="foot"><span class="who small"><span class="av">KS</span>Sample broker</span><button class="save" type="button" data-id="s5" aria-pressed="false">Save</button></div></div>
-      </article>
-      <article class="prop" data-locality="Gachibowli" data-type="apartment" data-deal="rent" data-price="65000">
-        <div class="ph"><img src="img/p6.jpg" alt="Modern bedroom" loading="lazy"><span class="tag">For rent</span></div>
-        <div class="body"><span class="price">₹65,000<span class="small muted"> /month</span></span><h3>3 BHK fully furnished</h3><span class="muted small">Gachibowli, Hyderabad</span>
-          <div class="facts"><span>Apartment</span><span>3 BHK</span><span>1,750 sq.ft</span></div>
-          <div class="foot"><span class="who small"><span class="av">PL</span>Sample broker</span><button class="save" type="button" data-id="s6" aria-pressed="false">Save</button></div></div>
-      </article>
-    </div>
-    <p id="prop-empty" class="card" hidden>No sample listing matches these filters. Try another locality or budget.</p>
-    <p class="demo-note">Sample listings for illustration. Prices and details are examples, not live offers. <a href="join">Join to see real network inventory →</a></p>
   </div>
 </section>
 
-<section class="section band-white">
-  <div class="wrap">
+<section class="section band-white" id="faq" hidden>
+  <div class="wrap narrow-faq">
     <div class="section-head">
-      <span class="eyebrow">Network collaboration</span>
-      <h2>Share the property, not your client.</h2>
-      <p class="lead">Brokers discuss the match and agree terms first. Owner and customer contact details are shared only after both sides accept the collaboration.</p>
+      <span class="eyebrow">FAQ</span>
+      <h2>Frequently asked questions.</h2>
     </div>
-    <div class="showcase" aria-label="Product preview of the collaboration workspace">
-      <div class="pane">
-        <h4>Brokers near Gachibowli</h4>
-        <div class="agent active"><span class="av">RK</span><div><b>Ravi K.</b><small>Kondapur · Apartments</small></div></div>
-        <div class="agent"><span class="av">SP</span><div><b>Sunita P.</b><small>Kokapet · Villas, plots</small></div></div>
-        <div class="agent"><span class="av">AN</span><div><b>Arjun N.</b><small>Madhapur · Rentals</small></div></div>
-        <span class="tag grey">Example profiles</span>
-      </div>
-      <div class="chatpane">
-        <div class="mini-prop"><b>Requirement · Buyer</b><span>3 BHK apartment · Gachibowli / Kondapur</span><span>Budget ₹1.1 – 1.3 Cr · Ready to move</span><span class="tag" style="justify-self:start">Customer details private</span></div>
-        <div class="bubble in">Your Gachibowli 3 BHK matches my buyer at 94%. Can we do a site visit on Saturday?</div>
-        <div class="bubble out">Yes. Requesting collaboration at 50:50 on the 1% brokerage.</div>
-        <div class="mini-prop"><b>Collaboration request</b><span>Split 50:50 · Listing: 3 BHK, Gachibowli</span><span class="tag" style="justify-self:start">Accepted</span></div>
-      </div>
-      <div class="pane">
-        <h4>Deal status</h4>
-        <ul class="stage">
-          <li class="done">Match found</li><li class="done">Collaboration accepted</li><li class="done">Customer introduced</li>
-          <li class="now">Site visit · Sat 11:00</li><li>Negotiation</li><li>Documentation</li><li>Closed</li>
-        </ul>
-      </div>
-    </div>
+    <div class="tfaq" id="h-faq"></div>
   </div>
 </section>
+
+<script type="module">
+// Testimonials and FAQ entered by PropMithra staff in the admin portal
+// (Our Clients → Testimonials & FAQ). Only items marked "Show" are public.
+const FB = {"apiKey": "AIzaSyDjHI3lnffcl5Gi57Mu7Ctkk0ohv-VHOpU", "authDomain": "propmithra.firebaseapp.com", "projectId": "propmithra", "storageBucket": "propmithra.firebasestorage.app", "messagingSenderId": "984054022166", "appId": "1:984054022166:web:6f7bbeabbd1203e0fdf537"};
+const V = 'https://www.gstatic.com/firebasejs/10.12.2/';
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const byOrder = (a, b) => (a.order || 0) - (b.order || 0);
+function photo(x) {
+  let src = '';
+  try { if (x.photo?.toBase64) src = 'data:image/png;base64,' + x.photo.toBase64(); } catch (_) {}
+  return src ? `<img class="testi-av" src="${src}" alt="">` : `<i class="testi-av">${esc((x.name || '?')[0].toUpperCase())}</i>`;
+}
+(async () => {
+  try {
+    const [app, fs] = await Promise.all([import(V + 'firebase-app.js'), import(V + 'firebase-firestore-lite.js')]);
+    const db = fs.getFirestore(app.initializeApp(FB, 'home'));
+    const get = (c) => fs.getDocs(fs.query(fs.collection(db, c), fs.where('active', '==', true)))
+      .then(r => r.docs.map(d => ({id: d.id, ...d.data()})).sort(byOrder)).catch(e => { console.warn(c, e); return []; });
+    const [ts, fq] = await Promise.all([get('testimonials'), get('teamFaqs')]);
+    if (ts.length) {
+      const track = document.getElementById('h-testi'), dots = document.getElementById('h-testi-dots');
+      track.innerHTML = ts.map(x => `<figure class="testi-card">${x.highlight ? `<span class="testi-hl">${esc(x.highlight)}</span>` : ''}<blockquote>“${esc(x.quote)}”</blockquote><figcaption>${photo(x)}<span><b>${esc(x.name)}</b>${x.role ? '<br>' + esc(x.role) : ''}</span></figcaption></figure>`).join('');
+      document.getElementById('testimonials').hidden = false;
+      const per = () => Math.max(1, Math.round(track.clientWidth / (track.children[0].offsetWidth + 12)));
+      const pages = () => Math.max(1, ts.length - per() + 1);
+      const drawDots = () => { dots.innerHTML = pages() > 1 ? Array.from({length: pages()}, (_, n) => `<i class="${n === i ? 'on' : ''}"></i>`).join('') : ''; };
+      let i = 0;
+      const go = (n) => { i = n; track.scrollTo({left: track.children[i].offsetLeft - track.offsetLeft, behavior: 'smooth'}); };
+      track.addEventListener('scroll', () => { const w = track.children[0].offsetWidth + 12; i = Math.round(track.scrollLeft / w); dots.querySelectorAll('i').forEach((d, n) => d.className = n === i ? 'on' : ''); }, {passive: true});
+      drawDots(); addEventListener('resize', drawDots);
+      let timer = setInterval(() => { if (pages() > 1) go((i + 1) % pages()); }, 5000);
+      track.addEventListener('pointerenter', () => clearInterval(timer));
+      track.addEventListener('pointerleave', () => { clearInterval(timer); timer = setInterval(() => { if (pages() > 1) go((i + 1) % pages()); }, 5000); });
+    }
+    if (fq.length) {
+      document.getElementById('h-faq').innerHTML = fq.map(f => `<details><summary>${esc(f.q)}</summary><p>${esc(f.a)}</p></details>`).join('');
+      document.getElementById('faq').hidden = false;
+    }
+  } catch (e) { console.warn('testimonials/faq', e); }
+})();
+</script>
 
 <section class="section">
   <div class="wrap split">
