@@ -685,6 +685,17 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .proj-head small { display: block; font-size: .72rem; color: var(--ink-3); }
 .proj-logo { width: 40px; height: 40px; flex: none; border-radius: 10px; border: 1px solid var(--line); background: #fff; display: grid; place-items: center; font-weight: 800; color: var(--teal); overflow: hidden; }
 .proj-logo img { width: 100%; height: 100%; object-fit: contain; }
+
+.proj-more details { border-top: 1px solid var(--line); padding: 6px 0; }
+.proj-more summary { cursor: pointer; font-weight: 650; font-size: .88rem; color: var(--teal); }
+.proj-more p { margin: 6px 0; font-size: .86rem; color: var(--ink-2); }
+.proj-more dl { margin: 6px 0; display: grid; gap: 2px; font-size: .84rem; }
+.proj-more dt { font-weight: 650; color: var(--ink); margin-top: 6px; }
+.proj-more dd { margin: 0; color: var(--ink-2); }
+.proj-more .fp { display: flex; justify-content: space-between; gap: 8px; align-items: center; padding: 6px 0; font-size: .86rem; }
+.proj-more .fp small { display: block; color: var(--ink-3); }
+.units { display: grid; gap: 4px; font-size: .86rem; padding: 8px 10px; border-radius: 10px; background: var(--mint); }
+.units b { color: var(--teal-dark); margin-right: 6px; }
 </style>
 <style>@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:700;font-display:swap;src:url(fonts/roboto-condensed-latin-700-italic.woff2) format("woff2")}@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:800;font-display:swap;src:url(fonts/roboto-condensed-latin-800-italic.woff2) format("woff2")}</style>
 </head>
@@ -1038,6 +1049,11 @@ function renderTeam() {
   box.querySelectorAll('.lcard').forEach(async (card) => {
     const p = team.find(x => x.id === card.dataset.id);
     if (p?.photos?.length) { try { const u = await blobUrl(p.photos[0]); card.querySelector('.lthumb').innerHTML = u ? `<img src="${u}" alt="">` : ''; } catch (_) {} }
+    card.querySelectorAll('[data-file]').forEach(b => b.onclick = async () => {
+      b.disabled = true;
+      try { const u = await blobUrl(b.dataset.file); if (u) { const a = document.createElement('a'); a.href = u; a.download = b.dataset.name; a.target = '_blank'; a.click(); } } catch (_) { alert('Could not open the file.'); }
+      b.disabled = false;
+    });
     const lg = card.querySelector('.proj-logo[data-logo]:not([data-logo=""])');
     if (lg) { try { const u = await blobUrl(lg.dataset.logo); if (u) lg.innerHTML = `<img src="${u}" alt="">`; } catch (_) {} }
   });
@@ -1052,7 +1068,25 @@ function projectBlock(x) {
     <div class="tags">${x.rera ? `<span class="tag ok">RERA ${esc(x.rera)}</span>` : ''}${x.stage ? `<span class="tag">${esc(x.stage)}</span>` : ''}${x.configurations ? `<span class="tag">${esc(x.configurations)}</span>` : ''}</div>
     ${where ? `<span class="muted">📍 ${esc(where)}${map ? ` · <a href="${map}" target="_blank" rel="noopener">Map</a>` : ''}</span>` : (map ? `<a href="${map}" target="_blank" rel="noopener">📍 Open map</a>` : '')}
     ${x.about ? `<span class="muted">${esc(String(x.about).slice(0, 160))}${String(x.about).length > 160 ? '…' : ''}</span>` : ''}
+    ${projectMore(x)}
   </div>`;
+}
+const SPEC_LABELS = [['overview','Overview'],['structure','Structure'],['walls','Walls'],['doors','Doors'],['railings','Railings'],['windows','Windows'],['flooring','Flooring'],['dado','Dado'],['kitchen','Kitchen'],['cpSanitary','CP & Sanitaryware'],['painting','Painting'],['electrical','Electrical'],['security','Security'],['lift','Lift']];
+// Expandable "About project" sections; files open via data-file.
+function projectMore(x) {
+  const out = [], specs = x.specs || {}, file = (f, label) => f?.url ? `<button type="button" class="link-btn" data-file="${esc(f.url)}" data-name="${esc(f.name || 'file')}" data-type="${esc(f.type || '')}">${label}</button>` : '';
+  if (x.details) out.push(`<details><summary>Project details</summary><p>${esc(x.details)}</p></details>`);
+  const sp = SPEC_LABELS.filter(([k]) => String(specs[k] || '').trim());
+  if (sp.length) out.push(`<details><summary>Specifications</summary><dl>${sp.map(([k, l]) => `<dt>${l}</dt><dd>${esc(specs[k])}</dd>`).join('')}</dl></details>`);
+  if (x.amenities?.length || x.otherFeatures) out.push(`<details><summary>Features &amp; Amenities</summary><div class="tags">${(x.amenities || []).map(a => `<span class="tag">${esc(a)}</span>`).join('')}</div>${x.otherFeatures ? `<p>${esc(x.otherFeatures)}</p>` : ''}</details>`);
+  if (x.floorPlans?.length || x.priceList) out.push(`<details><summary>Floor plans &amp; price list</summary>${(x.floorPlans || []).map(f => `<div class="fp"><span><b>${esc([f.config, f.size].filter(Boolean).join(' · '))}</b>${f.price ? `<small>${esc(f.price)}</small>` : ''}</span>${file(f.file, 'Plan')}</div>`).join('')}${x.priceList ? `<p>${file(x.priceList, 'Download price list')}</p>` : ''}</details>`);
+  if (x.faqs?.length) out.push(`<details><summary>FAQ</summary>${x.faqs.map(f => `<p><b>${esc(f.q)}</b><br>${esc(f.a || '')}</p>`).join('')}</details>`);
+  return out.length ? `<div class="proj-more">${out.join('')}</div>` : '';
+}
+function unitsBlock(p) {
+  if (!(p.units?.length > 1)) return '';
+  const rent = p.transaction !== 'sale';
+  return `<div class="units">${p.units.map(u => `<span><b>${u.bhk >= 6 ? '5+' : u.bhk} BHK</b> ${Number(u.area).toLocaleString('en-IN')} sq.ft · ${esc(inr(u.price))}${rent ? '/mo' : ''}</span>`).join('')}</div>`;
 }
 function teamCards() {
   const seen = seenTeam();
@@ -1064,6 +1098,7 @@ function teamCards() {
         <div class="lprice">${esc(inr(p.price))}${p.transaction !== 'sale' ? '<small>/mo</small>' : ''}</div>
         <b>${esc(p.title)}</b>
         <span class="muted">${esc(p.locality)}${p.areaSqft ? ' · ' + Number(p.areaSqft).toLocaleString('en-IN') + (p.areaMax > p.areaSqft ? ' – ' + Number(p.areaMax).toLocaleString('en-IN') : '') + ' sq.ft' : ''}${p.bhks?.length > 1 ? ' · ' + p.bhks.join(', ') + ' BHK' : ''}</span>
+        ${unitsBlock(p)}
         ${p.project ? projectBlock(p.project) : ''}
         ${p.listingSource ? `<span class="muted">Source: ${esc(p.listingSource)}</span>` : ''}
         <div class="tags"><span class="tag team">From PropMithra</span>${seen.has(p.id) ? '' : '<span class="tag new">New</span>'}<span class="tag ${p.availability === 'available' ? 'ok' : ''}">${esc(AVAIL[p.availability] || p.availability)}</span></div>
