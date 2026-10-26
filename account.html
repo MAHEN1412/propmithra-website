@@ -678,6 +678,13 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 #d-listings-wrap.camps-only .dash-actions,
 #d-listings-wrap.camps-only .team-alert,
 #d-listings-wrap.camps-only .tab:not([data-tab="camps"]) { display: none; }
+
+/* Developer project block on team listings */
+.proj { display: grid; gap: 6px; padding: 10px; margin: 4px 0; border: 1px solid var(--line); border-radius: 12px; background: var(--canvas); }
+.proj-head { display: flex; gap: 10px; align-items: center; }
+.proj-head small { display: block; font-size: .72rem; color: var(--ink-3); }
+.proj-logo { width: 40px; height: 40px; flex: none; border-radius: 10px; border: 1px solid var(--line); background: #fff; display: grid; place-items: center; font-weight: 800; color: var(--teal); overflow: hidden; }
+.proj-logo img { width: 100%; height: 100%; object-fit: contain; }
 </style>
 <style>@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:700;font-display:swap;src:url(fonts/roboto-condensed-latin-700-italic.woff2) format("woff2")}@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:800;font-display:swap;src:url(fonts/roboto-condensed-latin-800-italic.woff2) format("woff2")}</style>
 </head>
@@ -1031,7 +1038,21 @@ function renderTeam() {
   box.querySelectorAll('.lcard').forEach(async (card) => {
     const p = team.find(x => x.id === card.dataset.id);
     if (p?.photos?.length) { try { const u = await blobUrl(p.photos[0]); card.querySelector('.lthumb').innerHTML = u ? `<img src="${u}" alt="">` : ''; } catch (_) {} }
+    const lg = card.querySelector('.proj-logo[data-logo]:not([data-logo=""])');
+    if (lg) { try { const u = await blobUrl(lg.dataset.logo); if (u) lg.innerHTML = `<img src="${u}" alt="">`; } catch (_) {} }
   });
+}
+// Developer project of a team listing: logo, RERA id, address, map pin, about.
+function projectBlock(x) {
+  const where = [x.address, x.locality, x.city, x.pincode].filter(Boolean).join(', ');
+  const map = x.lat != null && x.lng != null ? `https://www.google.com/maps/search/?api=1&query=${x.lat},${x.lng}` : '';
+  return `<div class="proj">
+    <div class="proj-head"><span class="proj-logo" data-logo="${esc(x.logoUrl || '')}">${esc((x.name || 'P')[0])}</span>
+      <span><small>Project</small><b>${esc(x.name || '')}</b></span></div>
+    <div class="tags">${x.rera ? `<span class="tag ok">RERA ${esc(x.rera)}</span>` : ''}${x.stage ? `<span class="tag">${esc(x.stage)}</span>` : ''}${x.configurations ? `<span class="tag">${esc(x.configurations)}</span>` : ''}</div>
+    ${where ? `<span class="muted">📍 ${esc(where)}${map ? ` · <a href="${map}" target="_blank" rel="noopener">Map</a>` : ''}</span>` : (map ? `<a href="${map}" target="_blank" rel="noopener">📍 Open map</a>` : '')}
+    ${x.about ? `<span class="muted">${esc(String(x.about).slice(0, 160))}${String(x.about).length > 160 ? '…' : ''}</span>` : ''}
+  </div>`;
 }
 function teamCards() {
   const seen = seenTeam();
@@ -1043,6 +1064,7 @@ function teamCards() {
         <div class="lprice">${esc(inr(p.price))}${p.transaction !== 'sale' ? '<small>/mo</small>' : ''}</div>
         <b>${esc(p.title)}</b>
         <span class="muted">${esc(p.locality)}${p.areaSqft ? ' · ' + Number(p.areaSqft).toLocaleString('en-IN') + ' sq.ft' : ''}</span>
+        ${p.project ? projectBlock(p.project) : ''}
         ${p.listingSource ? `<span class="muted">Source: ${esc(p.listingSource)}</span>` : ''}
         <div class="tags"><span class="tag team">From PropMithra</span>${seen.has(p.id) ? '' : '<span class="tag new">New</span>'}<span class="tag ${p.availability === 'available' ? 'ok' : ''}">${esc(AVAIL[p.availability] || p.availability)}</span></div>
         ${p.description ? `<span class="muted">${esc(String(p.description).slice(0, 140))}${String(p.description).length > 140 ? '…' : ''}</span>` : ''}

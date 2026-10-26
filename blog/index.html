@@ -678,6 +678,13 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 #d-listings-wrap.camps-only .dash-actions,
 #d-listings-wrap.camps-only .team-alert,
 #d-listings-wrap.camps-only .tab:not([data-tab="camps"]) { display: none; }
+
+/* Developer project block on team listings */
+.proj { display: grid; gap: 6px; padding: 10px; margin: 4px 0; border: 1px solid var(--line); border-radius: 12px; background: var(--canvas); }
+.proj-head { display: flex; gap: 10px; align-items: center; }
+.proj-head small { display: block; font-size: .72rem; color: var(--ink-3); }
+.proj-logo { width: 40px; height: 40px; flex: none; border-radius: 10px; border: 1px solid var(--line); background: #fff; display: grid; place-items: center; font-weight: 800; color: var(--teal); overflow: hidden; }
+.proj-logo img { width: 100%; height: 100%; object-fit: contain; }
 </style>
 <style>@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:700;font-display:swap;src:url(../fonts/roboto-condensed-latin-700-italic.woff2) format("woff2")}@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:800;font-display:swap;src:url(../fonts/roboto-condensed-latin-800-italic.woff2) format("woff2")}</style>
 </head>
