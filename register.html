@@ -778,6 +778,8 @@ body.sv-open { overflow: hidden; }
 .contact-note.approved { background: var(--mint); color: var(--teal-dark); }
 .contact-note.rejected { background: #fff4f3; color: #b42318; }
 .contact-note[hidden] { display: none; }
+
+.field .hint.ok { color: var(--teal-dark); font-weight: 600; }
 </style>
 <style>@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:700;font-display:swap;src:url(fonts/roboto-condensed-latin-700-italic.woff2) format("woff2")}@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:800;font-display:swap;src:url(fonts/roboto-condensed-latin-800-italic.woff2) format("woff2")}</style>
 </head>
@@ -922,7 +924,7 @@ const SECTIONS = [
       {k: 'docs.aadhaar', label: 'Upload Aadhaar (front & back in one photo or PDF)', type: 'doc', req: 1},
     ]},
     {title: 'PAN card', fields: [
-      {k: 'identity.pan', label: 'PAN number', req: 1, rx: 'pan', upper: 1},
+      {k: 'identity.pan', label: 'PAN number', req: 1, rx: 'pan', upper: 1, maxlen: 10, help: '10 characters: 5 letters, 4 numbers, 1 letter — e.g. ABCDE1234F'},
       {k: 'docs.pan', label: 'Upload PAN card', type: 'doc', req: 1},
     ]},
     {title: 'RERA registration', note: 'Your real estate agent registration with RERA. We check it on the RERA portal before approving.', fields: [
@@ -953,7 +955,7 @@ const SECTIONS = [
       {k: 'bank.holder', label: 'Account holder name', req: 1},
       {k: 'bank.accountNumber', label: 'Account number', req: 1, rx: 'account', digits: 18, secret: 1},
       {k: '_confirmAccount', label: 'Confirm account number', req: 1, digits: 18, confirm: 'bank.accountNumber'},
-      {k: 'bank.ifsc', label: 'IFSC code', req: 1, rx: 'ifsc', upper: 1},
+      {k: 'bank.ifsc', label: 'IFSC code', req: 1, rx: 'ifsc', upper: 1, maxlen: 11, help: '11 characters, printed on your cheque book or passbook. We fill in the bank and branch.'},
       {k: 'bank.bankName', label: 'Bank name', req: 1},
       {k: 'bank.branch', label: 'Branch'},
     ]},
@@ -1040,7 +1042,10 @@ function fieldError(f) {
     return '';
   }
   if (f.confirm) return v === valueOf(f.confirm) ? '' : 'Account numbers do not match';
+  if (f.rx === 'pan') return panError(String(v));
   if (f.rx && !RX[f.rx][0].test(String(v))) return RX[f.rx][1];
+  if (f.k === 'bank.ifsc' && ifscInfo.code === v && ifscInfo.status === 'bad') return 'This IFSC code was not found. Please check it on your cheque book or passbook.';
+  if (f.k === 'bank.holder' && String(v).trim().length < 3) return 'Enter the name exactly as on your bank account';
   if (f.k === 'personal.dob') {
     const d = new Date(v), now = new Date(); let age = now.getFullYear() - d.getFullYear();
     if (now < new Date(now.getFullYear(), d.getMonth(), d.getDate())) age--;
@@ -1344,6 +1349,7 @@ function inputHtml(f) {
     f.list && `list="${f.list}"`,
     `autocomplete="${f.secret ? 'off' : (f.ac || 'off')}"`,
     f.upper && 'style="text-transform:uppercase"',
+    f.maxlen && `maxlength="${f.maxlen}"`,
     f.type === 'date' && !f.k.endsWith('validTill') && `max="${today}"`,
     f.k.endsWith('validTill') && `min="${today}"`,
   ].filter(Boolean).join(' ');
@@ -1397,6 +1403,8 @@ function bindFields() {
       if (v === undefined) return;
       if (f.upper) { v = v.toUpperCase().replace(/\s+/g, f.rx === 'dl' ? ' ' : ''); if (el.value !== v) el.value = v; }
       if (f.digits) { v = v.replace(/\D/g, '').slice(0, f.digits); if (el.value !== v) el.value = v; }
+      if (f.maxlen) { v = v.replace(/[^A-Z0-9]/g, '').slice(0, f.maxlen); if (el.value !== v) el.value = v; }
+      if (f.k === 'bank.ifsc') checkIfsc(v, true);
       if (f.type === 'number') { v = v.replace(/[^\d]/g, ''); if (el.value !== v) el.value = v; v = v === '' ? '' : Number(v); }
       if (typeof v === 'string' && el.tagName !== 'SELECT' && el.type !== 'date') v = v.replace(/^\s+/, '');
       if (f.k === '_confirmAccount') confirmAccount = v;
@@ -1409,6 +1417,7 @@ function bindFields() {
     el.addEventListener(el.tagName === 'SELECT' || el.type === 'radio' || el.type === 'date' ? 'change' : 'input', handler);
     el.addEventListener('blur', () => { el.dataset.touched = '1'; const t = FIELD[el.dataset.k] || FIELDS.find(x => x.details === el.dataset.k); if (t) markField(t, true); });
   });
+  const ic = String(valueOf('bank.ifsc') || ''); if (ic && $('f-bank-ifsc')) checkIfsc(ic, false);
   // Default values (e.g. State = Telangana) are saved the first time.
   FIELDS.filter(f => f.section === SECTIONS[current].id && f.def && !filled(valueOf(f.k))).forEach(f => queue(f.k, f.def));
   form.querySelectorAll('[data-file]').forEach(inp => inp.addEventListener('change', async () => {
@@ -1435,6 +1444,41 @@ async function loadThumbs() {
     try { const u = await previewUrl(key); const t = box.querySelector('.doc-thumb'); if (u && t) t.innerHTML = `<img src="${u}" alt="">`; } catch (e) { console.warn(e); }
   }
 }
+// PAN: exactly 10 characters — 5 letters, 4 numbers, 1 letter.
+function panError(v) {
+  if (v.length !== 10) return `PAN has 10 characters — you entered ${v.length}. Example: ABCDE1234F`;
+  if (!/^[A-Z]{5}/.test(v)) return 'The first 5 characters of a PAN are letters (e.g. ABCDE1234F)';
+  if (!/^[A-Z]{5}[0-9]{4}/.test(v)) return 'Characters 6 to 9 of a PAN are numbers (e.g. ABCDE1234F)';
+  if (!/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(v)) return 'The last character of a PAN is a letter (e.g. ABCDE1234F)';
+  return '';
+}
+// IFSC check: look the code up (free Razorpay IFSC directory) and fill in
+// the bank name and branch. If the lookup service can't be reached we
+// don't block the agent — the PropMithra team checks it during review.
+let ifscInfo = {code: '', status: ''};
+async function checkIfsc(code, typed) {
+  const hint = () => document.querySelector('#f-bank-ifsc')?.parentElement.querySelector('.hint');
+  if (!RX.ifsc[0].test(code)) { ifscInfo = {code: '', status: ''}; const h = hint(); if (h) h.textContent = FIELD['bank.ifsc'].help; return; }
+  if (ifscInfo.code === code && ifscInfo.status) return;
+  ifscInfo = {code, status: 'loading'};
+  const h0 = hint(); if (h0) h0.textContent = 'Checking IFSC…';
+  try {
+    const r = await fetch('https://ifsc.razorpay.com/' + encodeURIComponent(code));
+    if (ifscInfo.code !== code) return;
+    if (r.status === 404) ifscInfo = {code, status: 'bad'};
+    else if (r.ok) {
+      const j = await r.json();
+      ifscInfo = {code, status: 'ok', bank: j.BANK || '', branch: j.BRANCH || ''};
+      const fill = (k, v) => { const el = $('f-' + k.replace(/\./g, '-')); if (v && el && !locked && (typed || !String(valueOf(k) || '').trim())) { el.value = v; queue(k, v); markField(FIELD[k], true); } };
+      fill('bank.bankName', ifscInfo.bank); fill('bank.branch', ifscInfo.branch);
+    } else ifscInfo = {code, status: 'unknown'};
+  } catch (_) { ifscInfo = {code, status: 'unknown'}; }
+  const h = hint();
+  if (h) h.textContent = ifscInfo.status === 'ok' ? `✓ ${ifscInfo.bank}${ifscInfo.branch ? ', ' + ifscInfo.branch + ' branch' : ''}` : ifscInfo.status === 'bad' ? '' : FIELD['bank.ifsc'].help;
+  if (h) h.classList.toggle('ok', ifscInfo.status === 'ok');
+  markField(FIELD['bank.ifsc'], true); renderNav();
+}
+
 function markField(f, show) {
   const id = 'f-' + f.k.replace(/\./g, '-');
   const e = $(id + '-err'); const msg = fieldError(f);
