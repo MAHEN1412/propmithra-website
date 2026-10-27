@@ -772,6 +772,12 @@ body.sv-open { overflow: hidden; }
 .narrow-faq .tfaq details { padding: 16px 20px; }
 .section[hidden] { display: none; }
 .htesti .testi-av { background: var(--mint); }
+
+/* Account: email / phone change request status */
+.contact-note { margin: 10px 0 0; padding: 10px 14px; border-radius: 12px; font-size: .92rem; background: #fdf3e2; color: #8a5a00; }
+.contact-note.approved { background: var(--mint); color: var(--teal-dark); }
+.contact-note.rejected { background: #fff4f3; color: #b42318; }
+.contact-note[hidden] { display: none; }
 </style>
 <style>@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:700;font-display:swap;src:url(fonts/roboto-condensed-latin-700-italic.woff2) format("woff2")}@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:800;font-display:swap;src:url(fonts/roboto-condensed-latin-800-italic.woff2) format("woff2")}</style>
 </head>
@@ -832,6 +838,7 @@ body.sv-open { overflow: hidden; }
     <div class="dash" id="d-app" hidden>
       <!-- Status -->
       <div class="dash-status" id="d-status"></div>
+      <p class="contact-note" id="d-contact-note" hidden></p>
 
       <!-- Approved Mithras: actions + my listings / requirements -->
       <div id="d-listings-wrap" hidden>
@@ -977,7 +984,7 @@ body.sv-open { overflow: hidden; }
         </fieldset>
 
         <p class="form-msg" id="l-msg" role="alert"></p>
-        <div class="reg-foot"><button class="btn btn-ghost" type="button" id="d-cancel2">Cancel</button><button class="btn btn-primary" type="submit" id="l-save">Publish listing</button></div>
+        <div class="reg-foot"><button class="btn btn-ghost" type="button" id="d-cancel2">Cancel</button><button class="btn btn-primary" type="submit" id="l-save">Send for approval</button></div>
       </form>
     </div>
   </div>
@@ -1040,12 +1047,14 @@ function renderStatus() {
       <div><span class="eyebrow">PropMithra · Approved Mithra</span><h3>${esc(name)}</h3>
       ${mithra.mithraId ? `<p class="id-no">${esc(mithra.mithraId)}</p>` : ''}
       ${mithra.validTo ? `<p class="muted">Valid ${esc(fmtDate(mithra.validFrom))} – ${esc(fmtDate(mithra.validTo))}</p>` : ''}</div>
-      <div class="id-actions"><a class="btn btn-light btn-sm" href="register">My registration</a><button class="btn btn-light btn-sm" type="button" id="d-signout">Log out</button></div></div>`;
+      <div class="id-actions"><a class="btn btn-light btn-sm" href="register">My registration</a><button class="btn btn-light btn-sm" type="button" id="d-contact">Change email / phone</button><button class="btn btn-light btn-sm" type="button" id="d-signout">Log out</button></div></div>`;
     loadPhoto();
   } else {
     $('d-status').innerHTML = `<div class="status-card ${card[0]}"><div><b>${card[1]}</b><span>${card[2]}</span></div>
-      <div class="btn-row">${card[3]}<button class="btn btn-ghost" type="button" id="d-signout">Log out</button></div></div>`;
+      <div class="btn-row">${card[3]}<button class="btn btn-ghost" type="button" id="d-contact">Change email / phone</button><button class="btn btn-ghost" type="button" id="d-signout">Log out</button></div></div>`;
   }
+  $('d-contact').onclick = contactFlow;
+  loadContactChanges().catch(e => console.warn('contact changes', e));
   $('d-signout').onclick = async () => { await fb.auth.signOut(fb.au); window.pmSession?.(null); location.href = './'; };
   // Registered agents without approval/KYC still see campaigns for their
   // corridors (and can tap "I'm interested"); listings stay locked.
@@ -1082,14 +1091,14 @@ function renderListings() {
     box.querySelector('[data-add]').onclick = openForm; return;
   }
   box.innerHTML = listings.map(p => {
-    const hidden = p.moderation === 'hidden';
+    const hidden = p.moderation === 'hidden', pending = p.moderation === 'pending';
     return `<article class="lcard" data-id="${esc(p.id)}">
       <div class="lthumb">${p.photos?.length ? '<span class="spinner small"></span>' : `<span class="ph">${esc(TYPE_LABEL[p.type] || 'Property')}</span>`}</div>
       <div class="lbody">
         <div class="lprice">${esc(inr(p.price))}${p.transaction !== 'sale' ? '<small>/mo</small>' : ''}</div>
         <b>${esc(p.title)}</b>
         <span class="muted">${esc(p.locality)}${p.areaSqft ? ' · ' + Number(p.areaSqft).toLocaleString('en-IN') + ' sq.ft' : ''}</span>
-        <div class="tags"><span class="tag ${p.availability === 'available' ? 'ok' : ''}">${esc(AVAIL[p.availability] || p.availability)}</span><span class="tag">${esc(VIS[p.visibility] || p.visibility)}</span>${hidden ? '<span class="tag bad">Hidden by PropMithra</span>' : ''}${p.review === 'approved' ? '<span class="tag ok">Reviewed ✓</span>' : ''}${p.review === 'changes' ? '<span class="tag warn">Corrections requested</span>' : ''}</div>
+        <div class="tags"><span class="tag ${p.availability === 'available' ? 'ok' : ''}">${esc(AVAIL[p.availability] || p.availability)}</span><span class="tag">${esc(VIS[p.visibility] || p.visibility)}</span>${hidden ? '<span class="tag bad">Not published by PropMithra</span>' : ''}${pending && p.review !== 'changes' ? '<span class="tag warn">Waiting for approval</span>' : ''}${p.review === 'approved' ? '<span class="tag ok">Reviewed ✓</span>' : ''}${p.review === 'changes' ? '<span class="tag warn">Corrections requested</span>' : ''}</div>
         ${hidden && p.moderationNote ? `<span class="dl-warn">${esc(p.moderationNote)}</span>` : ''}
         ${!hidden && p.review === 'changes' && p.reviewNote ? `<span class="dl-warn">PropMithra: ${esc(p.reviewNote)} — please update it in the app.</span>` : ''}
         <div class="lactions">
@@ -1377,7 +1386,7 @@ async function save(ev) {
         data: fs.Bytes.fromUint8Array(new Uint8Array(await photos[i].blob.arrayBuffer())), at: fs.serverTimestamp()});
       urls.push('firestore://propertyMedia/' + id);
     }
-    btn.textContent = 'Publishing…';
+    btn.textContent = 'Sending…';
     const doc = {
       ownerBrokerId: uid, title, type, transaction, locality, city: $('l-city').value.trim() || 'Hyderabad', pincode: $('l-pincode').value.trim(),
       ...(known ? {lat: known[2], lng: known[3]} : {}),
@@ -1388,7 +1397,8 @@ async function save(ev) {
       negotiable: $('l-negotiable').checked, commissionPercent: parseFloat($('l-commission').value) || 1,
       availability: 'available', visibility, sharedWith: [], exclusive: $('l-exclusive').checked,
       listingSource: $('l-source').value, description: $('l-desc').value.trim(), photos: urls,
-      moderation: 'live', listed: visibility === 'network' || visibility === 'collaboration',
+      // Waits for PropMithra approval before other agents can see it.
+      moderation: 'pending', listed: false,
       source: 'website', listedAt: fs.serverTimestamp(), updatedAt: fs.serverTimestamp(),
     };
     await fs.setDoc(ref, doc);
@@ -1398,14 +1408,14 @@ async function save(ev) {
     fs.addDoc(fs.collection(db, 'activity'), {type: 'property_listed', actorId: uid, actorName: who, summary: `${who} listed ${title} (website)`, targetId: ref.id, targetType: 'property', at: fs.serverTimestamp()}).catch(() => {});
     listings.unshift({id: ref.id, ...doc, listedAt: null});
     closeForm(); renderListings();
-    $('d-count').textContent = '✓ Listing published — brokers can now see it in PropMithra.';
+    $('d-count').textContent = '✓ Sent to PropMithra for approval — agents see it once our team approves it.';
     window.scrollTo({top: $('d-listings-wrap').offsetTop - 90, behavior: 'smooth'});
   } catch (e) {
     console.error(e);
     $('l-msg').textContent = (e.code || '').includes('permission')
       ? 'Listing is not unlocked for your account yet. If you were just approved, refresh this page; otherwise contact PropMithra.'
       : 'Could not publish the listing. Please check your internet and try again.';
-  } finally { btn.disabled = false; btn.textContent = 'Publish listing'; }
+  } finally { btn.disabled = false; btn.textContent = 'Send for approval'; }
 }
 
 // ── Customer requirements ───────────────────────────────────────────────
@@ -1733,6 +1743,62 @@ async function renderKit(c, i) {
       btn.textContent = 'Downloaded';
     } catch (e) { console.warn(e); btn.textContent = 'Not allowed'; }
   });
+}
+// ── Email / phone change requests (PropMithra approves them) ─────────
+let myContactChanges = [];
+const curEmail = () => broker.email || mithra.personal?.email || user.email || '';
+const curPhone = () => broker.phone || mithra.personal?.mobile || user.phoneNumber || '';
+async function loadContactChanges() {
+  const {fs, db} = fb;
+  const r = await fs.getDocs(fs.query(fs.collection(db, 'contactChanges'), fs.where('uid', '==', uid)));
+  myContactChanges = r.docs.map(d => ({id: d.id, ...d.data()})).sort((a, b) => (b.at?.toMillis?.() || 0) - (a.at?.toMillis?.() || 0));
+  const c = myContactChanges[0], note = $('d-contact-note'), btn = $('d-contact');
+  const what = c ? [c.newEmail, c.newPhone].filter(Boolean).join(' · ') : '';
+  const recent = c && (c.status === 'pending' || (Date.now() - (c.decidedAt?.toMillis?.() || 0)) < 14 * 864e5);
+  if (btn) { btn.disabled = c?.status === 'pending'; btn.textContent = c?.status === 'pending' ? 'Change request sent' : 'Change email / phone'; }
+  if (!recent) { note.hidden = true; return; }
+  note.hidden = false;
+  note.className = 'contact-note ' + (c.status || 'pending');
+  note.textContent = c.status === 'approved' ? `✓ Your contact details were updated: ${what}`
+    : c.status === 'rejected' ? `Your email / phone change was not approved${c.note ? ': ' + c.note : '.'}`
+    : `Waiting for PropMithra to approve your change: ${what}`;
+}
+function contactFlow() {
+  const dlg = document.createElement('div');
+  dlg.className = 'modal-back';
+  dlg.innerHTML = `<form class="modal" role="dialog" aria-modal="true" aria-labelledby="cc-title" novalidate><h3 id="cc-title">Change email or phone</h3>
+    <p class="muted small">Current: ${esc(curEmail() || 'no email')} · ${esc(curPhone() || 'no mobile')}</p>
+    <div class="field"><label for="cc-email">New email</label><input id="cc-email" type="email" autocomplete="email" placeholder="Leave empty to keep"></div>
+    <div class="field"><label for="cc-phone">New mobile number</label><input id="cc-phone" inputmode="tel" autocomplete="tel" placeholder="10-digit mobile · leave empty to keep"></div>
+    <div class="field"><label for="cc-reason">Reason <span class="opt">optional</span></label><input id="cc-reason" placeholder="e.g. Changed my SIM"></div>
+    <p class="muted small">PropMithra checks the request and then updates your profile. The way you log in stays the same.</p>
+    <p class="err" id="cc-err"></p>
+    <div class="modal-actions"><button class="btn btn-ghost" type="button" id="cc-cancel">Cancel</button><button class="btn btn-primary" type="submit" id="cc-go">Send request</button></div></form>`;
+  document.body.appendChild(dlg);
+  const close = () => dlg.remove(), err = dlg.querySelector('#cc-err'), go = dlg.querySelector('#cc-go');
+  dlg.querySelector('#cc-cancel').onclick = close;
+  dlg.querySelector('#cc-email').focus();
+  dlg.querySelector('form').onsubmit = async (ev) => {
+    ev.preventDefault();
+    const email = dlg.querySelector('#cc-email').value.trim(), raw = dlg.querySelector('#cc-phone').value.trim(), reason = dlg.querySelector('#cc-reason').value.trim();
+    let d = raw.replace(/\D/g, ''); if (d.length === 12 && d.startsWith('91')) d = d.slice(2); if (d.length === 11 && d.startsWith('0')) d = d.slice(1);
+    const phone = raw ? (/^[6-9]\d{9}$/.test(d) ? '+91' + d : null) : '';
+    if (!email && !raw) { err.textContent = 'Enter a new email, a new mobile number, or both.'; return; }
+    if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { err.textContent = 'Please enter a valid email address.'; return; }
+    if (raw && !phone) { err.textContent = 'Enter a 10-digit Indian mobile number.'; return; }
+    const sameE = email && email.toLowerCase() === curEmail().toLowerCase(), sameP = phone && phone === curPhone();
+    if ((!email || sameE) && (!phone || sameP)) { err.textContent = 'These are already your current details.'; return; }
+    go.disabled = true; go.textContent = 'Sending…'; err.textContent = '';
+    try {
+      const {fs, db} = fb;
+      await fs.addDoc(fs.collection(db, 'contactChanges'), {
+        uid, agentName: [mithra.personal?.firstName, mithra.personal?.lastName].filter(Boolean).join(' ') || broker.name || user.displayName || 'Agent',
+        ...(curEmail() ? {currentEmail: curEmail()} : {}), ...(curPhone() ? {currentPhone: curPhone()} : {}),
+        ...(email ? {newEmail: email} : {}), ...(phone ? {newPhone: phone} : {}), ...(reason ? {reason} : {}),
+        status: 'pending', at: fs.serverTimestamp()});
+      close(); await loadContactChanges();
+    } catch (e) { console.warn(e); err.textContent = 'Could not send. Please check your internet and try again.'; go.disabled = false; go.textContent = 'Send request'; }
+  };
 }
 function interestFlow(c) {
   const m = c.commercial || {}, dlg = document.createElement('div');
