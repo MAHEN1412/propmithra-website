@@ -1763,6 +1763,59 @@ async function loadContactChanges() {
     : c.status === 'rejected' ? `Your email / phone change was not approved${c.note ? ': ' + c.note : '.'}`
     : `Waiting for PropMithra to approve your change: ${what}`;
 }
+let brokerExists = false;
+// Agents who registered on the website may have no broker profile (or one
+// without name / phone / email): fill it in from the registration so the
+// PropMithra team sees them in Admin → Agents.
+async function ensureProfile() {
+  const {fs, db} = fb, ref = fs.doc(db, 'brokers', uid);
+  const name = [mithra.personal?.firstName, mithra.personal?.lastName].filter(Boolean).join(' ') || user.displayName || '';
+  const want = {name, phone: mithra.personal?.mobile || user.phoneNumber || '', email: mithra.personal?.email || user.email || ''};
+  const add = {};
+  for (const [k, v] of Object.entries(want)) if (v && !String(broker[k] || '').trim()) add[k] = v;
+  if (!brokerExists) {
+    await fs.setDoc(ref, {uid, city: 'Hyderabad', source: 'website', ...add, createdAt: fs.serverTimestamp(), lastActiveAt: fs.serverTimestamp()});
+    broker = {...broker, uid, ...add}; brokerExists = true;
+  } else if (Object.keys(add).length) {
+    await fs.updateDoc(ref, add);
+    broker = {...broker, ...add};
+  }
+}
+// Mobile number and email are both required so the team can reach the agent.
+function contactRequired() {
+  const needP = !curPhone(), needE = !curEmail(), dlg = document.createElement('div');
+  dlg.className = 'modal-back';
+  dlg.innerHTML = `<form class="modal" role="dialog" aria-modal="true" aria-labelledby="cr-title" novalidate><h3 id="cr-title">Add your contact details</h3>
+    <p class="muted">Your mobile number and email are required. The PropMithra team uses them to reach you — for example, to help you complete KYC.</p>
+    ${needP ? '<div class="field"><label for="cr-phone">Mobile number<span class="req">*</span></label><input id="cr-phone" inputmode="tel" autocomplete="tel" placeholder="10-digit mobile"></div>' : ''}
+    ${needE ? `<div class="field"><label for="cr-email">Email<span class="req">*</span></label><input id="cr-email" type="email" autocomplete="email" value="${esc(user.email || '')}"></div>` : ''}
+    <p class="err" id="cr-err"></p>
+    <div class="modal-actions"><button class="btn btn-ghost" type="button" id="cr-out">Log out</button><button class="btn btn-primary" type="submit" id="cr-go">Save and continue</button></div></form>`;
+  document.body.appendChild(dlg);
+  const err = dlg.querySelector('#cr-err'), go = dlg.querySelector('#cr-go');
+  dlg.querySelector('input')?.focus();
+  dlg.querySelector('#cr-out').onclick = async () => { await fb.auth.signOut(fb.au); window.pmSession?.(null); location.href = './'; };
+  dlg.querySelector('form').onsubmit = async (ev) => {
+    ev.preventDefault();
+    const add = {};
+    if (needP) {
+      let d = dlg.querySelector('#cr-phone').value.replace(/\D/g, ''); if (d.length === 12 && d.startsWith('91')) d = d.slice(2); if (d.length === 11 && d.startsWith('0')) d = d.slice(1);
+      if (!/^[6-9]\d{9}$/.test(d)) { err.textContent = 'Enter your 10-digit mobile number.'; return; }
+      add.phone = '+91' + d;
+    }
+    if (needE) {
+      const e = dlg.querySelector('#cr-email').value.trim();
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)) { err.textContent = 'Please enter a valid email address.'; return; }
+      add.email = e;
+    }
+    go.disabled = true; go.textContent = 'Saving…'; err.textContent = '';
+    try {
+      const {fs, db} = fb;
+      await fs.setDoc(fs.doc(db, 'brokers', uid), {...(brokerExists ? {} : {uid, createdAt: fs.serverTimestamp()}), ...add, contactAddedAt: fs.serverTimestamp()}, {merge: true});
+      broker = {...broker, ...add}; brokerExists = true; dlg.remove();
+    } catch (e) { console.warn(e); err.textContent = 'Could not save. Please check your internet and try again.'; go.disabled = false; go.textContent = 'Save and continue'; }
+  };
+}
 function contactFlow() {
   const dlg = document.createElement('div');
   dlg.className = 'modal-back';
@@ -1843,9 +1896,11 @@ function interestFlow(c) {
     try {
       const {fs, db} = fb;
       const [m, b] = await Promise.all([fs.getDoc(fs.doc(db, 'mithras', uid)), fs.getDoc(fs.doc(db, 'brokers', uid))]);
-      mithra = m.exists() ? m.data() : {}; broker = b.exists() ? b.data() : {};
+      mithra = m.exists() ? m.data() : {}; broker = b.exists() ? b.data() : {}; brokerExists = b.exists();
       window.pmSession?.({name: [mithra.personal?.firstName, mithra.personal?.lastName].filter(Boolean).join(' ') || broker.name || u.displayName || ''});
+      await ensureProfile().catch(e => console.warn('profile', e));
       show('d-app'); setupForm(); setupReqForm(); renderStatus();
+      if (!curPhone() || !curEmail()) contactRequired();
       document.querySelectorAll('.tab').forEach(t => t.onclick = () => tab(t.dataset.tab));
       if (!approved() && broker.uid !== undefined) await loadCamps().catch(e => console.warn('campaigns', e));
       if (approved()) {
