@@ -1104,8 +1104,17 @@ $('acct-form').addEventListener('submit', async (ev) => {
                            : await auth.createUserWithEmailAndPassword(au, email, pass);
     if (!signinMode && $('j-name').value.trim()) await auth.updateProfile(res.user, {displayName: $('j-name').value.trim()}).catch(() => {});
     await signedIn(res.user);
-  } catch (e) { console.error(e); $('a-msg').textContent = friendly(e); }
-  finally { busy(btn, false, label); }
+  } catch (e) {
+    console.error(e);
+    if (!signinMode && String(e?.code || e).includes('email-already-in-use')) {
+      // Already registered: switch to sign-in with the email kept (no duplicate account).
+      setMode(true); $('a-email').value = email; $('a-pass').value = ''; $('a-pass').focus();
+      $('a-msg').textContent = email + ' is already registered with PropMithra. Sign in with your password — or with Google if you signed up with Google. Forgot it? Tap "Forgot password?".';
+      return;
+    }
+    $('a-msg').textContent = friendly(e);
+  }
+  finally { busy(btn, false, signinMode ? 'Sign in' : label); }
 });
 $('a-mode').addEventListener('click', () => setMode(!signinMode));
 $('a-back').addEventListener('click', () => step(1));
