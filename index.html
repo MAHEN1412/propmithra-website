@@ -780,6 +780,45 @@ body.sv-open { overflow: hidden; }
 .contact-note[hidden] { display: none; }
 
 .field .hint.ok { color: var(--teal-dark); font-weight: 600; }
+
+/* Account page: campaign banner slider */
+.cbanner { margin-top: 14px; }
+.cbanner[hidden] { display: none; }
+.cb-track { display: grid; grid-auto-flow: column; grid-auto-columns: 100%; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; border-radius: 28px; }
+.cb-track::-webkit-scrollbar { display: none; }
+.cb-slide { scroll-snap-align: start; position: relative; overflow: hidden; display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); align-items: center; gap: 24px; min-height: 240px; padding: clamp(22px, 3vw, 36px) clamp(22px, 3vw, 40px); border-radius: 28px; color: #fff;
+  background: radial-gradient(60% 140% at 72% 40%, rgba(44, 183, 64, .55), transparent 60%), radial-gradient(40% 120% at 58% 100%, rgba(18, 140, 126, .55), transparent 70%), linear-gradient(100deg, #101a19 0%, #13201e 45%, #0b3d36 100%); }
+.cb-text { display: grid; gap: 10px; min-width: 0; }
+.cb-eyebrow { font-size: .8rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: rgba(255,255,255,.7); }
+.cb-slide h2 { color: #fff; margin: 0; font-weight: 500; font-size: clamp(1.35rem, 2.4vw, 2rem); line-height: 1.25; }
+.cb-line { margin: 0; color: rgba(255,255,255,.8); }
+.cb-row { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 22px; margin-top: 8px; }
+.cb-cta { background: #fff; color: #10201e; border: 0; border-radius: 14px; padding: 14px 30px; font-weight: 700; font-size: 1.05rem; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,.25); }
+.cb-cta:hover { background: #e7f8ef; }
+.cb-price { display: grid; gap: 4px; }
+.cb-price b { font-size: 1.45rem; font-weight: 700; }
+.cb-tags { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.cb-badge { background: #22a23a; color: #fff; font-weight: 700; font-size: .85rem; padding: 4px 10px; border-radius: 8px; }
+.cb-was { color: rgba(255,255,255,.65); font-size: .85rem; }
+.cb-art { position: relative; justify-self: end; width: min(300px, 100%); aspect-ratio: 4 / 3; margin-right: 14px; }
+.cb-photo { position: absolute; inset: 8% 6% 12% 4%; border-radius: 14px; overflow: hidden; transform: rotate(-3deg); background: rgba(255,255,255,.08); border: 3px solid rgba(255,255,255,.9); box-shadow: 0 14px 30px rgba(0,0,0,.4); display: grid; place-items: center; }
+.cb-photo img { width: 100%; height: 100%; object-fit: cover; }
+.cb-photo .ph { color: rgba(255,255,255,.75); font-weight: 700; }
+.cb-logo { position: absolute; top: -2%; right: -2%; width: 62px; height: 62px; border-radius: 16px; background: #22a23a; display: grid; place-items: center; font-weight: 800; font-size: 1.1rem; transform: rotate(6deg); box-shadow: 0 8px 20px rgba(0,0,0,.35); }
+.cb-pct { position: absolute; top: 14%; left: -4%; width: 46px; height: 46px; border-radius: 50%; background: #e5484d; display: grid; place-items: center; font-weight: 800; font-size: 1.2rem; box-shadow: 0 6px 16px rgba(0,0,0,.3); }
+.cb-chip { position: absolute; bottom: 0; right: 0; background: #fff; color: #10201e; font-size: .8rem; font-weight: 600; padding: 8px 12px; border-radius: 10px; box-shadow: 0 8px 20px rgba(0,0,0,.3); white-space: nowrap; }
+.cb-nav { display: flex; justify-content: center; align-items: center; gap: 22px; margin-top: 14px; }
+.cb-nav[hidden] { display: none; }
+.cb-arrow { background: none; border: 0; font-size: 1.8rem; line-height: 1; color: var(--ink); cursor: pointer; padding: 2px 10px; }
+.cb-dots { display: flex; gap: 10px; }
+.cb-dots button { width: 12px; height: 12px; padding: 0; border: 0; border-radius: 99px; background: #9aa5a3; cursor: pointer; transition: width .2s; }
+.cb-dots button.on { width: 26px; background: var(--ink); }
+@media (max-width: 720px) {
+  .cb-slide { grid-template-columns: 1fr; gap: 18px; min-height: 0; }
+  .cb-art { justify-self: center; width: min(260px, 82%); margin: 0; order: -1; }
+  .cb-cta { padding: 12px 24px; }
+}
+@media (min-width: 721px) { .cb-row { flex-wrap: nowrap; } .cb-cta { flex: none; } }
 </style>
 <style>@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:700;font-display:swap;src:url(fonts/roboto-condensed-latin-700-italic.woff2) format("woff2")}@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:800;font-display:swap;src:url(fonts/roboto-condensed-latin-800-italic.woff2) format("woff2")}</style>
 </head>
