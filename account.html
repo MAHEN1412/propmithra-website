@@ -1014,6 +1014,31 @@ body.sv-open { overflow: hidden; }
   .lcard.wide .talk { border-top: 0; padding-top: 0; }
   .lcard.wide .proj { margin: 0; }
 }
+
+/* Assigned / All Properties: simple 3-column cards */
+#d-team, #d-all { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+@media (max-width: 1000px) { #d-team, #d-all { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) { #d-team, #d-all { grid-template-columns: 1fr; } }
+#d-team .empty-card, #d-all .empty-card { grid-column: 1 / -1; }
+.pcard { background: var(--surface, #fff); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; display: flex; flex-direction: column; transition: box-shadow .2s, transform .2s; }
+.pcard:hover { box-shadow: 0 10px 28px rgba(11, 20, 26, .10); transform: translateY(-2px); }
+.pc-photo { position: relative; aspect-ratio: 16 / 10; }
+.pc-photo img { width: 100%; height: 100%; object-fit: cover; }
+.pc-tag { position: absolute; left: 10px; top: 10px; background: rgba(7, 94, 84, .92); color: #fff; font-size: .74rem; font-weight: 700; padding: 4px 9px; border-radius: 99px; }
+.pc-new { position: absolute; right: 10px; top: 10px; background: #22a23a; color: #fff; font-size: .74rem; font-weight: 700; padding: 4px 9px; border-radius: 99px; }
+.pc-body { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+.pc-price { font-size: 1.3rem; font-weight: 800; color: var(--ink); }
+.pc-price small { font-size: .8rem; font-weight: 600; color: var(--ink-3); }
+.pc-title { font-size: 1rem; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.pc-meta { color: var(--ink-3); font-size: .88rem; }
+.pc-proj { display: flex; gap: 10px; align-items: center; padding: 8px 10px; border-radius: 12px; background: var(--canvas, #f3f6f5); margin-top: 2px; }
+.pc-proj .proj-logo { width: 34px; height: 34px; flex: none; }
+.pc-proj b { display: block; font-size: .9rem; }
+.pc-proj small { display: block; font-size: .74rem; color: var(--teal-dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
+.pc-foot { margin-top: auto; padding-top: 10px; display: grid; gap: 8px; }
+.pc-int { font-size: .85rem; color: var(--ink-3); }
+.pc-foot .btn-talk { width: 100%; min-height: 42px; }
+.talk-terms.small { margin-top: 0; font-size: .8rem; }
 </style>
 <style>@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:700;font-display:swap;src:url(fonts/roboto-condensed-latin-700-italic.woff2) format("woff2")}@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:800;font-display:swap;src:url(fonts/roboto-condensed-latin-800-italic.woff2) format("woff2")}</style>
 </head>
@@ -1398,7 +1423,7 @@ function renderAll() {
 }
 function bindPropCards(box, list) {
   box.querySelectorAll('[data-talk]').forEach(b => b.onclick = () => talkToTeam(list.find(x => x.id === b.dataset.talk), b));
-  box.querySelectorAll('.lcard').forEach(async (card) => {
+  box.querySelectorAll('.lcard, .pcard').forEach(async (card) => {
     const p = list.find(x => x.id === card.dataset.id);
     if (p?.photos?.length) { try { const u = await blobUrl(p.photos[0]); card.querySelector('.lthumb').innerHTML = u ? `<img src="${u}" alt="">` : ''; } catch (_) {} }
     card.querySelectorAll('[data-file]').forEach(b => b.onclick = async () => {
@@ -1440,30 +1465,28 @@ function unitsBlock(p) {
   const rent = p.transaction !== 'sale';
   return `<div class="units">${p.units.map(u => `<span><b>${u.bhk >= 6 ? '5+' : u.bhk} BHK</b> ${Number(u.area).toLocaleString('en-IN')} sq.ft · ${esc(inr(u.price))}${rent ? '/mo' : ''}</span>`).join('')}</div>`;
 }
+// Simple property cards (3 per row on computers): photo, price, title,
+// location, project + RERA, interest count and "Talk to our team".
 function teamCards(list) {
   const seen = seenTeam();
   return list.map(p => {
-    const ph = String(p.contactPhone || '').replace(/[^0-9+]/g, ''), d = ph.replace('+', ''), wa = d.length === 10 ? '91' + d : d;
-    return `<article class="lcard team wide" data-id="${esc(p.id)}" data-team>
-      <div class="lthumb">${p.photos?.length ? '<span class="spinner small"></span>' : `<span class="ph">${esc(TYPE_LABEL[p.type] || 'Property')}</span>`}</div>
-      <div class="lbody">
-       <div class="lmain">
-        <div class="lprice">${esc(inr(p.price))}${p.transaction !== 'sale' ? '<small>/mo</small>' : ''}</div>
-        <b>${esc(p.title)}</b>
-        <span class="muted">${esc(p.locality)}${p.areaSqft ? ' · ' + Number(p.areaSqft).toLocaleString('en-IN') + (p.areaMax > p.areaSqft ? ' – ' + Number(p.areaMax).toLocaleString('en-IN') : '') + ' sq.ft' : ''}${p.bhks?.length > 1 ? ' · ' + p.bhks.join(', ') + ' BHK' : ''}</span>
-        ${unitsBlock(p)}
-        ${p.listingSource ? `<span class="muted">Source: ${esc(p.listingSource)}</span>` : ''}
-        <div class="tags">${p.byTeam ? `<span class="tag team">From PropMithra</span>${seen.has(p.id) ? '' : '<span class="tag new">New</span>'}` : '<span class="tag team">Verified by PropMithra</span>'}<span class="tag ${p.availability === 'available' ? 'ok' : ''}">${esc(AVAIL[p.availability] || p.availability)}</span></div>
-        ${p.description ? `<span class="muted">${esc(String(p.description).slice(0, 220))}${String(p.description).length > 220 ? '…' : ''}</span>` : ''}
-       </div>
-       <div class="lside">
-        ${p.project ? projectBlock(p.project) : ''}
-        <div class="talk">
-          <span class="muted">${teamStats[p.id] ? `<b>${teamStats[p.id]}</b> agent${teamStats[p.id] > 1 ? 's are' : ' is'} interested in this listing.` : 'Be the first agent to show interest.'}</span>
-          ${myTeamInterest[p.id] ? '<button type="button" class="btn btn-talk sent" disabled>Interest sent ✓</button>' : `<button type="button" class="btn btn-talk" data-talk="${esc(p.id)}">Talk to our team</button><label class="talk-terms"><input type="checkbox" data-terms="${esc(p.id)}"> <span>I agree to PropMithra's terms and conditions for selling this property. <a href="/terms" target="_blank" rel="noopener">Read terms</a></span></label>`}
-          <small class="muted">${myTeamInterest[p.id] ? 'Our team will contact you to discuss the project details and commission.' : 'Submit your interest, and our team will contact you to discuss the project details and attractive commission opportunities.'}</small>
+    const pr = p.project || {}, size = p.areaSqft ? Number(p.areaSqft).toLocaleString('en-IN') + (p.areaMax > p.areaSqft ? '–' + Number(p.areaMax).toLocaleString('en-IN') : '') + ' sq.ft' : '';
+    const bhk = (p.bhks?.length ? p.bhks : (p.bhk ? [p.bhk] : [])).join(', ');
+    const sent = myTeamInterest[p.id], n = teamStats[p.id] || 0;
+    return `<article class="pcard" data-id="${esc(p.id)}" data-team>
+      <div class="lthumb pc-photo">${p.photos?.length ? '<span class="spinner small"></span>' : `<span class="ph">${esc(TYPE_LABEL[p.type] || 'Property')}</span>`}
+        <span class="pc-tag">${p.byTeam ? 'From PropMithra' : 'Verified by PropMithra'}</span>${p.byTeam && !seen.has(p.id) ? '<span class="pc-new">New</span>' : ''}</div>
+      <div class="pc-body">
+        <div class="pc-price">${esc(inr(p.price))}${p.transaction !== 'sale' ? '<small>/mo</small>' : ''}</div>
+        <b class="pc-title">${esc(p.title)}</b>
+        <span class="pc-meta">📍 ${esc(p.locality || '')}${size ? ' · ' + esc(size) : ''}${bhk ? ' · ' + esc(bhk) + ' BHK' : ''}</span>
+        ${pr.name ? `<span class="pc-proj"><span class="proj-logo" data-logo="${esc(pr.logoUrl || '')}">${esc((pr.name || 'P')[0])}</span><span><b>${esc(pr.name)}</b>${pr.rera ? `<small>RERA ${esc(pr.rera)}</small>` : ''}</span></span>` : ''}
+        <div class="pc-foot">
+          <span class="pc-int">${n ? `<b>${n}</b> agent${n > 1 ? 's' : ''} interested` : 'Be the first to show interest'}</span>
+          ${sent ? '<button type="button" class="btn btn-talk sent" disabled>Interest sent ✓</button>'
+                 : `<button type="button" class="btn btn-talk" data-talk="${esc(p.id)}">Talk to our team</button>
+                    <label class="talk-terms small"><input type="checkbox" data-terms="${esc(p.id)}"> <span>I agree to the <a href="/terms" target="_blank" rel="noopener">terms</a> for selling this property</span></label>`}
         </div>
-       </div>
       </div></article>`;
   }).join('');
 }
