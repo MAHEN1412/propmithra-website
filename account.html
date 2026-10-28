@@ -937,9 +937,6 @@ body.sv-open { overflow: hidden; }
 
       <!-- Approved Mithras: actions + my listings / requirements -->
       <div id="d-listings-wrap" hidden>
-        <div class="dash-actions">
-          <button class="action-tile" type="button" id="d-add"><span class="ai">+</span><span><b>Add listing</b><small>A property you have — sale, rent or lease</small></span></button>
-        </div>
         <div class="team-alert" id="d-team-alert" hidden role="status"><span class="ta-ico" aria-hidden="true">📣</span><span class="ta-text"><b id="d-team-title"></b><small id="d-team-sub"></small></span><button class="btn btn-primary" type="button" id="d-team-view">View</button><button class="link-btn" type="button" id="d-team-close" aria-label="Dismiss">✕</button></div>
         <div class="tabs" role="tablist">
           <button type="button" role="tab" class="tab on" data-tab="team">Assigned by PropMithra <span id="t-team">0</span></button>
@@ -1172,6 +1169,8 @@ async function signOutNow() { await fb.auth.signOut(fb.au); window.pmSession?.(n
 function menuHash() {
   if (location.hash === '#contact') { history.replaceState(null, '', location.pathname); contactFlow(); }
   else if (location.hash === '#logout') { history.replaceState(null, '', location.pathname); signOutNow(); }
+  // Top bar "+ Add listing" while already on this page.
+  else if (location.hash === '#add' && approved()) { history.replaceState(null, '', location.pathname); openForm(); }
 }
 window.addEventListener('hashchange', () => { if (fb && uid) menuHash(); });
 const blobCache = new Map();
@@ -1442,7 +1441,7 @@ function setupForm() {
   $('l-price').oninput = hint; $('l-unit').onchange = hint;
   $('l-transaction').onchange = () => { if ($('l-transaction').value !== 'sale' && $('l-unit').value !== '1') $('l-unit').value = '1'; hint(); };
   ['l-area', 'l-baths', 'l-floor', 'l-floors', 'l-parking', 'l-age', 'l-pincode'].forEach(id => $(id).addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g, ''); }));
-  $('d-add').onclick = openForm; $('d-cancel').onclick = closeForm; $('d-cancel2').onclick = closeForm;
+  if ($('d-add')) $('d-add').onclick = openForm; $('d-cancel').onclick = closeForm; $('d-cancel2').onclick = closeForm;
   $('d-form').onsubmit = save;
   const clear = (id) => () => { fieldErr(id, ''); if (!$('d-form').querySelector('.err:not(:empty)')) $('l-msg').textContent = ''; };
   $('l-area').addEventListener('input', clear('l-area'));
