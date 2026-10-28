@@ -1052,6 +1052,10 @@ body.sv-open { overflow: hidden; }
 .cb-slide.img-only .cb-media { grid-row: 1; grid-column: 1; }
 .cb-slide.img-only .cb-text { grid-row: 1; grid-column: 1; z-index: 2; align-self: end; align-content: end; background: linear-gradient(0deg, rgba(0,0,0,.45), transparent); }
 .cb-slide.img-only .cb-price:empty { display: none; }
+/* Customer Partner status under the button */
+.pc-lead { display: block; font-size: .78rem; color: var(--muted, #667085); text-align: center; }
+.btn-talk.sent.assigned, .btn-talk.sent.won { background: #e7f8ef; color: #0b6b3a; }
+.btn-talk.sent.lost { background: #f2f4f7; color: #667085; }
 </style>
 <style>@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:700;font-display:swap;src:url(fonts/roboto-condensed-latin-700-italic.woff2) format("woff2")}@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:800;font-display:swap;src:url(fonts/roboto-condensed-latin-800-italic.woff2) format("woff2")}</style>
 </head>
@@ -1148,6 +1152,7 @@ const DEAL = [
   ['none', 'Published', 'Property visible to eligible agents.', 0],
   ['interestReview', 'Interest under review', 'PropMithra is speaking with the interested agent and keeps you informed.', 2],
   ['ownerNotified', 'Interest under review', 'PropMithra has informed you about the collaboration request.', 2],
+  ['partnerAssigned', 'Customer Partner assigned', 'PropMithra has assigned an agent who has a buyer or tenant for your property. Next: follow-up and site visit.', 2],
   ['siteVisit', 'Discussion & negotiation', 'Site visits and commercial terms are being discussed.', 3],
   ['negotiation', 'Discussion & negotiation', 'Site visits and commercial terms are being discussed.', 3],
   ['closed', 'Deal closed', 'The agreed closure conditions have been met.', 4],
@@ -1203,7 +1208,7 @@ function render(p, id, interested) {
     const at = st[3] > 0 ? st[3] : (interested > 0 ? 1 : 0);
     const deal = [
       ['Interest received', interested > 0 ? `${interested} agent${interested === 1 ? '' : 's'} interested` : 'Agents tap "Talk to our team"'],
-      ['Under review', 'PropMithra speaks with the agent'],
+      st[0] === 'partnerAssigned' ? ['Partner assigned', 'Agent with a customer assigned'] : ['Under review', 'PropMithra picks an agent with a customer'],
       ['Discussion & negotiation', 'Site visits and terms'],
       ['Deal closed', 'Closure conditions met'],
       ['Commission', settled ? 'Settled' : st[0] === 'commissionProcessing' ? 'Being processed' : 'After the deal closes'],

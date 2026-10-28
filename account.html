@@ -1052,6 +1052,10 @@ body.sv-open { overflow: hidden; }
 .cb-slide.img-only .cb-media { grid-row: 1; grid-column: 1; }
 .cb-slide.img-only .cb-text { grid-row: 1; grid-column: 1; z-index: 2; align-self: end; align-content: end; background: linear-gradient(0deg, rgba(0,0,0,.45), transparent); }
 .cb-slide.img-only .cb-price:empty { display: none; }
+/* Customer Partner status under the button */
+.pc-lead { display: block; font-size: .78rem; color: var(--muted, #667085); text-align: center; }
+.btn-talk.sent.assigned, .btn-talk.sent.won { background: #e7f8ef; color: #0b6b3a; }
+.btn-talk.sent.lost { background: #f2f4f7; color: #667085; }
 </style>
 <style>@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:700;font-display:swap;src:url(fonts/roboto-condensed-latin-700-italic.woff2) format("woff2")}@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:800;font-display:swap;src:url(fonts/roboto-condensed-latin-800-italic.woff2) format("woff2")}</style>
 </head>
@@ -1500,7 +1504,7 @@ function teamCards(list) {
         ${pr.name ? `<span class="pc-proj"><span class="proj-logo" data-logo="${esc(pr.logoUrl || '')}">${esc((pr.name || 'P')[0])}</span><span><b>${esc(pr.name)}</b>${pr.rera ? `<small>RERA ${esc(pr.rera)}</small>` : ''}</span></span>` : ''}
         <div class="pc-foot">
           <span class="pc-int">${n ? `<b>${n}</b> agent${n > 1 ? 's' : ''} interested` : 'Be the first to show interest'}</span>
-          ${sent ? '<button type="button" class="btn btn-talk sent" disabled>Interest sent ✓</button>'
+          ${sent ? `<button type="button" class="btn btn-talk sent ${sent}" disabled>${LEAD_TEXT[sent][0]}</button><small class="pc-lead">${LEAD_TEXT[sent][1]}</small>`
                  : `<button type="button" class="btn btn-talk" data-talk="${esc(p.id)}">Talk to our team</button>
                     <label class="talk-terms small"><input type="checkbox" data-terms="${esc(p.id)}"> <span>I agree to the <a href="/terms" target="_blank" rel="noopener">terms</a> for selling this property</span></label>`}
         </div>
@@ -1508,10 +1512,22 @@ function teamCards(list) {
   }).join('');
 }
 let teamStats = {}, myTeamInterest = {}, allProps = [];
+// What PropMithra decided on this agent's interest (same as the app).
+const LEAD_TEXT = {
+  sent: ['Interest sent ✓', 'PropMithra is reviewing. If you are assigned, our team will call you.'],
+  assigned: ['You\'re assigned ✓', 'You are the Customer Partner. Our team will call you for the next step.'],
+  won: ['Deal closed ✓', 'Congratulations — this deal is closed.'],
+  lost: ['Not taken forward', 'PropMithra went ahead with another partner this time.'],
+};
+function leadState(x) {
+  const byStatus = {new: 'newLead', contacted: 'contacted', closed: 'lost'};
+  const st = x.stage && ({newLead: 'new', contacted: 'contacted', visit: 'contacted', negotiation: 'contacted', won: 'closed', lost: 'closed'})[x.stage] === x.status ? x.stage : byStatus[x.status] || 'newLead';
+  return st === 'newLead' ? 'sent' : st === 'won' ? 'won' : st === 'lost' ? 'lost' : 'assigned';
+}
 async function loadTeamExtras() {
   const {fs, db} = fb;
   const mine = await fs.getDocs(fs.query(fs.collection(db, 'listingInterests'), fs.where('uid', '==', uid))).catch(() => ({docs: []}));
-  myTeamInterest = {}; mine.docs.forEach(d => { myTeamInterest[d.data().propertyId] = true; });
+  myTeamInterest = {}; mine.docs.forEach(d => { const x = d.data(); myTeamInterest[x.propertyId] = leadState(x); });
   const stats = await Promise.all(allProps.map(p => fs.getDoc(fs.doc(db, 'listingStats', p.id)).catch(() => null)));
   teamStats = {}; stats.forEach((d, n) => { if (d?.exists?.()) teamStats[allProps[n].id] = d.data().interested || 0; });
   const [ts, fq] = await Promise.all([
@@ -1561,7 +1577,7 @@ async function talkToTeam(p, btn) {
     });
     b.set(fs.doc(db, 'listingStats', p.id), {interested: fs.increment(1)}, {merge: true});
     await b.commit();
-    myTeamInterest[p.id] = true; teamStats[p.id] = (teamStats[p.id] || 0) + 1; renderTeam();
+    myTeamInterest[p.id] = 'sent'; teamStats[p.id] = (teamStats[p.id] || 0) + 1; renderTeam();
   } catch (e) { console.warn(e); alert('Could not send your interest. Please try again.'); btn.disabled = false; }
 }
 async function loadTeam() {
@@ -2229,6 +2245,7 @@ const DEAL = [
   ['none', 'Published', 'Property visible to eligible agents.'],
   ['interestReview', 'Interest under review', 'PropMithra is speaking with the interested agent to understand the opportunity.'],
   ['ownerNotified', 'Interest under review', 'PropMithra has informed you about the collaboration request.'],
+  ['partnerAssigned', 'Customer Partner assigned', 'PropMithra has assigned an agent who has a buyer or tenant for your property. Next: follow-up and site visit.'],
   ['siteVisit', 'Discussion & negotiation', 'The participating agents are coordinating the next steps.'],
   ['negotiation', 'Discussion & negotiation', 'The parties are discussing commercial terms.'],
   ['closed', 'Deal closed', 'The agreed closure conditions have been met.'],
