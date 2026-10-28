@@ -969,6 +969,35 @@ body.sv-open { overflow: hidden; }
 .cb-fdots { position: absolute; left: 0; right: 0; bottom: 8px; display: flex; justify-content: center; gap: 5px; z-index: 2; }
 .cb-fdots i { width: 6px; height: 6px; border-radius: 99px; background: rgba(255,255,255,.6); transition: width .2s; }
 .cb-fdots i.on { width: 16px; background: #fff; }
+
+/* Campaign banner v3: full-banner slides — text left half, image right half */
+.cb-slide { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important; gap: 0 !important; padding: 0 !important; min-height: 320px; align-items: stretch !important; }
+.cb-slide .cb-text { padding: clamp(24px, 3vw, 40px); align-content: center; }
+.cb-media { position: relative; min-height: 320px; overflow: hidden; display: grid; place-items: center; }
+.cb-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 22%); mask-image: linear-gradient(to right, transparent 0, #000 22%); }
+.cb-media .ph { color: rgba(255,255,255,.55); font-weight: 700; font-size: 1.1rem; }
+.cb-media .cb-img-t, .cb-media .cb-img-m { display: none; }
+.cb-media .cb-chip { position: absolute; right: 16px; bottom: 16px; top: auto; left: auto; }
+.cb-chip.open { color: #0b4d40; }
+.cb-art, .cb-pct, .cb-logo { display: none !important; }
+/* text slides in when its banner becomes active */
+@keyframes cbIn { from { opacity: 0; transform: translateX(-18px); } to { opacity: 1; transform: none; } }
+.cb-slide.active .cb-text > * { animation: cbIn .6s ease both; }
+.cb-slide.active .cb-text > *:nth-child(2) { animation-delay: .08s; }
+.cb-slide.active .cb-text > *:nth-child(3) { animation-delay: .16s; }
+.cb-slide.active .cb-text > *:nth-child(4) { animation-delay: .24s; }
+@media (prefers-reduced-motion: reduce) { .cb-slide.active .cb-text > * { animation: none; } }
+@media (min-width: 721px) and (max-width: 1100px) {
+  .cb-media .cb-img-d { display: none; } .cb-media .cb-img-t { display: block; }
+}
+@media (max-width: 720px) {
+  .cb-slide { grid-template-columns: 1fr !important; min-height: 0; }
+  .cb-media { order: -1; min-height: 0; aspect-ratio: 16 / 9; }
+  .cb-media img { -webkit-mask-image: linear-gradient(to bottom, #000 72%, transparent); mask-image: linear-gradient(to bottom, #000 72%, transparent); }
+  .cb-media .cb-img-d, .cb-media .cb-img-t { display: none; } .cb-media .cb-img-m { display: block; }
+  .cb-slide .cb-text { padding: 4px 20px 24px; }
+}
 </style>
 <style>@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:700;font-display:swap;src:url(fonts/roboto-condensed-latin-700-italic.woff2) format("woff2")}@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:800;font-display:swap;src:url(fonts/roboto-condensed-latin-800-italic.woff2) format("woff2")}</style>
 </head>
@@ -1814,20 +1843,35 @@ const initials = (t) => (t || 'P').split(/\s+/).filter(Boolean).slice(0, 2).map(
 // commission on the left, the project's cover image on the right; slides
 // move every 6 seconds (pauses on hover), with arrows and dots below.
 let cbTimer = null, cbIndex = 0;
-function renderSlider() {
-  const wrap = $('d-banner'), track = $('cb-track'), dots = $('cb-dots');
+// Campaign banners: every image slide is a full banner — text on the left
+// half, the image on the right half. The whole banner slides to the next
+// one (6 s; pauses on hover), with arrows and dots below.
+let cbRun = 0;
+async function renderSlider() {
+  const run = ++cbRun, wrap = $('d-banner');
   clearInterval(cbTimer);
   if (!camps.length) { wrap.hidden = true; return; }
   wrap.hidden = false;
-  track.innerHTML = camps.map((c, n) => {
+  drawBanners(camps.map(c => ({c, img: null})));
+  const imgs = await Promise.all(camps.map(c => campImages(c)));
+  if (run !== cbRun) return;
+  const slides = [];
+  camps.forEach((c, n) => { if (!imgs[n].length) slides.push({c, img: null}); else imgs[n].forEach(img => slides.push({c, img})); });
+  drawBanners(slides);
+}
+function drawBanners(slides) {
+  const wrap = $('d-banner'), track = $('cb-track'), dots = $('cb-dots');
+  clearInterval(cbTimer);
+  track.innerHTML = slides.map(({c, img}, n) => {
     const m = c.commercial || {}, dl = toDate(c.requirements?.applicationDeadline);
     const where = [c.locality, c.city || 'Hyderabad'].filter(Boolean).join(', ');
-    const line = c.requirements?.objective || [c.developer, where].filter(Boolean).join(' · ');
-    return `<article class="cb-slide" data-id="${esc(c.id)}" role="group" aria-label="${n + 1} of ${camps.length}">
+    const eyebrow = [c.developer, where].filter(Boolean).join(' · ');
+    const line = c.requirements?.objective || '';
+    return `<article class="cb-slide ${img ? 'has-img' : ''} ${n ? '' : 'active'}" data-id="${esc(c.id)}" role="group" aria-label="${n + 1} of ${slides.length}">
       <div class="cb-text">
-        <span class="cb-eyebrow">${esc([c.developer, where].filter(Boolean).join(' · '))}</span>
+        <span class="cb-eyebrow">${esc(eyebrow)}</span>
         <h2>${esc(c.title || 'Campaign')}</h2>
-        ${line && line !== [c.developer, where].filter(Boolean).join(' · ') ? `<p class="cb-line">${esc(line)}</p>` : ''}
+        ${line ? `<p class="cb-line">${esc(line)}</p>` : ''}
         <div class="cb-row">
           <button class="cb-cta" type="button" data-open="${esc(c.id)}">View campaign</button>
           <div class="cb-price">
@@ -1836,19 +1880,21 @@ function renderSlider() {
           </div>
         </div>
       </div>
-      <div class="cb-art">
-        <div class="cb-photo"><span class="ph">${esc(c.propertyType || 'Project')}</span></div>
-        <span class="cb-logo">${esc(initials(c.developer || c.title))}</span>
-        <span class="cb-pct">%</span>
-        <span class="cb-chip">${campOpen(c) ? '● Campaign open' : 'Applications closed'}</span>
+      <div class="cb-media">
+        ${img ? `<img class="cb-img-d" src="${img.desktop}" alt=""><img class="cb-img-t" src="${img.tablet}" alt=""><img class="cb-img-m" src="${img.mobile}" alt="">` : `<span class="ph">${esc(c.propertyType || 'Project')}</span>`}
+        <span class="cb-chip ${campOpen(c) ? 'open' : ''}">${campOpen(c) ? '● Campaign open' : 'Applications closed'}</span>
       </div>
     </article>`;
   }).join('');
-  dots.innerHTML = camps.length > 1 ? camps.map((_, n) => `<button type="button" aria-label="Campaign ${n + 1}" class="${n ? '' : 'on'}"></button>`).join('') : '';
-  wrap.querySelector('.cb-nav').hidden = camps.length < 2;
-  const go = (n) => { cbIndex = (n + camps.length) % camps.length; track.scrollTo({left: track.children[cbIndex].offsetLeft - track.offsetLeft, behavior: 'smooth'}); };
-  const restart = () => { clearInterval(cbTimer); if (camps.length > 1) cbTimer = setInterval(() => go(cbIndex + 1), 6000); };
-  track.onscroll = () => { const k = Math.round(track.scrollLeft / (track.clientWidth || 1)); cbIndex = k; dots.querySelectorAll('button').forEach((d, n) => d.className = n === k ? 'on' : ''); };
+  dots.innerHTML = slides.length > 1 ? slides.map((_, n) => `<button type="button" aria-label="Banner ${n + 1}" class="${n ? '' : 'on'}"></button>`).join('') : '';
+  wrap.querySelector('.cb-nav').hidden = slides.length < 2;
+  const setActive = (k) => {
+    track.querySelectorAll('.cb-slide').forEach((el, n) => el.classList.toggle('active', n === k));
+    dots.querySelectorAll('button').forEach((d, n) => d.className = n === k ? 'on' : '');
+  };
+  const go = (n) => { cbIndex = (n + slides.length) % slides.length; track.scrollTo({left: track.children[cbIndex].offsetLeft - track.offsetLeft, behavior: 'smooth'}); };
+  const restart = () => { clearInterval(cbTimer); if (slides.length > 1) cbTimer = setInterval(() => go(cbIndex + 1), 6000); };
+  track.onscroll = () => { const k = Math.round(track.scrollLeft / (track.clientWidth || 1)); if (k !== cbIndex) { cbIndex = k; } setActive(k); };
   dots.querySelectorAll('button').forEach((d, n) => d.onclick = () => { go(n); restart(); });
   $('cb-prev').onclick = () => { go(cbIndex - 1); restart(); };
   $('cb-next').onclick = () => { go(cbIndex + 1); restart(); };
@@ -1856,25 +1902,8 @@ function renderSlider() {
   track.querySelectorAll('.cb-slide').forEach(sl => {
     const c = camps.find(x => x.id === sl.dataset.id);
     sl.querySelector('[data-open]').onclick = () => { tab('camps'); openCamp(c); $('d-listings-wrap').scrollIntoView({behavior: 'smooth', block: 'start'}); };
-    campImages(c).then(list => {
-      if (!list.length) return;
-      const box = sl.querySelector('.cb-photo');
-      box.innerHTML = list.map((i, n) => `<div class="cb-frame${n ? '' : ' on'}"><img class="cb-img-d" src="${i.desktop}" alt=""><img class="cb-img-t" src="${i.tablet}" alt=""><img class="cb-img-m" src="${i.mobile}" alt=""></div>`).join('')
-        + (list.length > 1 ? `<div class="cb-fdots">${list.map((_, n) => `<i class="${n ? '' : 'on'}"></i>`).join('')}</div>` : '');
-      sl.classList.add('has-img');
-      // Photo slides cross-fade every 3.5 s.
-      if (list.length > 1) {
-        let k = 0;
-        setInterval(() => {
-          const frames = box.querySelectorAll('.cb-frame'), dts = box.querySelectorAll('.cb-fdots i');
-          frames[k].classList.remove('on'); dts[k]?.classList.remove('on');
-          k = (k + 1) % frames.length;
-          frames[k].classList.add('on'); dts[k]?.classList.add('on');
-        }, 3500);
-      }
-    });
   });
-  cbIndex = 0; restart();
+  track.scrollLeft = 0; cbIndex = 0; restart();
 }
 const SV_MS = 6000;
 let sv = null;
