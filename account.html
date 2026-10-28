@@ -1931,8 +1931,8 @@ function drawBanners(slides) {
         <div class="cb-row">
           <button class="cb-cta" type="button" data-open="${esc(c.id)}">${esc(own('button') || 'View campaign')}</button>
           <div class="cb-price">
-            <div class="cb-tags">${m.commission ? `<span class="cb-badge">Commission ${esc(m.commission)}</span>` : ''}${dl ? `<span class="cb-was">Apply by ${esc(fmtDate(dl))}</span>` : ''}</div>
-            <b>${esc(campPrice(c))}</b>
+            <div class="cb-tags">${own('badge') ? `<span class="cb-badge">${esc(own('badge'))}</span>` : m.commission ? `<span class="cb-badge">Commission ${esc(m.commission)}</span>` : ''}${own('note') ? `<span class="cb-was">${esc(own('note'))}</span>` : dl ? `<span class="cb-was">Apply by ${esc(fmtDate(dl))}</span>` : ''}</div>
+            <b>${esc(own('price') || campPrice(c))}</b>
           </div>
         </div>
       </div>
