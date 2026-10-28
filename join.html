@@ -10,7 +10,7 @@
 <meta property="og:description" content="Join the PropMithra broker network free. Verify your mobile with an OTP and choose your Hyderabad corridor.">
 <meta property="og:type" content="website">
 <meta name="theme-color" content="#008069">
-<link rel="canonical" href="https://propmithra.iadesigns.in/join">
+<link rel="canonical" href="https://www.propmithra.com/join">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
@@ -1033,7 +1033,8 @@ function friendlyText(c) {
   if (c.includes('too-many-requests')) return 'Too many attempts. Please wait a while and try again.';
   if (c.includes('invalid-verification-code')) return 'Wrong OTP. Please check the code and try again.';
   if (c.includes('code-expired')) return 'This OTP has expired. Tap Resend to get a new one.';
-  if (c.includes('unauthorized-domain') || c.includes('captcha-check-failed')) return 'Sign-up is not enabled on this web address yet. Please use the PropMithra app, or contact us on WhatsApp.';
+  if (c.includes('unauthorized-domain')) return 'Login is being set up on this web address. Please try again in a few minutes, or use the PropMithra app.';
+  if (c.includes('captcha-check-failed')) return 'Phone sign-in is not available on this web address yet. Please use Google or email, or the PropMithra app.';
   if (c.includes('billing-not-enabled') || c.includes('quota-exceeded') || c.includes('operation-not-allowed')) return 'OTP by SMS is not switched on yet. Please contact us on WhatsApp to join.';
   if (c.includes('network')) return 'No internet connection. Please try again.';
   if (c.includes('popup-closed') || c.includes('cancelled-popup')) return 'Google sign-in was closed. Please try again.';
