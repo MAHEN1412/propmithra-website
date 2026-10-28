@@ -868,6 +868,13 @@ body.sv-open { overflow: hidden; }
 .tl li:not(.done):not(.cur) b { color: var(--ink-3); }
 .tl small { display: block; margin-top: 4px; color: #1a56db; font-weight: 700; letter-spacing: .08em; font-size: .72rem; }
 .tl li.alert small, .tl li.alert p { color: #8a5a00; }
+
+/* My Properties card actions */
+.lactions.mine { display: grid; gap: 10px; justify-content: stretch; }
+.btn-track { width: 100%; min-height: 42px; }
+.la-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.la-avail { display: flex; align-items: center; gap: 8px; font-size: .85rem; color: var(--ink-3); }
+.la-avail select { min-height: 36px; }
 </style>
 <style>@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:700;font-display:swap;src:url(fonts/roboto-condensed-latin-700-italic.woff2) format("woff2")}@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:800;font-display:swap;src:url(fonts/roboto-condensed-latin-800-italic.woff2) format("woff2")}</style>
 </head>
@@ -1192,13 +1199,14 @@ function renderListings() {
         <b>${esc(p.title)}</b>
         <span class="muted">${esc(p.locality)}${p.areaSqft ? ' · ' + Number(p.areaSqft).toLocaleString('en-IN') + ' sq.ft' : ''}</span>
         <span class="track-line"><span class="track-chip ${trackPhase(p)}">${esc(trackLabel(p))}</span><span class="muted small">ID ${esc(listingRef(p.id))}</span></span>
-        <div class="tags"><span class="tag ${p.availability === 'available' ? 'ok' : ''}">${esc(AVAIL[p.availability] || p.availability)}</span><span class="tag">${esc(VIS[p.visibility] || p.visibility)}</span>${hidden ? '<span class="tag bad">Not published by PropMithra</span>' : ''}${pending && p.review !== 'changes' ? '<span class="tag warn">Waiting for approval</span>' : ''}${p.review === 'approved' ? '<span class="tag ok">Reviewed ✓</span>' : ''}${p.review === 'changes' ? '<span class="tag warn">Corrections requested</span>' : ''}</div>
         ${hidden && p.moderationNote ? `<span class="dl-warn">${esc(p.moderationNote)}</span>` : ''}
         ${!hidden && p.review === 'changes' && p.reviewNote ? `<span class="dl-warn">PropMithra: ${esc(p.reviewNote)} — please update it in the app.</span>` : ''}
-        <div class="lactions">
-          <select data-avail aria-label="Status">${Object.entries(AVAIL).map(([k, v]) => `<option value="${k}"${k === p.availability ? ' selected' : ''}>${v}</option>`).join('')}</select>
-          <button type="button" class="link-btn" data-track>Track listing →</button>
-          <button type="button" class="link-btn danger" data-del>Delete</button>
+        <div class="lactions mine">
+          <button type="button" class="btn btn-primary btn-track" data-track>Track listing →</button>
+          <div class="la-row">
+            <label class="la-avail"><span>Availability</span><select data-avail aria-label="Availability">${Object.entries(AVAIL).map(([k, v]) => `<option value="${k}"${k === p.availability ? ' selected' : ''}>${v}</option>`).join('')}</select></label>
+            <button type="button" class="link-btn danger" data-del>Delete</button>
+          </div>
         </div>
       </div></article>`;
   }).join('');
