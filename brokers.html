@@ -998,6 +998,22 @@ body.sv-open { overflow: hidden; }
   .cb-media .cb-img-d, .cb-media .cb-img-t { display: none; } .cb-media .cb-img-m { display: block; }
   .cb-slide .cb-text { padding: 4px 20px 24px; }
 }
+
+/* Assigned / All Properties: wide cards on computers */
+#d-team, #d-all { grid-template-columns: 1fr; }
+.lcard.wide .lbody { display: grid; gap: 14px; }
+.lcard.wide .lmain, .lcard.wide .lside { display: grid; gap: 8px; align-content: start; min-width: 0; }
+@media (min-width: 900px) {
+  .lcard.wide { display: grid; grid-template-columns: minmax(260px, 34%) 1fr; }
+  .lcard.wide .lthumb { aspect-ratio: auto; height: 100%; min-height: 280px; }
+  .lcard.wide .lthumb img { width: 100%; height: 100%; object-fit: cover; }
+  .lcard.wide .lbody { grid-template-columns: minmax(0, 1.15fr) minmax(260px, 1fr); gap: 24px; padding: 22px 24px; align-items: start; }
+  .lcard.wide .lprice { font-size: 1.5rem; }
+  .lcard.wide .lmain > b { font-size: 1.15rem; }
+  .lcard.wide .lside { border-left: 1px solid var(--line); padding-left: 24px; }
+  .lcard.wide .talk { border-top: 0; padding-top: 0; }
+  .lcard.wide .proj { margin: 0; }
+}
 </style>
 <style>@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:700;font-display:swap;src:url(fonts/roboto-condensed-latin-700-italic.woff2) format("woff2")}@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:800;font-display:swap;src:url(fonts/roboto-condensed-latin-800-italic.woff2) format("woff2")}</style>
 </head>

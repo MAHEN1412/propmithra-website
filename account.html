@@ -998,6 +998,22 @@ body.sv-open { overflow: hidden; }
   .cb-media .cb-img-d, .cb-media .cb-img-t { display: none; } .cb-media .cb-img-m { display: block; }
   .cb-slide .cb-text { padding: 4px 20px 24px; }
 }
+
+/* Assigned / All Properties: wide cards on computers */
+#d-team, #d-all { grid-template-columns: 1fr; }
+.lcard.wide .lbody { display: grid; gap: 14px; }
+.lcard.wide .lmain, .lcard.wide .lside { display: grid; gap: 8px; align-content: start; min-width: 0; }
+@media (min-width: 900px) {
+  .lcard.wide { display: grid; grid-template-columns: minmax(260px, 34%) 1fr; }
+  .lcard.wide .lthumb { aspect-ratio: auto; height: 100%; min-height: 280px; }
+  .lcard.wide .lthumb img { width: 100%; height: 100%; object-fit: cover; }
+  .lcard.wide .lbody { grid-template-columns: minmax(0, 1.15fr) minmax(260px, 1fr); gap: 24px; padding: 22px 24px; align-items: start; }
+  .lcard.wide .lprice { font-size: 1.5rem; }
+  .lcard.wide .lmain > b { font-size: 1.15rem; }
+  .lcard.wide .lside { border-left: 1px solid var(--line); padding-left: 24px; }
+  .lcard.wide .talk { border-top: 0; padding-top: 0; }
+  .lcard.wide .proj { margin: 0; }
+}
 </style>
 <style>@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:700;font-display:swap;src:url(fonts/roboto-condensed-latin-700-italic.woff2) format("woff2")}@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:800;font-display:swap;src:url(fonts/roboto-condensed-latin-800-italic.woff2) format("woff2")}</style>
 </head>
@@ -1428,22 +1444,26 @@ function teamCards(list) {
   const seen = seenTeam();
   return list.map(p => {
     const ph = String(p.contactPhone || '').replace(/[^0-9+]/g, ''), d = ph.replace('+', ''), wa = d.length === 10 ? '91' + d : d;
-    return `<article class="lcard team" data-id="${esc(p.id)}" data-team>
+    return `<article class="lcard team wide" data-id="${esc(p.id)}" data-team>
       <div class="lthumb">${p.photos?.length ? '<span class="spinner small"></span>' : `<span class="ph">${esc(TYPE_LABEL[p.type] || 'Property')}</span>`}</div>
       <div class="lbody">
+       <div class="lmain">
         <div class="lprice">${esc(inr(p.price))}${p.transaction !== 'sale' ? '<small>/mo</small>' : ''}</div>
         <b>${esc(p.title)}</b>
         <span class="muted">${esc(p.locality)}${p.areaSqft ? ' · ' + Number(p.areaSqft).toLocaleString('en-IN') + (p.areaMax > p.areaSqft ? ' – ' + Number(p.areaMax).toLocaleString('en-IN') : '') + ' sq.ft' : ''}${p.bhks?.length > 1 ? ' · ' + p.bhks.join(', ') + ' BHK' : ''}</span>
         ${unitsBlock(p)}
-        ${p.project ? projectBlock(p.project) : ''}
         ${p.listingSource ? `<span class="muted">Source: ${esc(p.listingSource)}</span>` : ''}
         <div class="tags">${p.byTeam ? `<span class="tag team">From PropMithra</span>${seen.has(p.id) ? '' : '<span class="tag new">New</span>'}` : '<span class="tag team">Verified by PropMithra</span>'}<span class="tag ${p.availability === 'available' ? 'ok' : ''}">${esc(AVAIL[p.availability] || p.availability)}</span></div>
-        ${p.description ? `<span class="muted">${esc(String(p.description).slice(0, 140))}${String(p.description).length > 140 ? '…' : ''}</span>` : ''}
+        ${p.description ? `<span class="muted">${esc(String(p.description).slice(0, 220))}${String(p.description).length > 220 ? '…' : ''}</span>` : ''}
+       </div>
+       <div class="lside">
+        ${p.project ? projectBlock(p.project) : ''}
         <div class="talk">
           <span class="muted">${teamStats[p.id] ? `<b>${teamStats[p.id]}</b> agent${teamStats[p.id] > 1 ? 's are' : ' is'} interested in this listing.` : 'Be the first agent to show interest.'}</span>
           ${myTeamInterest[p.id] ? '<button type="button" class="btn btn-talk sent" disabled>Interest sent ✓</button>' : `<button type="button" class="btn btn-talk" data-talk="${esc(p.id)}">Talk to our team</button><label class="talk-terms"><input type="checkbox" data-terms="${esc(p.id)}"> <span>I agree to PropMithra's terms and conditions for selling this property. <a href="/terms" target="_blank" rel="noopener">Read terms</a></span></label>`}
           <small class="muted">${myTeamInterest[p.id] ? 'Our team will contact you to discuss the project details and commission.' : 'Submit your interest, and our team will contact you to discuss the project details and attractive commission opportunities.'}</small>
         </div>
+       </div>
       </div></article>`;
   }).join('');
 }
