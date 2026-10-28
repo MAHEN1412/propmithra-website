@@ -850,7 +850,8 @@ body.sv-open { overflow: hidden; }
         <div class="team-alert" id="d-team-alert" hidden role="status"><span class="ta-ico" aria-hidden="true">📣</span><span class="ta-text"><b id="d-team-title"></b><small id="d-team-sub"></small></span><button class="btn btn-primary" type="button" id="d-team-view">View</button><button class="link-btn" type="button" id="d-team-close" aria-label="Dismiss">✕</button></div>
         <div class="tabs" role="tablist">
           <button type="button" role="tab" class="tab on" data-tab="team">Assigned by PropMithra <span id="t-team">0</span></button>
-          <button type="button" role="tab" class="tab" data-tab="listings">My listings <span id="t-listings">0</span></button>
+          <button type="button" role="tab" class="tab" data-tab="all">All Properties <span id="t-all">0</span></button>
+          <button type="button" role="tab" class="tab" data-tab="listings">My Properties <span id="t-listings">0</span></button>
         </div>
         <div data-pane="listings" hidden>
           <p class="muted" id="d-count">Your properties on the PropMithra network.</p>
@@ -859,12 +860,16 @@ body.sv-open { overflow: hidden; }
         <div data-pane="team">
           <p class="muted" id="tm-count">Properties the PropMithra team has assigned to you.</p>
           <div class="listing-grid" id="d-team"></div>
-          <div id="tm-extra"></div>
+        </div>
+        <div data-pane="all" hidden>
+          <p class="muted" id="all-count">Every property PropMithra has published to you.</p>
+          <div class="listing-grid" id="d-all"></div>
         </div>
         <div data-pane="camps" hidden>
           <div id="c-list"><p class="muted" id="c-count">Developer projects PropMithra has published for you.</p><div class="listing-grid" id="d-camps"></div></div>
           <div id="c-detail" hidden></div>
         </div>
+        <div id="tm-extra"></div>
         <div data-pane="reqs" hidden>
           <p class="muted" id="r-count">Customers you are finding a property for. Brokers with a matching property can contact you.</p>
           <div class="listing-grid" id="d-reqs"></div>
@@ -1083,6 +1088,8 @@ async function blobUrl(url) {
 function tab(name) {
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.tab === name));
   document.querySelectorAll('[data-pane]').forEach(p => p.hidden = p.dataset.pane !== name);
+  // Testimonials + FAQ under Assigned by PropMithra and All Properties.
+  if ($('tm-extra')) $('tm-extra').hidden = !(name === 'team' || name === 'all');
 }
 function renderListings() {
   $('t-listings').textContent = listings.length;
@@ -1141,11 +1148,25 @@ function renderTeam() {
   $('tm-count').textContent = team.length ? `${team.length} propert${team.length > 1 ? 'ies' : 'y'} assigned to you by the PropMithra team.` : 'Properties the PropMithra team has assigned to you.';
   renderTeamAlert();
   const box = $('d-team');
-  if (!team.length) { box.innerHTML = `<div class="empty-card"><b>Nothing assigned yet</b><span>When the PropMithra team assigns you a property, it appears here and in the app.</span></div>`; return; }
-  box.innerHTML = teamCards();
-  box.querySelectorAll('[data-talk]').forEach(b => b.onclick = () => talkToTeam(team.find(x => x.id === b.dataset.talk), b));
+  if (!team.length) { box.innerHTML = `<div class="empty-card"><b>Nothing assigned yet</b><span>When the PropMithra team assigns you a property, it appears here and in the app.</span></div>`; renderAll(); return; }
+  box.innerHTML = teamCards(team);
+  bindPropCards(box, team);
+  renderAll();
+}
+// All Properties: team listings + broker listings PropMithra approved for
+// this agent (published to all, or shared with them). Never their own.
+function renderAll() {
+  $('t-all').textContent = allProps.length;
+  $('all-count').textContent = allProps.length ? `${allProps.length} propert${allProps.length > 1 ? 'ies' : 'y'} published to you by PropMithra.` : 'Every property PropMithra has published to you.';
+  const box = $('d-all');
+  if (!allProps.length) { box.innerHTML = `<div class="empty-card"><b>No properties yet</b><span>Properties PropMithra publishes to you appear here and in the app.</span></div>`; return; }
+  box.innerHTML = teamCards(allProps);
+  bindPropCards(box, allProps);
+}
+function bindPropCards(box, list) {
+  box.querySelectorAll('[data-talk]').forEach(b => b.onclick = () => talkToTeam(list.find(x => x.id === b.dataset.talk), b));
   box.querySelectorAll('.lcard').forEach(async (card) => {
-    const p = team.find(x => x.id === card.dataset.id);
+    const p = list.find(x => x.id === card.dataset.id);
     if (p?.photos?.length) { try { const u = await blobUrl(p.photos[0]); card.querySelector('.lthumb').innerHTML = u ? `<img src="${u}" alt="">` : ''; } catch (_) {} }
     card.querySelectorAll('[data-file]').forEach(b => b.onclick = async () => {
       b.disabled = true;
@@ -1186,9 +1207,9 @@ function unitsBlock(p) {
   const rent = p.transaction !== 'sale';
   return `<div class="units">${p.units.map(u => `<span><b>${u.bhk >= 6 ? '5+' : u.bhk} BHK</b> ${Number(u.area).toLocaleString('en-IN')} sq.ft · ${esc(inr(u.price))}${rent ? '/mo' : ''}</span>`).join('')}</div>`;
 }
-function teamCards() {
+function teamCards(list) {
   const seen = seenTeam();
-  return team.map(p => {
+  return list.map(p => {
     const ph = String(p.contactPhone || '').replace(/[^0-9+]/g, ''), d = ph.replace('+', ''), wa = d.length === 10 ? '91' + d : d;
     return `<article class="lcard team" data-id="${esc(p.id)}" data-team>
       <div class="lthumb">${p.photos?.length ? '<span class="spinner small"></span>' : `<span class="ph">${esc(TYPE_LABEL[p.type] || 'Property')}</span>`}</div>
@@ -1199,7 +1220,7 @@ function teamCards() {
         ${unitsBlock(p)}
         ${p.project ? projectBlock(p.project) : ''}
         ${p.listingSource ? `<span class="muted">Source: ${esc(p.listingSource)}</span>` : ''}
-        <div class="tags"><span class="tag team">From PropMithra</span>${seen.has(p.id) ? '' : '<span class="tag new">New</span>'}<span class="tag ${p.availability === 'available' ? 'ok' : ''}">${esc(AVAIL[p.availability] || p.availability)}</span></div>
+        <div class="tags">${p.byTeam ? `<span class="tag team">From PropMithra</span>${seen.has(p.id) ? '' : '<span class="tag new">New</span>'}` : '<span class="tag team">Verified by PropMithra</span>'}<span class="tag ${p.availability === 'available' ? 'ok' : ''}">${esc(AVAIL[p.availability] || p.availability)}</span></div>
         ${p.description ? `<span class="muted">${esc(String(p.description).slice(0, 140))}${String(p.description).length > 140 ? '…' : ''}</span>` : ''}
         <div class="talk">
           <span class="muted">${teamStats[p.id] ? `<b>${teamStats[p.id]}</b> agent${teamStats[p.id] > 1 ? 's are' : ' is'} interested in this listing.` : 'Be the first agent to show interest.'}</span>
@@ -1209,13 +1230,13 @@ function teamCards() {
       </div></article>`;
   }).join('');
 }
-let teamStats = {}, myTeamInterest = {};
+let teamStats = {}, myTeamInterest = {}, allProps = [];
 async function loadTeamExtras() {
   const {fs, db} = fb;
   const mine = await fs.getDocs(fs.query(fs.collection(db, 'listingInterests'), fs.where('uid', '==', uid))).catch(() => ({docs: []}));
   myTeamInterest = {}; mine.docs.forEach(d => { myTeamInterest[d.data().propertyId] = true; });
-  const stats = await Promise.all(team.map(p => fs.getDoc(fs.doc(db, 'listingStats', p.id)).catch(() => null)));
-  teamStats = {}; stats.forEach((d, n) => { if (d?.exists?.()) teamStats[team[n].id] = d.data().interested || 0; });
+  const stats = await Promise.all(allProps.map(p => fs.getDoc(fs.doc(db, 'listingStats', p.id)).catch(() => null)));
+  teamStats = {}; stats.forEach((d, n) => { if (d?.exists?.()) teamStats[allProps[n].id] = d.data().interested || 0; });
   const [ts, fq] = await Promise.all([
     fs.getDocs(fs.query(fs.collection(db, 'testimonials'))).catch(() => ({docs: []})),
     fs.getDocs(fs.query(fs.collection(db, 'teamFaqs'))).catch(() => ({docs: []})),
@@ -1270,12 +1291,14 @@ async function loadTeam() {
   const {fs, db} = fb, col = fs.collection(db, 'properties');
   const [mine, all, own] = await Promise.all([
     fs.getDocs(fs.query(col, fs.where('sharedWith', 'array-contains', uid))).catch(e => { console.warn('team (sent to me)', e); return {docs: []}; }),
-    fs.getDocs(fs.query(col, fs.where('listed', '==', true), fs.where('byTeam', '==', true))).catch(e => { console.warn('team (all)', e); return {docs: []}; }),
+    fs.getDocs(fs.query(col, fs.where('listed', '==', true))).catch(e => { console.warn('listed', e); return {docs: []}; }),
     fs.getDocs(fs.query(col, fs.where('ownerBrokerId', '==', uid))).catch(() => ({docs: []})),
   ]);
   const byId = new Map();
-  [...mine.docs, ...all.docs, ...own.docs].forEach(d => { const x = {id: d.id, ...d.data()}; if (x.byTeam && x.moderation !== 'hidden') byId.set(d.id, x); });
-  team = [...byId.values()].filter(x => !x.draft).sort((a, b) => (b.listedAt?.toMillis?.() || 0) - (a.listedAt?.toMillis?.() || 0));
+  [...mine.docs, ...all.docs, ...own.docs].forEach(d => { const x = {id: d.id, ...d.data()}; if (x.moderation !== 'hidden' && x.moderation !== 'pending' && !x.draft) byId.set(d.id, x); });
+  const newest = (a, b) => (b.listedAt?.toMillis?.() || 0) - (a.listedAt?.toMillis?.() || 0);
+  team = [...byId.values()].filter(x => x.byTeam).sort(newest);
+  allProps = [...byId.values()].filter(x => x.byTeam || x.ownerBrokerId !== uid).sort(newest);
   renderTeam();
   loadTeamExtras().then(renderTeam).catch(e => console.warn('team extras', e));
 }
