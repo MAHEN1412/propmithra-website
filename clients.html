@@ -1016,9 +1016,15 @@ body.sv-open { overflow: hidden; }
 }
 
 /* Assigned / All Properties: simple 3-column cards */
-#d-team, #d-all { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
-@media (max-width: 1000px) { #d-team, #d-all { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 640px) { #d-team, #d-all { grid-template-columns: 1fr; } }
+#d-team, #d-all, #d-listings { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+@media (max-width: 1000px) { #d-team, #d-all, #d-listings { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) { #d-team, #d-all, #d-listings { grid-template-columns: 1fr; } }
+#d-listings .empty-card { grid-column: 1 / -1; }
+.pc-tag.st-review { background: rgba(26, 86, 219, .92); }
+.pc-tag.st-action { background: rgba(138, 90, 0, .92); }
+.pc-tag.st-rejected { background: rgba(180, 35, 24, .92); }
+.pc-ref { font-size: .8rem; color: var(--muted, #667085); }
+.pc-foot .la-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 #d-team .empty-card, #d-all .empty-card { grid-column: 1 / -1; }
 .pcard { background: var(--surface, #fff); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; display: flex; flex-direction: column; transition: box-shadow .2s, transform .2s; }
 .pcard:hover { box-shadow: 0 10px 28px rgba(11, 20, 26, .10); transform: translateY(-2px); }
