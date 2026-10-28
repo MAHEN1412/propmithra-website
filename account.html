@@ -1204,7 +1204,7 @@ function renderListings() {
         <div class="lactions mine">
           <button type="button" class="btn btn-primary btn-track" data-track>Track listing →</button>
           <div class="la-row">
-            <label class="la-avail"><span>Availability</span><select data-avail aria-label="Availability">${Object.entries(AVAIL).map(([k, v]) => `<option value="${k}"${k === p.availability ? ' selected' : ''}>${v}</option>`).join('')}</select></label>
+            ${p.availability && p.availability !== 'available' ? `<span class="muted small">Marked ${esc((AVAIL[p.availability] || p.availability).toLowerCase())} by PropMithra</span>` : '<span></span>'}
             <button type="button" class="link-btn danger" data-del>Delete</button>
           </div>
         </div>
@@ -1212,7 +1212,6 @@ function renderListings() {
   }).join('');
   box.querySelectorAll('.lcard').forEach(async (card) => {
     const p = listings.find(x => x.id === card.dataset.id);
-    card.querySelector('[data-avail]').onchange = (e) => setAvailability(p, e.target.value, e.target);
     card.querySelector('[data-del]').onclick = () => removeListing(p, card);
     card.querySelector('[data-track]').onclick = () => openTrack(p);
     if (p.photos?.length) { try { const u = await blobUrl(p.photos[0]); card.querySelector('.lthumb').innerHTML = u ? `<img src="${u}" alt="">` : ''; } catch (_) {} }
@@ -1396,15 +1395,6 @@ async function loadTeam() {
   allProps = [...byId.values()].filter(x => x.byTeam || x.ownerBrokerId !== uid).sort(newest);
   renderTeam();
   loadTeamExtras().then(renderTeam).catch(e => console.warn('team extras', e));
-}
-async function setAvailability(p, value, sel) {
-  sel.disabled = true;
-  try {
-    const {fs, db} = fb;
-    await fs.updateDoc(fs.doc(db, 'properties', p.id), {availability: value, updatedAt: fs.serverTimestamp()});
-    p.availability = value; renderListings();
-  } catch (e) { console.error(e); alertMsg('Could not change the status. Please try again.'); sel.value = p.availability; }
-  finally { sel.disabled = false; }
 }
 async function removeListing(p, card) {
   if (!confirm(`Delete "${p.title}"? This cannot be undone.`)) return;
