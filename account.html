@@ -949,6 +949,17 @@ body.sv-open { overflow: hidden; }
   .trk-deal-head { flex-direction: column; }
 }
 @media (max-width: 720px) { .trk-photo { aspect-ratio: 16 / 9; max-height: 190px; width: 100%; } }
+
+/* Campaign banner: uploaded images (desktop 4:3 card / mobile 16:9 strip) */
+.cb-photo .cb-img-m { display: none; }
+.cb-slide.has-img .cb-photo { transform: rotate(-2deg); }
+@media (max-width: 720px) {
+  .cb-photo .cb-img-d { display: none; }
+  .cb-photo .cb-img-m { display: block; }
+  .cb-slide.has-img .cb-art { width: 100%; aspect-ratio: 16 / 9; }
+  .cb-slide.has-img .cb-photo { inset: 0; transform: none; border-width: 0; border-radius: 16px; }
+  .cb-slide.has-img .cb-pct, .cb-slide.has-img .cb-logo { display: none; }
+}
 </style>
 <style>@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:700;font-display:swap;src:url(fonts/roboto-condensed-latin-700-italic.woff2) format("woff2")}@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:800;font-display:swap;src:url(fonts/roboto-condensed-latin-800-italic.woff2) format("woff2")}</style>
 </head>
@@ -1761,15 +1772,23 @@ async function assetBlob(cid, a) {
 // status): circles with a ring; tap opens a full-screen viewer that moves
 // on by itself. Seen campaigns get a grey ring (remembered on this device).
 const coverCache = new Map();
-function coverUrl(c) {
-  if (!coverCache.has(c.id)) coverCache.set(c.id, (async () => {
+// Campaign images uploaded in admin: banners for desktop (4:3) and mobile
+// (16:9), else the first public image.
+const bannerCache = new Map();
+function campImages(c) {
+  if (!bannerCache.has(c.id)) bannerCache.set(c.id, (async () => {
     const {fs, db} = fb;
     const s = await fs.getDocs(fs.query(fs.collection(db, 'projectCampaigns', c.id, 'assets'), fs.where('access', '==', 'public'), fs.where('superseded', '==', false)));
-    const img = s.docs.map(d => ({id: d.id, ...d.data()})).find(a => String(a.contentType).startsWith('image/'));
-    return img ? URL.createObjectURL(await assetBlob(c.id, img)) : null;
-  })().catch(() => null));
-  return coverCache.get(c.id);
+    const imgs = s.docs.map(d => ({id: d.id, ...d.data()})).filter(a => String(a.contentType).startsWith('image/'));
+    const url = async (a) => a ? URL.createObjectURL(await assetBlob(c.id, a)) : null;
+    const d = imgs.find(a => a.bannerFor === 'desktop'), m = imgs.find(a => a.bannerFor === 'mobile');
+    const fallback = d || m ? null : imgs[0];
+    const [du, mu, fu] = await Promise.all([url(d), url(m), url(fallback)]);
+    return {desktop: du || mu || fu, mobile: mu || du || fu};
+  })().catch(() => ({desktop: null, mobile: null})));
+  return bannerCache.get(c.id);
 }
+async function coverUrl(c) { const i = await campImages(c); return i.mobile || i.desktop; }
 const CAMP_SEEN_KEY = 'pm_seen_campaigns';
 function seenSet() { try { return new Set(JSON.parse(localStorage.getItem(CAMP_SEEN_KEY) || '[]')); } catch (_) { return new Set(); } }
 function markSeen(id) { try { const s = seenSet(); s.add(id); localStorage.setItem(CAMP_SEEN_KEY, JSON.stringify([...s].slice(-200))); } catch (_) {} }
@@ -1820,7 +1839,11 @@ function renderSlider() {
   track.querySelectorAll('.cb-slide').forEach(sl => {
     const c = camps.find(x => x.id === sl.dataset.id);
     sl.querySelector('[data-open]').onclick = () => { tab('camps'); openCamp(c); $('d-listings-wrap').scrollIntoView({behavior: 'smooth', block: 'start'}); };
-    coverUrl(c).then(u => { if (u) sl.querySelector('.cb-photo').innerHTML = `<img src="${u}" alt="">`; });
+    campImages(c).then(i => {
+      if (!i.desktop && !i.mobile) return;
+      sl.querySelector('.cb-photo').innerHTML = `<img class="cb-img-d" src="${i.desktop}" alt=""><img class="cb-img-m" src="${i.mobile}" alt="">`;
+      sl.classList.add('has-img');
+    });
   });
   cbIndex = 0; restart();
 }

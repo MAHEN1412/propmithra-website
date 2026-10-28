@@ -949,6 +949,17 @@ body.sv-open { overflow: hidden; }
   .trk-deal-head { flex-direction: column; }
 }
 @media (max-width: 720px) { .trk-photo { aspect-ratio: 16 / 9; max-height: 190px; width: 100%; } }
+
+/* Campaign banner: uploaded images (desktop 4:3 card / mobile 16:9 strip) */
+.cb-photo .cb-img-m { display: none; }
+.cb-slide.has-img .cb-photo { transform: rotate(-2deg); }
+@media (max-width: 720px) {
+  .cb-photo .cb-img-d { display: none; }
+  .cb-photo .cb-img-m { display: block; }
+  .cb-slide.has-img .cb-art { width: 100%; aspect-ratio: 16 / 9; }
+  .cb-slide.has-img .cb-photo { inset: 0; transform: none; border-width: 0; border-radius: 16px; }
+  .cb-slide.has-img .cb-pct, .cb-slide.has-img .cb-logo { display: none; }
+}
 </style>
 <style>@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:700;font-display:swap;src:url(../fonts/roboto-condensed-latin-700-italic.woff2) format("woff2")}@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:800;font-display:swap;src:url(../fonts/roboto-condensed-latin-800-italic.woff2) format("woff2")}</style>
 </head>
