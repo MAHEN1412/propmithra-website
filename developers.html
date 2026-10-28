@@ -951,7 +951,8 @@ body.sv-open { overflow: hidden; }
 @media (max-width: 720px) { .trk-photo { aspect-ratio: 16 / 9; max-height: 190px; width: 100%; } }
 
 /* Campaign banner: uploaded images (desktop 4:3 card / mobile 16:9 strip) */
-.cb-photo .cb-img-m { display: none; }
+.cb-photo .cb-img-m, .cb-photo .cb-img-t { display: none; }
+@media (min-width: 721px) and (max-width: 1100px) { .cb-photo .cb-img-d { display: none; } .cb-photo .cb-img-t { display: block; } }
 .cb-slide.has-img .cb-photo { transform: rotate(-2deg); }
 @media (max-width: 720px) {
   .cb-photo .cb-img-d { display: none; }

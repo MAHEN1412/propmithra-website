@@ -951,7 +951,8 @@ body.sv-open { overflow: hidden; }
 @media (max-width: 720px) { .trk-photo { aspect-ratio: 16 / 9; max-height: 190px; width: 100%; } }
 
 /* Campaign banner: uploaded images (desktop 4:3 card / mobile 16:9 strip) */
-.cb-photo .cb-img-m { display: none; }
+.cb-photo .cb-img-m, .cb-photo .cb-img-t { display: none; }
+@media (min-width: 721px) and (max-width: 1100px) { .cb-photo .cb-img-d { display: none; } .cb-photo .cb-img-t { display: block; } }
 .cb-slide.has-img .cb-photo { transform: rotate(-2deg); }
 @media (max-width: 720px) {
   .cb-photo .cb-img-d { display: none; }
@@ -1781,10 +1782,10 @@ function campImages(c) {
     const s = await fs.getDocs(fs.query(fs.collection(db, 'projectCampaigns', c.id, 'assets'), fs.where('access', '==', 'public'), fs.where('superseded', '==', false)));
     const imgs = s.docs.map(d => ({id: d.id, ...d.data()})).filter(a => String(a.contentType).startsWith('image/'));
     const url = async (a) => a ? URL.createObjectURL(await assetBlob(c.id, a)) : null;
-    const d = imgs.find(a => a.bannerFor === 'desktop'), m = imgs.find(a => a.bannerFor === 'mobile');
-    const fallback = d || m ? null : imgs[0];
-    const [du, mu, fu] = await Promise.all([url(d), url(m), url(fallback)]);
-    return {desktop: du || mu || fu, mobile: mu || du || fu};
+    const d = imgs.find(a => a.bannerFor === 'desktop'), t = imgs.find(a => a.bannerFor === 'tablet'), m = imgs.find(a => a.bannerFor === 'mobile');
+    const fallback = d || t || m ? null : imgs[0];
+    const [du, tu, mu, fu] = await Promise.all([url(d), url(t), url(m), url(fallback)]);
+    return {desktop: du || tu || mu || fu, tablet: tu || du || mu || fu, mobile: mu || tu || du || fu};
   })().catch(() => ({desktop: null, mobile: null})));
   return bannerCache.get(c.id);
 }
@@ -1841,7 +1842,7 @@ function renderSlider() {
     sl.querySelector('[data-open]').onclick = () => { tab('camps'); openCamp(c); $('d-listings-wrap').scrollIntoView({behavior: 'smooth', block: 'start'}); };
     campImages(c).then(i => {
       if (!i.desktop && !i.mobile) return;
-      sl.querySelector('.cb-photo').innerHTML = `<img class="cb-img-d" src="${i.desktop}" alt=""><img class="cb-img-m" src="${i.mobile}" alt="">`;
+      sl.querySelector('.cb-photo').innerHTML = `<img class="cb-img-d" src="${i.desktop}" alt=""><img class="cb-img-t" src="${i.tablet}" alt=""><img class="cb-img-m" src="${i.mobile}" alt="">`;
       sl.classList.add('has-img');
     });
   });
