@@ -1057,22 +1057,7 @@ body.sv-open { overflow: hidden; }
           <span class="err" id="l-photo-err"></span>
         </fieldset>
 
-        <fieldset class="reg-group"><legend>Deal terms</legend>
-          <div class="reg-fields">
-            <div class="field"><label for="l-commission">Commission to share (%)</label><input id="l-commission" inputmode="decimal" value="1"></div>
-            <div class="field"><label for="l-source">Listing source</label><select id="l-source"><option>Direct from owner</option><option>Builder / developer</option><option>Another broker</option><option>Bank auction</option></select></div>
-            <div class="field wide"><span class="q">Who can see it</span>
-              <div class="vis" id="l-visibility">
-                <label class="vis-opt"><input type="radio" name="vis" value="network" checked><b>My network</b><small>All PropMithra brokers see the full listing</small></label>
-                <label class="vis-opt"><input type="radio" name="vis" value="collaboration"><b>On collaboration</b><small>Summary visible, details after you accept</small></label>
-                <label class="vis-opt"><input type="radio" name="vis" value="private"><b>Private</b><small>Only you</small></label>
-              </div></div>
-            <label class="check"><input type="checkbox" id="l-negotiable" checked><span>Price negotiable</span></label>
-            <label class="check"><input type="checkbox" id="l-exclusive"><span>Exclusive mandate</span></label>
-          </div>
-        </fieldset>
-
-        <fieldset class="reg-group"><legend>Owner details <span class="opt">Private — only you</span></legend>
+        <fieldset class="reg-group"><legend>Owner details <span class="opt">Only you and the PropMithra team</span></legend>
           <div class="reg-fields">
             <div class="field"><label for="l-owner">Owner name</label><input id="l-owner"></div>
             <div class="field"><label for="l-owner-phone">Owner mobile</label><input id="l-owner-phone" inputmode="tel"></div>
@@ -1502,7 +1487,8 @@ async function save(ev) {
     const ref = fs.doc(fs.collection(db, 'properties'));
     const known = LOCALITIES.find(l => l[0] === locality);
     const bhk = HAS_BHK.has(type) ? Number($('l-bhk').value) : null;
-    const visibility = document.querySelector('input[name="vis"]:checked').value;
+    // PropMithra decides who sees it (and the deal terms) when approving.
+    const visibility = 'network';
     const title = $('l-title').value.trim() || `${bhk ? bhk + ' BHK ' : ''}${TYPE_LABEL[type]} in ${locality}`;
     // Photos first (kept inside Firestore — free plan).
     const urls = [], stamp = Date.now();
@@ -1521,9 +1507,9 @@ async function save(ev) {
       facing: $('l-facing').value || null, ageYears: int('l-age') || 0, underConstruction: $('l-uc').checked,
       furnishing: $('l-furnishing').value, parking: int('l-parking') || 0,
       amenities: [...document.querySelectorAll('#l-amenities input:checked')].map(i => i.value),
-      negotiable: $('l-negotiable').checked, commissionPercent: parseFloat($('l-commission').value) || 1,
-      availability: 'available', visibility, sharedWith: [], exclusive: $('l-exclusive').checked,
-      listingSource: $('l-source').value, description: $('l-desc').value.trim(), photos: urls,
+      negotiable: true, commissionPercent: 1,
+      availability: 'available', visibility, sharedWith: [], exclusive: false,
+      listingSource: 'Direct from owner', description: $('l-desc').value.trim(), photos: urls,
       // Waits for PropMithra approval before other agents can see it.
       moderation: 'pending', listed: false,
       source: 'website', listedAt: fs.serverTimestamp(), updatedAt: fs.serverTimestamp(),
