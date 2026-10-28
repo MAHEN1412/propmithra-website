@@ -1015,10 +1015,10 @@ body.sv-open { overflow: hidden; }
       <!-- After publishing -->
       <article class="trk-card" id="t-deal" hidden>
         <div class="trk-deal-head">
-          <div><h3>After publishing</h3><p class="muted small">PropMithra updates these steps as agents take interest. Agent details stay private.</p></div>
+          <div><h3>Finding agents</h3><p class="muted small">PropMithra updates these steps as agents take interest. Agent details stay private.</p></div>
           <div class="trk-stat"><b id="t-interest">0</b><span>agents interested</span></div>
         </div>
-        <div class="deal-list" id="t-deal-steps"></div>
+        <div class="stepper" id="t-deal-steps"></div>
       </article>
 
       <div class="trk-help">
@@ -1040,15 +1040,16 @@ const ago = (v) => { const d = v?.toDate ? v.toDate() : null; if (!d) return '';
 const show = (id) => ['t-loading', 't-signedout', 't-missing', 't-app'].forEach(x => $(x).hidden = x !== id);
 
 // Same stages as the app (lib/features/properties/domain/listing_tracking.dart).
+// "Finding agents" stages set by PropMithra; step = place on the 5-step bar.
 const DEAL = [
-  ['none', 'Published', 'Listing visible to eligible agents.'],
-  ['interestReview', 'Interest under review', 'PropMithra is speaking with the interested agent to understand the opportunity.'],
-  ['ownerNotified', 'You are notified', 'PropMithra has informed you about the collaboration request.'],
-  ['siteVisit', 'Discussion / site visit', 'The participating agents are coordinating the next steps.'],
-  ['negotiation', 'Negotiation in progress', 'The parties are discussing commercial terms.'],
-  ['closed', 'Deal closed', 'The agreed closure conditions have been met.'],
-  ['commissionProcessing', 'Commission processing', 'Eligibility and settlement details are being checked.'],
-  ['commissionSettled', 'Commission settled', 'The applicable commission settlement is completed.'],
+  ['none', 'Published', 'Listing visible to eligible agents.', 0],
+  ['interestReview', 'Interest under review', 'PropMithra is speaking with the interested agent and keeps you informed.', 2],
+  ['ownerNotified', 'Interest under review', 'PropMithra has informed you about the collaboration request.', 2],
+  ['siteVisit', 'Discussion & negotiation', 'Site visits and commercial terms are being discussed.', 3],
+  ['negotiation', 'Discussion & negotiation', 'Site visits and commercial terms are being discussed.', 3],
+  ['closed', 'Deal closed', 'The agreed closure conditions have been met.', 4],
+  ['commissionProcessing', 'Commission processing', 'Eligibility and settlement details are being checked.', 5],
+  ['commissionSettled', 'Commission settled', 'The applicable commission settlement is completed.', 5],
 ];
 const listingRef = (id) => 'PL-' + String(id || '').slice(0, 6).toUpperCase();
 const phaseOf = (p) => p.moderation === 'hidden' ? 'rejected' : p.moderation === 'pending' ? (p.review === 'changes' ? 'action' : 'review') : 'published';
@@ -1095,10 +1096,20 @@ function render(p, id, interested) {
   $('t-deal').hidden = !pub;
   if (pub) {
     $('t-interest').textContent = interested;
-    const deal = [['Interest received', interested > 0 ? `${interested} agent${interested === 1 ? ' has' : 's have'} shown interest.` : 'Agents tap "Talk to our team" when they have a buyer or tenant.', interested > 0 || di > 0, di === 0 && interested > 0]]
-      .concat(DEAL.slice(1).map((x, n) => { const k = n + 1, last = k === DEAL.length - 1; return [x[1], x[2], k < di || (last && k === di), k === di && !last]; }));
-    $('t-deal-steps').innerHTML = deal.map(([t, d, done, isCur]) =>
-      `<div class="dl ${done && !isCur ? 'done' : ''} ${isCur ? 'cur' : ''}"><span class="dl-dot">${done && !isCur ? '✓' : ''}</span><div><b>${esc(t)}</b><span>${esc(d)}</span>${isCur ? '<em>Current stage</em>' : ''}</div></div>`).join('');
+    const st = DEAL[di], settled = st[0] === 'commissionSettled';
+    const at = st[3] > 0 ? st[3] : (interested > 0 ? 1 : 0);
+    const deal = [
+      ['Interest received', interested > 0 ? `${interested} agent${interested === 1 ? '' : 's'} interested` : 'Agents tap "Talk to our team"'],
+      ['Under review', 'PropMithra speaks with the agent'],
+      ['Discussion & negotiation', 'Site visits and terms'],
+      ['Deal closed', 'Closure conditions met'],
+      ['Commission', settled ? 'Settled' : st[0] === 'commissionProcessing' ? 'Being processed' : 'After the deal closes'],
+    ];
+    $('t-deal-steps').innerHTML = deal.map(([t, d], n) => {
+      const k = n + 1, done = k < at || (k === 5 && settled), cur = k === at && !(k === 5 && settled);
+      return `<div class="st ${done ? 'done' : ''} ${cur ? 'cur' : ''}"><span class="st-dot">${done ? '✓' : k}</span><b>${esc(t)}</b><small>${esc(d)}</small></div>`;
+    }).join('');
+    $('t-deal-steps').style.setProperty('--pct', (Math.max(0, Math.min(at, 5) - 1) / 4 * 100) + '%');
   }
 }
 
