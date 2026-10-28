@@ -849,14 +849,14 @@ body.sv-open { overflow: hidden; }
         </div>
         <div class="team-alert" id="d-team-alert" hidden role="status"><span class="ta-ico" aria-hidden="true">📣</span><span class="ta-text"><b id="d-team-title"></b><small id="d-team-sub"></small></span><button class="btn btn-primary" type="button" id="d-team-view">View</button><button class="link-btn" type="button" id="d-team-close" aria-label="Dismiss">✕</button></div>
         <div class="tabs" role="tablist">
-          <button type="button" role="tab" class="tab on" data-tab="listings">My listings <span id="t-listings">0</span></button>
-          <button type="button" role="tab" class="tab" data-tab="team">Assigned by PropMithra <span id="t-team">0</span></button>
+          <button type="button" role="tab" class="tab on" data-tab="team">Assigned by PropMithra <span id="t-team">0</span></button>
+          <button type="button" role="tab" class="tab" data-tab="listings">My listings <span id="t-listings">0</span></button>
         </div>
-        <div data-pane="listings">
+        <div data-pane="listings" hidden>
           <p class="muted" id="d-count">Your properties on the PropMithra network.</p>
           <div class="listing-grid" id="d-listings"></div>
         </div>
-        <div data-pane="team" hidden>
+        <div data-pane="team">
           <p class="muted" id="tm-count">Properties the PropMithra team has assigned to you.</p>
           <div class="listing-grid" id="d-team"></div>
           <div id="tm-extra"></div>
@@ -1716,7 +1716,7 @@ async function openCamp(c) {
         <p class="muted small">Always download the latest version here. Files you already downloaded stay on your device — please delete outdated copies yourself.</p></section>
       ${m.managerName || m.managerPhone ? `<section class="reg-group"><h3>Contact</h3>${kv('Campaign manager', m.managerName)}${m.managerPhone ? `<p><a class="btn btn-ghost btn-sm" href="tel:${esc(String(m.managerPhone).replace(/[^0-9+]/g, ''))}">Call ${esc(m.managerPhone)}</a></p>` : ''}${kv('Email', m.managerEmail)}</section>` : ''}
     </div></div>`;
-  $('c-back').onclick = () => { box.hidden = true; $('c-list').hidden = false; if (approved()) tab('listings'); };
+  $('c-back').onclick = () => { box.hidden = true; $('c-list').hidden = false; if (approved()) tab('team'); };
   if ($('c-interest')) $('c-interest').onclick = () => interestFlow(c);
   if ($('c-withdraw')) $('c-withdraw').onclick = async () => { await fb.fs.updateDoc(fb.fs.doc(fb.db, 'campaignInterests', i.id), {status: 'withdrawn'}).catch(() => {}); await loadCamps(); openCamp(camps.find(x => x.id === c.id) || c); };
   renderKit(c, i);
