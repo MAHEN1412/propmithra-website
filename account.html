@@ -1093,7 +1093,7 @@ body.sv-open { overflow: hidden; }
 
     <div class="reg-state" id="d-signedout" hidden>
       <h2>Log in to your account</h2>
-      <p class="muted">See your Mithra registration and manage your property listings.</p>
+      <p class="muted">See your Mithra registration and manage your properties.</p>
       <div class="btn-row" style="justify-content:center"><a class="btn btn-primary" href="join?signin=1&amp;next=account">Log in</a><a class="btn btn-ghost" href="join">Join free</a></div>
     </div>
 
@@ -1119,7 +1119,7 @@ body.sv-open { overflow: hidden; }
       <div class="dash-status" id="d-status"></div>
       <p class="contact-note" id="d-contact-note" hidden></p>
 
-      <!-- Approved Mithras: actions + my listings / requirements -->
+      <!-- Approved Mithras: actions + my properties / requirements -->
       <div id="d-listings-wrap" hidden>
         <div class="team-alert" id="d-team-alert" hidden role="status"><span class="ta-ico" aria-hidden="true">📣</span><span class="ta-text"><b id="d-team-title"></b><small id="d-team-sub"></small></span><button class="btn btn-primary" type="button" id="d-team-view">View</button><button class="link-btn" type="button" id="d-team-close" aria-label="Dismiss">✕</button></div>
         <div class="tabs" role="tablist">
@@ -1192,10 +1192,10 @@ body.sv-open { overflow: hidden; }
         <div class="reg-foot"><button class="btn btn-ghost" type="button" data-q-cancel>Cancel</button><button class="btn btn-primary" type="submit" id="q-save">Post requirement</button></div>
       </form>
 
-      <!-- Add listing form -->
+      <!-- Add property form -->
       <form class="listing-form" id="d-form" hidden novalidate>
         <div class="dash-head">
-          <div><h2>Add a listing</h2><p class="muted">Other brokers see the listing; owner details stay private to you.</p></div>
+          <div><h2>Add a property</h2><p class="muted">Other brokers see the property; owner details stay private to you.</p></div>
           <button class="btn btn-ghost" type="button" id="d-cancel">Cancel</button>
         </div>
 
@@ -1231,7 +1231,7 @@ body.sv-open { overflow: hidden; }
             <div class="field"><label for="l-age">Age of property (years)</label><input id="l-age" inputmode="numeric" placeholder="0 = new"></div>
             <label class="check wide"><input type="checkbox" id="l-uc"><span>Under construction</span></label>
             <div class="field wide"><span class="q">Amenities</span><div class="chips" id="l-amenities"></div></div>
-            <div class="field wide"><label for="l-title">Listing title</label><input id="l-title" placeholder="Left empty, we write one, e.g. 3 BHK Apartment in Gachibowli" maxlength="90"></div>
+            <div class="field wide"><label for="l-title">Property title</label><input id="l-title" placeholder="Left empty, we write one, e.g. 3 BHK Apartment in Gachibowli" maxlength="90"></div>
             <div class="field wide"><label for="l-desc">Description</label><textarea id="l-desc" rows="3" maxlength="1500" placeholder="What makes this property good: view, layout, nearby schools, metro…"></textarea></div>
           </div>
         </fieldset>
@@ -1301,10 +1301,10 @@ function renderStatus() {
   const s = mithra.status || (mithra.uid ? 'draft' : 'none');
   const name = [mithra.personal?.firstName, mithra.personal?.lastName].filter(Boolean).join(' ') || broker.name || user.displayName || '';
   const card = {
-    none: ['todo', 'Start your Mithra registration', 'Fill in your details and documents once. After approval you can post listings here.', '<a class="btn btn-primary" href="register">Start registration</a>'],
+    none: ['todo', 'Start your Mithra registration', 'Fill in your details and documents once. After approval you can post properties here.', '<a class="btn btn-primary" href="register">Start registration</a>'],
     draft: ['todo', 'Finish your Mithra registration', 'Your registration is saved but not submitted yet. Complete it and submit it for approval.', '<a class="btn btn-primary" href="register">Continue registration</a>'],
-    submitted: ['wait', 'Registration under review', 'Our team is checking your details and documents — usually within 2 working days. You can post listings as soon as you are approved.', '<a class="btn btn-ghost" href="register">View registration</a>'],
-    underReview: ['wait', 'Registration under review', 'A PropMithra reviewer is checking your details and documents now. You can post listings as soon as you are approved.', '<a class="btn btn-ghost" href="register">View registration</a>'],
+    submitted: ['wait', 'Registration under review', 'Our team is checking your details and documents — usually within 2 working days. You can post properties as soon as you are approved.', '<a class="btn btn-ghost" href="register">View registration</a>'],
+    underReview: ['wait', 'Registration under review', 'A PropMithra reviewer is checking your details and documents now. You can post properties as soon as you are approved.', '<a class="btn btn-ghost" href="register">View registration</a>'],
     changes: ['todo', 'Changes requested', esc(mithra.reviewNote || 'Please update your registration and resubmit.'), '<a class="btn btn-primary" href="register">Update registration</a>'],
     rejected: ['bad', 'Registration not approved', esc(mithra.reviewNote || 'Please contact PropMithra for details.'), '<a class="btn btn-ghost" href="contact">Contact us</a>'],
   }[s];
@@ -1323,7 +1323,7 @@ function renderStatus() {
   loadContactChanges().catch(e => console.warn('contact changes', e));
   if ($('d-signout')) $('d-signout').onclick = signOutNow;
   // Registered agents without approval/KYC still see campaigns for their
-  // corridors (and can tap "I'm interested"); listings stay locked.
+  // corridors (and can tap "I'm interested"); properties stay locked.
   const campsOnly = !approved() && broker.uid !== undefined;
   $('d-listings-wrap').hidden = !approved() && !campsOnly;
   $('d-listings-wrap').classList.toggle('camps-only', campsOnly);
@@ -1338,7 +1338,7 @@ async function signOutNow() { await fb.auth.signOut(fb.au); window.pmSession?.(n
 function menuHash() {
   if (location.hash === '#contact') { history.replaceState(null, '', location.pathname); contactFlow(); }
   else if (location.hash === '#logout') { history.replaceState(null, '', location.pathname); signOutNow(); }
-  // Top bar "+ Add listing" while already on this page.
+  // Top bar "+ Add property" while already on this page.
   else if (location.hash === '#add' && approved()) { history.replaceState(null, '', location.pathname); openForm(); }
 }
 window.addEventListener('hashchange', () => { if (fb && uid) menuHash(); });
@@ -1352,7 +1352,7 @@ async function blobUrl(url) {
   blobCache.set(url, u); return u;
 }
 
-// ── My listings ─────────────────────────────────────────────────────────
+// ── My properties ─────────────────────────────────────────────────────────
 function tab(name) {
   document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.tab === name));
   document.querySelectorAll('[data-pane]').forEach(p => p.hidden = p.dataset.pane !== name);
@@ -1362,9 +1362,9 @@ function tab(name) {
 function renderListings() {
   $('t-listings').textContent = listings.length;
   const box = $('d-listings');
-  $('d-count').textContent = listings.length ? `${listings.length} listing${listings.length > 1 ? 's' : ''} by you · visible in the PropMithra app too.` : 'Your properties on the PropMithra network.';
+  $('d-count').textContent = listings.length ? `${listings.length} propert${listings.length > 1 ? 'ies' : 'y'} by you · visible in the PropMithra app too.` : 'Your properties on the PropMithra network.';
   if (!listings.length) {
-    box.innerHTML = `<div class="empty-card"><b>No listings yet</b><span>Add your first property — it takes about two minutes.</span><button class="btn btn-primary" type="button" data-add>+ Add listing</button></div>`;
+    box.innerHTML = `<div class="empty-card"><b>No properties yet</b><span>Add your first property — it takes about two minutes.</span><button class="btn btn-primary" type="button" data-add>+ Add property</button></div>`;
     box.querySelector('[data-add]').onclick = openForm; return;
   }
   box.innerHTML = listings.map(p => {
@@ -1379,11 +1379,11 @@ function renderListings() {
         <div class="pc-price">${esc(inr(p.price))}${p.transaction !== 'sale' ? '<small>/mo</small>' : ''}</div>
         <b class="pc-title">${esc(p.title)}</b>
         <span class="pc-meta">📍 ${esc(p.locality || '')}${size ? ' · ' + esc(size) : ''}${bhk ? ' · ' + esc(bhk) + ' BHK' : ''}</span>
-        <span class="pc-ref">Listing ID ${esc(listingRef(p.id))}</span>
+        <span class="pc-ref">Property ID ${esc(listingRef(p.id))}</span>
         ${hidden && p.moderationNote ? `<span class="dl-warn">${esc(p.moderationNote)}</span>` : ''}
         ${!hidden && p.review === 'changes' && p.reviewNote ? `<span class="dl-warn">PropMithra: ${esc(p.reviewNote)} — please update it in the app.</span>` : ''}
         <div class="pc-foot">
-          <button type="button" class="btn btn-talk" data-track>Track listing →</button>
+          <button type="button" class="btn btn-talk" data-track>Track property →</button>
           <div class="la-row">
             ${p.availability && p.availability !== 'available' ? `<span class="muted small">Marked ${esc((AVAIL[p.availability] || p.availability).toLowerCase())} by PropMithra</span>` : '<span></span>'}
             <button type="button" class="link-btn danger" data-del>Delete</button>
@@ -1401,11 +1401,11 @@ function renderListings() {
 async function loadListings() {
   const {fs, db} = fb;
   const snap = await fs.getDocs(fs.query(fs.collection(db, 'properties'), fs.where('ownerBrokerId', '==', uid)));
-  // PropMithra team listings never count as "my listings" (even for the admin's own account).
+  // PropMithra team properties never count as "my properties" (even for the admin's own account).
   listings = snap.docs.map(d => ({id: d.id, ...d.data()})).filter(p => !p.byTeam).sort((a, b) => (b.listedAt?.toMillis?.() || 0) - (a.listedAt?.toMillis?.() || 0));
   renderListings();
 }
-// ── From PropMithra (team listings sent to me / to all agents) ─────────
+// ── From PropMithra (team properties sent to me / to all agents) ─────────
 let team = [];
 const SEEN_KEY = 'pm-team-seen';
 function seenTeam() { try { return new Set(JSON.parse(localStorage.getItem(SEEN_KEY) || '[]')); } catch (_) { return new Set(); } }
@@ -1413,7 +1413,7 @@ function markTeamSeen() { try { localStorage.setItem(SEEN_KEY, JSON.stringify([.
 function renderTeamAlert() {
   const seen = seenTeam(), fresh = team.filter(p => !seen.has(p.id)), box = $('d-team-alert');
   box.hidden = !fresh.length; if (!fresh.length) return;
-  $('d-team-title').textContent = fresh.length === 1 ? 'New listing from PropMithra' : `${fresh.length} new listings from PropMithra`;
+  $('d-team-title').textContent = fresh.length === 1 ? 'New property from PropMithra' : `${fresh.length} new properties from PropMithra`;
   $('d-team-sub').textContent = fresh.length === 1 ? fresh[0].title || '' : 'See the Assigned by PropMithra tab';
   $('d-team-view').onclick = () => { const id = fresh[0].id; markTeamSeen(); tab('team'); document.querySelector(`.lcard[data-id="${CSS.escape(id)}"]`)?.scrollIntoView({behavior: 'smooth', block: 'center'}); };
   $('d-team-close').onclick = markTeamSeen;
@@ -1428,7 +1428,7 @@ function renderTeam() {
   bindPropCards(box, team);
   renderAll();
 }
-// All Properties: team listings + broker listings PropMithra approved for
+// All Properties: team properties + broker properties PropMithra approved for
 // this agent (published to all, or shared with them). Never their own.
 function renderAll() {
   $('t-all').textContent = allProps.length;
@@ -1452,7 +1452,7 @@ function bindPropCards(box, list) {
     if (lg) { try { const u = await blobUrl(lg.dataset.logo); if (u) lg.innerHTML = `<img src="${u}" alt="">`; } catch (_) {} }
   });
 }
-// Developer project of a team listing: logo, RERA id, address, map pin, about.
+// Developer project of a team property: logo, RERA id, address, map pin, about.
 function projectBlock(x) {
   const where = [x.address, x.locality, x.city, x.pincode].filter(Boolean).join(', ');
   const map = x.lat != null && x.lng != null ? `https://www.google.com/maps/search/?api=1&query=${x.lat},${x.lng}` : '';
@@ -1528,7 +1528,7 @@ function testiPhoto(x) {
   try { if (x.photo?.toBase64) src = 'data:image/png;base64,' + x.photo.toBase64(); } catch (e) {}
   return src ? `<img class="testi-av" src="${src}" alt="">` : `<i class="testi-av">${esc((x.name || '?')[0].toUpperCase())}</i>`;
 }
-// Testimonials (auto slider) + FAQ under the team listings.
+// Testimonials (auto slider) + FAQ under the team properties.
 function renderTeamExtras(ts, fq) {
   const box = $('tm-extra'); if (!box) return;
   let h = '';
@@ -1552,7 +1552,7 @@ async function talkToTeam(p, btn) {
   try {
     const {fs, db} = fb, b = fs.writeBatch(db);
     b.set(fs.doc(db, 'listingInterests', p.id + '_' + uid), {
-      propertyId: p.id, propertyTitle: p.title || 'Listing', uid,
+      propertyId: p.id, propertyTitle: p.title || 'Property', uid,
       ...(p.clientName ? {clientName: p.clientName} : {}), ...(p.projectName ? {projectName: p.projectName} : {}),
       agentName: broker.name || [mithra.personal?.firstName, mithra.personal?.lastName].filter(Boolean).join(' ') || user.displayName || 'Agent',
       ...((broker.phone || user.phoneNumber) ? {agentPhone: broker.phone || user.phoneNumber} : {}),
@@ -1588,11 +1588,11 @@ async function removeListing(p, card) {
     await fs.deleteDoc(fs.doc(db, 'properties', p.id, 'private', 'details')).catch(() => {});
     await fs.deleteDoc(fs.doc(db, 'properties', p.id));
     listings = listings.filter(x => x.id !== p.id); renderListings();
-  } catch (e) { console.error(e); card.style.opacity = 1; alertMsg('Could not delete the listing. Please try again.'); }
+  } catch (e) { console.error(e); card.style.opacity = 1; alertMsg('Could not delete the property. Please try again.'); }
 }
 function alertMsg(m) { $('d-count').textContent = m; $('d-count').classList.add('dl-warn'); setTimeout(() => $('d-count').classList.remove('dl-warn'), 4000); }
 
-// ── Add listing ─────────────────────────────────────────────────────────
+// ── Add property ─────────────────────────────────────────────────────────
 function setupForm() {
   $('l-type').innerHTML = TYPES.map(t => `<option value="${t[0]}">${t[1]}</option>`).join('');
   $('l-locality').innerHTML = '<option value="">Choose…</option>' + LOCALITIES.map(l => `<option>${l[0]}</option>`).join('') + '<option value="__other">Other…</option>';
@@ -1633,7 +1633,7 @@ function renderPhotos() {
       try { const blob = await shrink(f); photos.push({blob, preview: URL.createObjectURL(blob)}); }
       catch (e) { $('l-photo-err').textContent = e.message; }
     }
-    if (inp.files.length > MAX_PHOTOS) $('l-photo-err').textContent = `Up to ${MAX_PHOTOS} photos per listing.`;
+    if (inp.files.length > MAX_PHOTOS) $('l-photo-err').textContent = `Up to ${MAX_PHOTOS} photos per property.`;
     renderPhotos();
   };
 }
@@ -1707,8 +1707,8 @@ async function save(ev) {
   } catch (e) {
     console.error(e);
     $('l-msg').textContent = (e.code || '').includes('permission')
-      ? 'Listing is not unlocked for your account yet. If you were just approved, refresh this page; otherwise contact PropMithra.'
-      : 'Could not publish the listing. Please check your internet and try again.';
+      ? 'Property is not unlocked for your account yet. If you were just approved, refresh this page; otherwise contact PropMithra.'
+      : 'Could not publish the property. Please check your internet and try again.';
   } finally { btn.disabled = false; btn.textContent = 'Send for approval'; }
 }
 
@@ -2223,10 +2223,10 @@ function contactFlow() {
     } catch (e) { console.warn(e); err.textContent = 'Could not send. Please check your internet and try again.'; go.disabled = false; go.textContent = 'Send request'; }
   };
 }
-// ── Listing tracking (agent's own listings) ─────────────────────────
+// ── Property tracking (agent's own properties) ─────────────────────────
 // Same steps as the app: review before publishing, deal progress after.
 const DEAL = [
-  ['none', 'Published', 'Listing visible to eligible agents.'],
+  ['none', 'Published', 'Property visible to eligible agents.'],
   ['interestReview', 'Interest under review', 'PropMithra is speaking with the interested agent to understand the opportunity.'],
   ['ownerNotified', 'Interest under review', 'PropMithra has informed you about the collaboration request.'],
   ['siteVisit', 'Discussion & negotiation', 'The participating agents are coordinating the next steps.'],
@@ -2256,12 +2256,12 @@ function trackSteps(p, interested) {
     {t: 'Property submitted', d: 'Your property details and photos have been received.', done: true},
     {t: 'Admin review', d: 'Our team is checking the submitted information.', done: ph !== 'review', cur: ph === 'review'},
     ph === 'action'
-      ? {t: 'Action required', d: (note ? 'PropMithra asks: ' + note : 'PropMithra needs a correction.') + ' Edit the listing in the app and save to resubmit.', cur: true, alert: true}
+      ? {t: 'Action required', d: (note ? 'PropMithra asks: ' + note : 'PropMithra needs a correction.') + ' Edit the property in the app and save to resubmit.', cur: true, alert: true}
       : {t: 'Verification & clarification', d: 'Any additional details or documents are requested if needed.', done: pub},
     ph === 'rejected'
-      ? {t: 'Not approved', d: note ? 'Reason: ' + note : 'PropMithra did not publish this listing. Contact support for details.', cur: true, alert: true}
-      : {t: 'Approved for publishing', d: 'Your listing is approved for publication.', done: pub},
-    {t: 'Published on PropMithra', d: 'Eligible registered agents can now view your listing.', done: pub, cur: pub && di === 0},
+      ? {t: 'Not approved', d: note ? 'Reason: ' + note : 'PropMithra did not publish this property. Contact support for details.', cur: true, alert: true}
+      : {t: 'Approved for publishing', d: 'Your property is approved for publication.', done: pub},
+    {t: 'Published on PropMithra', d: 'Eligible registered agents can now view your property.', done: pub, cur: pub && di === 0},
   ];
   const post = [{t: 'Interest received', d: interested > 0 ? `${interested} agent${interested === 1 ? ' has' : 's have'} shown interest in your property.` : 'Agents tap "Talk to our team" when they have a buyer or tenant.', done: interested > 0 || di > 0, cur: di === 0 && interested > 0}]
     .concat(DEAL.slice(1).map((x, n) => { const k = n + 1; return {t: x[1], d: x[2], done: k < di || (k === DEAL.length - 1 && k === di), cur: k === di && k !== DEAL.length - 1}; }));
@@ -2281,10 +2281,10 @@ async function openTrack(p) {
   dlg.innerHTML = `<div class="modal track-modal" role="dialog" aria-modal="true" aria-labelledby="tr-title">
     <div class="tr-head"><div><small>MY PROPERTY SUBMISSION</small><h3 id="tr-title">Property tracking</h3></div><button type="button" class="link-btn" id="tr-x" aria-label="Close">✕</button></div>
     <div class="tr-sum"><b>${esc(p.title)}</b>
-      <span class="muted">Listing ID: <b>${esc(listingRef(p.id))}</b> · Submitted: ${esc(fmtDate(p.listedAt) || 'just now')}${ph === 'published' && p.reviewedAt ? ' · Published: ' + esc(fmtDate(p.reviewedAt)) : ''}</span>
+      <span class="muted">Property ID: <b>${esc(listingRef(p.id))}</b> · Submitted: ${esc(fmtDate(p.listedAt) || 'just now')}${ph === 'published' && p.reviewedAt ? ' · Published: ' + esc(fmtDate(p.reviewedAt)) : ''}</span>
       <span class="track-chip ${ph}">${esc(trackLabel(p))}</span></div>
     ${ph === 'published' && p.dealNote ? `<p class="tr-note">Latest update: ${esc(p.dealNote)}</p>` : ''}
-    <h4>Listing progress</h4>${timelineHtml(pre, true)}
+    <h4>Property progress</h4>${timelineHtml(pre, true)}
     ${post.length ? `<h4>After publishing</h4><p class="muted small">PropMithra updates these steps as agents take interest. Agent details stay private.</p>${timelineHtml(post, false)}` : ''}
     <div class="modal-actions"><a class="btn btn-ghost" href="contact">Contact support</a><button class="btn btn-primary" type="button" id="tr-ok">Close</button></div></div>`;
   document.body.appendChild(dlg);
@@ -2414,7 +2414,7 @@ function interestFlow(c) {
         + '<a role="menuitem" href="' + acct + '#contact">Change email / phone</a>'
         + '<a role="menuitem" class="am-out" href="' + acct + '#logout">Log out</a>'
         + '</div></div>'
-        + '<a class="btn btn-primary add-btn" href="' + acct + '#add">+ Add listing</a>';
+        + '<a class="btn btn-primary add-btn" href="' + acct + '#add">+ Add property</a>';
       var btn = cta.querySelector('.acct-btn'), menu = cta.querySelector('.acct-menu');
       var setOpen = function (on) { menu.hidden = !on; btn.setAttribute('aria-expanded', on ? 'true' : 'false'); };
       btn.addEventListener('click', function (e) { e.stopPropagation(); setOpen(menu.hidden); });
@@ -2510,7 +2510,7 @@ function interestFlow(c) {
     ends.forEach(function (el) { io.observe(el); });
   }
 
-  // Property discovery filters (sample listings on the home page)
+  // Property discovery filters (sample properties on the home page)
   var grid = document.getElementById('prop-grid');
   if (grid) {
     var selects = document.querySelectorAll('[data-filter]');

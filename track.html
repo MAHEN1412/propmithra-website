@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Track Listing — PropMithra</title>
-<meta name="description" content="Follow your property listing: review, publishing and deal progress.">
+<title>Track Property — PropMithra</title>
+<meta name="description" content="Follow your property: review, publishing and deal progress.">
 <meta name="claude:viewport-fit-sides" content="cover">
-<meta property="og:title" content="Track Listing — PropMithra">
-<meta property="og:description" content="Follow your property listing: review, publishing and deal progress.">
+<meta property="og:title" content="Track Property — PropMithra">
+<meta property="og:description" content="Follow your property: review, publishing and deal progress.">
 <meta property="og:type" content="website">
 <meta name="theme-color" content="#008069">
 <link rel="canonical" href="https://www.propmithra.com/track">
@@ -1072,21 +1072,21 @@ body.sv-open { overflow: hidden; }
 <main id="main">
 <section class="page-hero tr-hero">
   <div class="wrap">
-    <span class="crumb"><a href="./">Home</a> / <a href="account">My account</a> / Track listing</span>
-    <h1>Track your listing</h1>
+    <span class="crumb"><a href="./">Home</a> / <a href="account">My account</a> / Track property</span>
+    <h1>Track your property</h1>
   </div>
 </section>
 
 <section class="section tight">
   <div class="wrap trk">
-    <div class="reg-state" id="t-loading"><div class="spinner" aria-hidden="true"></div><p>Loading your listing…</p></div>
+    <div class="reg-state" id="t-loading"><div class="spinner" aria-hidden="true"></div><p>Loading your property…</p></div>
     <div class="reg-state" id="t-signedout" hidden>
-      <h2>Log in to track your listing</h2>
+      <h2>Log in to track your property</h2>
       <div class="btn-row" style="justify-content:center"><a class="btn btn-primary" href="join?signin=1&amp;next=account">Log in</a></div>
     </div>
     <div class="reg-state" id="t-missing" hidden>
-      <h2>Listing not found</h2>
-      <p class="muted">This listing doesn't exist, or it isn't yours.</p>
+      <h2>Property not found</h2>
+      <p class="muted">This property doesn't exist, or it isn't yours.</p>
       <div class="btn-row" style="justify-content:center"><a class="btn btn-primary" href="account">My properties</a></div>
     </div>
 
@@ -1099,7 +1099,7 @@ body.sv-open { overflow: hidden; }
           <h2 id="t-title"></h2>
           <p class="muted" id="t-sub"></p>
           <div class="trk-meta">
-            <button type="button" class="trk-id" id="t-id" title="Copy listing ID"></button>
+            <button type="button" class="trk-id" id="t-id" title="Copy property ID"></button>
             <span id="t-dates" class="muted"></span>
           </div>
           <span class="track-chip big" id="t-status"></span>
@@ -1109,9 +1109,9 @@ body.sv-open { overflow: hidden; }
       <!-- Current stage -->
       <div class="trk-now" id="t-now"></div>
 
-      <!-- Listing progress: horizontal stepper -->
+      <!-- Property progress: horizontal stepper -->
       <article class="trk-card">
-        <h3>Listing progress</h3>
+        <h3>Property progress</h3>
         <div class="stepper" id="t-steps"></div>
       </article>
 
@@ -1145,7 +1145,7 @@ const show = (id) => ['t-loading', 't-signedout', 't-missing', 't-app'].forEach(
 // Same stages as the app (lib/features/properties/domain/listing_tracking.dart).
 // "Finding agents" stages set by PropMithra; step = place on the 5-step bar.
 const DEAL = [
-  ['none', 'Published', 'Listing visible to eligible agents.', 0],
+  ['none', 'Published', 'Property visible to eligible agents.', 0],
   ['interestReview', 'Interest under review', 'PropMithra is speaking with the interested agent and keeps you informed.', 2],
   ['ownerNotified', 'Interest under review', 'PropMithra has informed you about the collaboration request.', 2],
   ['siteVisit', 'Discussion & negotiation', 'Site visits and commercial terms are being discussed.', 3],
@@ -1165,15 +1165,15 @@ function render(p, id, interested) {
   $('t-title').textContent = p.title || 'Property';
   $('t-sub').textContent = [inr(p.price) + (p.transaction && p.transaction !== 'sale' ? ' / month' : ''), p.locality, p.areaSqft ? Number(p.areaSqft).toLocaleString('en-IN') + ' sq.ft' : ''].filter(Boolean).join(' · ');
   const ref = listingRef(id);
-  $('t-id').innerHTML = `Listing ID <b>${esc(ref)}</b> <span aria-hidden="true">⧉</span>`;
-  $('t-id').onclick = () => { navigator.clipboard?.writeText(ref).then(() => { $('t-id').innerHTML = `Copied <b>${esc(ref)}</b> ✓`; setTimeout(() => $('t-id').innerHTML = `Listing ID <b>${esc(ref)}</b> <span aria-hidden="true">⧉</span>`, 1600); }); };
+  $('t-id').innerHTML = `Property ID <b>${esc(ref)}</b> <span aria-hidden="true">⧉</span>`;
+  $('t-id').onclick = () => { navigator.clipboard?.writeText(ref).then(() => { $('t-id').innerHTML = `Copied <b>${esc(ref)}</b> ✓`; setTimeout(() => $('t-id').innerHTML = `Property ID <b>${esc(ref)}</b> <span aria-hidden="true">⧉</span>`, 1600); }); };
   $('t-dates').textContent = ['Submitted ' + (fmtDate(p.listedAt) || 'just now'), pub && p.reviewedAt ? 'Published ' + fmtDate(p.reviewedAt) : ''].filter(Boolean).join(' · ');
   $('t-status').textContent = status; $('t-status').className = 'track-chip big ' + ph;
 
   // 5 review steps
   const steps = [
     ['Submitted', 'Details and photos received', true],
-    ['Admin review', 'Our team checks your listing', ph !== 'review'],
+    ['Admin review', 'Our team checks your property', ph !== 'review'],
     [ph === 'action' ? 'Action required' : 'Verification', ph === 'action' ? 'A correction is needed' : 'Extra details if needed', pub],
     [ph === 'rejected' ? 'Not approved' : 'Approved', ph === 'rejected' ? 'Not published' : 'Approved for publishing', pub],
     ['Published', 'Visible to eligible agents', pub],
@@ -1188,10 +1188,10 @@ function render(p, id, interested) {
 
   // What's happening now
   const now = ph === 'review' ? ['info', 'Under admin review', 'Our team is checking the details and photos you sent. This usually takes 1–2 working days. You will see the result here.']
-    : ph === 'action' ? ['warn', 'Action required', (note ? `PropMithra asks: “${note}”. ` : 'PropMithra needs a correction. ') + 'Open the listing in the PropMithra app, make the change and save — it comes back to our team automatically.']
-    : ph === 'rejected' ? ['bad', 'Not published', note ? `Reason: ${note}` : 'PropMithra did not publish this listing. Contact support if you have questions.']
+    : ph === 'action' ? ['warn', 'Action required', (note ? `PropMithra asks: “${note}”. ` : 'PropMithra needs a correction. ') + 'Open the property in the PropMithra app, make the change and save — it comes back to our team automatically.']
+    : ph === 'rejected' ? ['bad', 'Not published', note ? `Reason: ${note}` : 'PropMithra did not publish this property. Contact support if you have questions.']
     : di > 0 ? ['ok', DEAL[di][1], DEAL[di][2]]
-    : ['ok', 'Published on PropMithra', 'Eligible registered agents can now see your listing. When an agent shows interest, PropMithra takes it forward and you will see each step below.'];
+    : ['ok', 'Published on PropMithra', 'Eligible registered agents can now see your property. When an agent shows interest, PropMithra takes it forward and you will see each step below.'];
   $('t-now').className = 'trk-now ' + now[0];
   $('t-now').innerHTML = `<small>Current stage</small><b>${esc(now[1])}</b><p>${esc(now[2])}</p>${pub && p.dealNote ? `<p class="trk-update"><span>Latest update${p.dealUpdatedAt ? ' · ' + esc(ago(p.dealUpdatedAt)) : ''}</span>${esc(p.dealNote)}</p>` : ''}`;
 
@@ -1313,7 +1313,7 @@ let fb;
         + '<a role="menuitem" href="' + acct + '#contact">Change email / phone</a>'
         + '<a role="menuitem" class="am-out" href="' + acct + '#logout">Log out</a>'
         + '</div></div>'
-        + '<a class="btn btn-primary add-btn" href="' + acct + '#add">+ Add listing</a>';
+        + '<a class="btn btn-primary add-btn" href="' + acct + '#add">+ Add property</a>';
       var btn = cta.querySelector('.acct-btn'), menu = cta.querySelector('.acct-menu');
       var setOpen = function (on) { menu.hidden = !on; btn.setAttribute('aria-expanded', on ? 'true' : 'false'); };
       btn.addEventListener('click', function (e) { e.stopPropagation(); setOpen(menu.hidden); });
@@ -1409,7 +1409,7 @@ let fb;
     ends.forEach(function (el) { io.observe(el); });
   }
 
-  // Property discovery filters (sample listings on the home page)
+  // Property discovery filters (sample properties on the home page)
   var grid = document.getElementById('prop-grid');
   if (grid) {
     var selects = document.querySelectorAll('[data-filter]');

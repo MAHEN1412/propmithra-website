@@ -1164,7 +1164,7 @@ body.sv-open { overflow: hidden; }
         + '<a role="menuitem" href="' + acct + '#contact">Change email / phone</a>'
         + '<a role="menuitem" class="am-out" href="' + acct + '#logout">Log out</a>'
         + '</div></div>'
-        + '<a class="btn btn-primary add-btn" href="' + acct + '#add">+ Add listing</a>';
+        + '<a class="btn btn-primary add-btn" href="' + acct + '#add">+ Add property</a>';
       var btn = cta.querySelector('.acct-btn'), menu = cta.querySelector('.acct-menu');
       var setOpen = function (on) { menu.hidden = !on; btn.setAttribute('aria-expanded', on ? 'true' : 'false'); };
       btn.addEventListener('click', function (e) { e.stopPropagation(); setOpen(menu.hidden); });
@@ -1260,7 +1260,7 @@ body.sv-open { overflow: hidden; }
     ends.forEach(function (el) { io.observe(el); });
   }
 
-  // Property discovery filters (sample listings on the home page)
+  // Property discovery filters (sample properties on the home page)
   var grid = document.getElementById('prop-grid');
   if (grid) {
     var selects = document.querySelectorAll('[data-filter]');
