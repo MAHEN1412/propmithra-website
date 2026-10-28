@@ -1045,6 +1045,13 @@ body.sv-open { overflow: hidden; }
 .pc-int { font-size: .85rem; color: var(--ink-3); }
 .pc-foot .btn-talk { width: 100%; min-height: 42px; }
 .talk-terms.small { margin-top: 0; font-size: .8rem; }
+
+/* Banner slide with no text of its own: the image fills the banner and the
+   button sits on it, bottom left. */
+.cb-slide.img-only { grid-template-columns: 1fr !important; }
+.cb-slide.img-only .cb-media { grid-row: 1; grid-column: 1; }
+.cb-slide.img-only .cb-text { grid-row: 1; grid-column: 1; z-index: 2; align-self: end; align-content: end; background: linear-gradient(0deg, rgba(0,0,0,.45), transparent); }
+.cb-slide.img-only .cb-price:empty { display: none; }
 </style>
 <style>@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:700;font-display:swap;src:url(fonts/roboto-condensed-latin-700-italic.woff2) format("woff2")}@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:800;font-display:swap;src:url(fonts/roboto-condensed-latin-800-italic.woff2) format("woff2")}</style>
 </head>
