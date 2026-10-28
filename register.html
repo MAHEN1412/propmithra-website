@@ -1091,6 +1091,14 @@ body.sv-open { overflow: hidden; }
 }
 .office-addr { font-style: normal; line-height: 1.55; color: var(--ink-2, #344054); }
 .foot-bottom a { color: inherit; }
+/* Inner-page header band: compact and clean. */
+.page-hero { padding-block: clamp(24px, 3.5vw, 40px) clamp(16px, 2.5vw, 24px); }
+.page-hero .wrap { gap: 8px; }
+.page-hero h1 { font-size: clamp(1.6rem, 2.8vw, 2.2rem); font-weight: 750; }
+.page-hero .eyebrow { display: none; }
+.page-hero .lead { font-size: 1rem; color: var(--ink-3); }
+.page-hero + .section.tight, .page-hero + .section { padding-top: clamp(16px, 2.5vw, 28px); }
+@media (max-width: 620px) { .page-hero h1 { font-size: 1.5rem; } }
 </style>
 <style>@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:700;font-display:swap;src:url(fonts/roboto-condensed-latin-700-italic.woff2) format("woff2")}@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:800;font-display:swap;src:url(fonts/roboto-condensed-latin-800-italic.woff2) format("woff2")}</style>
 </head>
