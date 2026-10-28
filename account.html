@@ -1056,6 +1056,7 @@ body.sv-open { overflow: hidden; }
 .pc-lead { display: block; font-size: .78rem; color: var(--muted, #667085); text-align: center; }
 .btn-talk.sent.assigned, .btn-talk.sent.won { background: #e7f8ef; color: #0b6b3a; }
 .btn-talk.sent.lost { background: #f2f4f7; color: #667085; }
+.pc-meet { margin-top: 8px; padding: 10px 12px; border-radius: 10px; background: #e8f0fe; color: #1a3d8f; font-size: .85rem; line-height: 1.4; }
 </style>
 <style>@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:700;font-display:swap;src:url(fonts/roboto-condensed-latin-700-italic.woff2) format("woff2")}@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:800;font-display:swap;src:url(fonts/roboto-condensed-latin-800-italic.woff2) format("woff2")}</style>
 </head>
@@ -1504,14 +1505,15 @@ function teamCards(list) {
         ${pr.name ? `<span class="pc-proj"><span class="proj-logo" data-logo="${esc(pr.logoUrl || '')}">${esc((pr.name || 'P')[0])}</span><span><b>${esc(pr.name)}</b>${pr.rera ? `<small>RERA ${esc(pr.rera)}</small>` : ''}</span></span>` : ''}
         <div class="pc-foot">
           <span class="pc-int">${n ? `<b>${n}</b> agent${n > 1 ? 's' : ''} interested` : 'Be the first to show interest'}</span>
-          ${sent ? `<button type="button" class="btn btn-talk sent ${sent}" disabled>${LEAD_TEXT[sent][0]}</button><small class="pc-lead">${LEAD_TEXT[sent][1]}</small>`
+          ${sent ? `<button type="button" class="btn btn-talk sent ${sent}" disabled>${LEAD_TEXT[sent][0]}</button><small class="pc-lead">${LEAD_TEXT[sent][1]}</small>${myMeet[p.id] ? `<div class="pc-meet">📅 <b>${esc(myMeet[p.id].meetingType || 'Meeting')} with PropMithra</b><br>${esc(meetWhen(myMeet[p.id].meetingAt.toDate()))}${myMeet[p.id].meetingNote ? '<br><small>' + esc(myMeet[p.id].meetingNote) + '</small>' : ''}</div>` : ''}`
                  : `<button type="button" class="btn btn-talk" data-talk="${esc(p.id)}">Talk to our team</button>
                     <label class="talk-terms small"><input type="checkbox" data-terms="${esc(p.id)}"> <span>I agree to the <a href="/terms" target="_blank" rel="noopener">terms</a> for selling this property</span></label>`}
         </div>
       </div></article>`;
   }).join('');
 }
-let teamStats = {}, myTeamInterest = {}, allProps = [];
+let teamStats = {}, myTeamInterest = {}, allProps = [], myMeet = {};
+const meetWhen = (d) => d.toLocaleString('en-IN', {weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit'});
 // What PropMithra decided on this agent's interest (same as the app).
 const LEAD_TEXT = {
   sent: ['Interest sent ✓', 'PropMithra is reviewing. If you are assigned, our team will call you.'],
@@ -1527,7 +1529,7 @@ function leadState(x) {
 async function loadTeamExtras() {
   const {fs, db} = fb;
   const mine = await fs.getDocs(fs.query(fs.collection(db, 'listingInterests'), fs.where('uid', '==', uid))).catch(() => ({docs: []}));
-  myTeamInterest = {}; mine.docs.forEach(d => { const x = d.data(); myTeamInterest[x.propertyId] = leadState(x); });
+  myTeamInterest = {}; mine.docs.forEach(d => { const x = d.data(); myTeamInterest[x.propertyId] = leadState(x); if (x.meetingAt?.toDate && x.meetingAt.toDate() > Date.now() - 72e5) myMeet[x.propertyId] = x; });
   const stats = await Promise.all(allProps.map(p => fs.getDoc(fs.doc(db, 'listingStats', p.id)).catch(() => null)));
   teamStats = {}; stats.forEach((d, n) => { if (d?.exists?.()) teamStats[allProps[n].id] = d.data().interested || 0; });
   const [ts, fq] = await Promise.all([
