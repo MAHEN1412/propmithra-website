@@ -840,6 +840,34 @@ body.sv-open { overflow: hidden; }
 .acct-menu a.am-out { color: #b42318; border-top: 1px solid var(--line); border-radius: 0 0 10px 10px; margin-top: 4px; }
 @media (max-width: 860px) { .acct-wrap { flex: 1; } .acct-wrap .acct-btn { width: 100%; } .acct-menu { position: static; width: auto; margin-top: 8px; box-shadow: none; } }
 .dash-status[hidden] { display: none; }
+
+/* Listing tracking */
+.track-line { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.track-chip { display: inline-block; font-size: .78rem; font-weight: 700; padding: 3px 10px; border-radius: 99px; background: #e8f0fe; color: #1a56db; }
+.track-chip.action { background: #fdf3e2; color: #8a5a00; }
+.track-chip.rejected { background: #fff4f3; color: #b42318; }
+.track-chip.published { background: var(--mint); color: var(--teal-dark); }
+.track-modal { max-width: 620px; width: 100%; max-height: 90vh; overflow: auto; }
+.tr-head { display: flex; justify-content: space-between; align-items: flex-start; }
+.tr-head small { letter-spacing: .08em; color: var(--ink-3); font-weight: 600; }
+.tr-head h3 { margin: 2px 0 0; }
+.tr-sum { display: grid; gap: 6px; padding: 12px 0 14px; border-bottom: 1px solid var(--line); }
+.tr-sum .track-chip { justify-self: start; }
+.tr-note { background: var(--mint); border-radius: 10px; padding: 10px 12px; margin: 12px 0 0; }
+.track-modal h4 { margin: 18px 0 8px; }
+.tl { list-style: none; margin: 0; padding: 0; }
+.tl li { position: relative; display: flex; gap: 14px; padding-bottom: 16px; }
+.tl li:not(:last-child)::before { content: ""; position: absolute; left: 14px; top: 30px; bottom: 0; width: 2px; background: var(--line); }
+.tl li.done:not(:last-child)::before { background: #22a23a; }
+.tl-dot { flex: none; width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--line); display: grid; place-items: center; font-size: .82rem; font-weight: 700; color: var(--ink-3); background: #fff; position: relative; }
+.tl li.done .tl-dot { background: #22a23a; border-color: #22a23a; color: #fff; }
+.tl li.cur .tl-dot { background: #1a56db; border-color: #1a56db; color: #fff; }
+.tl li.alert .tl-dot { background: #d97706; border-color: #d97706; }
+.tl b { display: block; margin-top: 4px; }
+.tl p { margin: 2px 0 0; color: var(--ink-2); font-size: .92rem; }
+.tl li:not(.done):not(.cur) b { color: var(--ink-3); }
+.tl small { display: block; margin-top: 4px; color: #1a56db; font-weight: 700; letter-spacing: .08em; font-size: .72rem; }
+.tl li.alert small, .tl li.alert p { color: #8a5a00; }
 </style>
 <style>@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:700;font-display:swap;src:url(fonts/roboto-condensed-latin-700-italic.woff2) format("woff2")}@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:800;font-display:swap;src:url(fonts/roboto-condensed-latin-800-italic.woff2) format("woff2")}</style>
 </head>
@@ -1179,11 +1207,13 @@ function renderListings() {
         <div class="lprice">${esc(inr(p.price))}${p.transaction !== 'sale' ? '<small>/mo</small>' : ''}</div>
         <b>${esc(p.title)}</b>
         <span class="muted">${esc(p.locality)}${p.areaSqft ? ' · ' + Number(p.areaSqft).toLocaleString('en-IN') + ' sq.ft' : ''}</span>
+        <span class="track-line"><span class="track-chip ${trackPhase(p)}">${esc(trackLabel(p))}</span><span class="muted small">ID ${esc(listingRef(p.id))}</span></span>
         <div class="tags"><span class="tag ${p.availability === 'available' ? 'ok' : ''}">${esc(AVAIL[p.availability] || p.availability)}</span><span class="tag">${esc(VIS[p.visibility] || p.visibility)}</span>${hidden ? '<span class="tag bad">Not published by PropMithra</span>' : ''}${pending && p.review !== 'changes' ? '<span class="tag warn">Waiting for approval</span>' : ''}${p.review === 'approved' ? '<span class="tag ok">Reviewed ✓</span>' : ''}${p.review === 'changes' ? '<span class="tag warn">Corrections requested</span>' : ''}</div>
         ${hidden && p.moderationNote ? `<span class="dl-warn">${esc(p.moderationNote)}</span>` : ''}
         ${!hidden && p.review === 'changes' && p.reviewNote ? `<span class="dl-warn">PropMithra: ${esc(p.reviewNote)} — please update it in the app.</span>` : ''}
         <div class="lactions">
           <select data-avail aria-label="Status">${Object.entries(AVAIL).map(([k, v]) => `<option value="${k}"${k === p.availability ? ' selected' : ''}>${v}</option>`).join('')}</select>
+          <button type="button" class="link-btn" data-track>Track listing →</button>
           <button type="button" class="link-btn danger" data-del>Delete</button>
         </div>
       </div></article>`;
@@ -1192,6 +1222,7 @@ function renderListings() {
     const p = listings.find(x => x.id === card.dataset.id);
     card.querySelector('[data-avail]').onchange = (e) => setAvailability(p, e.target.value, e.target);
     card.querySelector('[data-del]').onclick = () => removeListing(p, card);
+    card.querySelector('[data-track]').onclick = () => openTrack(p);
     if (p.photos?.length) { try { const u = await blobUrl(p.photos[0]); card.querySelector('.lthumb').innerHTML = u ? `<img src="${u}" alt="">` : ''; } catch (_) {} }
   });
 }
@@ -1983,6 +2014,75 @@ function contactFlow() {
       close(); await loadContactChanges();
     } catch (e) { console.warn(e); err.textContent = 'Could not send. Please check your internet and try again.'; go.disabled = false; go.textContent = 'Send request'; }
   };
+}
+// ── Listing tracking (agent's own listings) ─────────────────────────
+// Same steps as the app: review before publishing, deal progress after.
+const DEAL = [
+  ['none', 'Published', 'Listing visible to eligible agents.'],
+  ['interestReview', 'Interest under review', 'PropMithra is speaking with the interested agent to understand the opportunity.'],
+  ['ownerNotified', 'You are notified', 'PropMithra has informed you about the collaboration request.'],
+  ['siteVisit', 'Discussion / site visit', 'The participating agents are coordinating the next steps.'],
+  ['negotiation', 'Negotiation in progress', 'The parties are discussing commercial terms.'],
+  ['closed', 'Deal closed', 'The agreed closure conditions have been met.'],
+  ['commissionProcessing', 'Commission processing', 'Eligibility and settlement details are being checked.'],
+  ['commissionSettled', 'Commission settled', 'The applicable commission settlement is completed.'],
+];
+const listingRef = (id) => 'PL-' + String(id || '').slice(0, 6).toUpperCase();
+function trackPhase(p) {
+  if (p.moderation === 'hidden') return 'rejected';
+  if (p.moderation === 'pending') return p.review === 'changes' ? 'action' : 'review';
+  return 'published';
+}
+function trackLabel(p) {
+  const ph = trackPhase(p);
+  if (ph === 'review') return 'Under admin review';
+  if (ph === 'action') return 'Action required';
+  if (ph === 'rejected') return 'Not published';
+  const d = DEAL.find(x => x[0] === p.dealStage);
+  return d && d[0] !== 'none' ? d[1] : 'Published';
+}
+function trackSteps(p, interested) {
+  const ph = trackPhase(p), note = String(p.reviewNote || '').trim(), pub = ph === 'published';
+  const di = Math.max(0, DEAL.findIndex(x => x[0] === (p.dealStage || 'none')));
+  const pre = [
+    {t: 'Property submitted', d: 'Your property details and photos have been received.', done: true},
+    {t: 'Admin review', d: 'Our team is checking the submitted information.', done: ph !== 'review', cur: ph === 'review'},
+    ph === 'action'
+      ? {t: 'Action required', d: (note ? 'PropMithra asks: ' + note : 'PropMithra needs a correction.') + ' Edit the listing in the app and save to resubmit.', cur: true, alert: true}
+      : {t: 'Verification & clarification', d: 'Any additional details or documents are requested if needed.', done: pub},
+    ph === 'rejected'
+      ? {t: 'Not approved', d: note ? 'Reason: ' + note : 'PropMithra did not publish this listing. Contact support for details.', cur: true, alert: true}
+      : {t: 'Approved for publishing', d: 'Your listing is approved for publication.', done: pub},
+    {t: 'Published on PropMithra', d: 'Eligible registered agents can now view your listing.', done: pub, cur: pub && di === 0},
+  ];
+  const post = [{t: 'Interest received', d: interested > 0 ? `${interested} agent${interested === 1 ? ' has' : 's have'} shown interest in your property.` : 'Agents tap "Talk to our team" when they have a buyer or tenant.', done: interested > 0 || di > 0, cur: di === 0 && interested > 0}]
+    .concat(DEAL.slice(1).map((x, n) => { const k = n + 1; return {t: x[1], d: x[2], done: k < di || (k === DEAL.length - 1 && k === di), cur: k === di && k !== DEAL.length - 1}; }));
+  return {pre, post: pub ? post : []};
+}
+function timelineHtml(steps, numbered) {
+  return `<ol class="tl">${steps.map((s, n) => `<li class="${s.done && !s.cur ? 'done' : ''} ${s.cur ? 'cur' : ''} ${s.alert ? 'alert' : ''}">
+    <span class="tl-dot">${s.done && !s.cur ? '✓' : (numbered ? n + 1 : '')}</span>
+    <div><b>${esc(s.t)}</b><p>${esc(s.d)}</p>${s.cur ? '<small>CURRENT STAGE</small>' : ''}</div></li>`).join('')}</ol>`;
+}
+async function openTrack(p) {
+  let interested = 0;
+  try { const st = await fb.fs.getDoc(fb.fs.doc(fb.db, 'listingStats', p.id)); if (st.exists()) interested = st.data().interested || 0; } catch (_) {}
+  const {pre, post} = trackSteps(p, interested), ph = trackPhase(p);
+  const dlg = document.createElement('div');
+  dlg.className = 'modal-back';
+  dlg.innerHTML = `<div class="modal track-modal" role="dialog" aria-modal="true" aria-labelledby="tr-title">
+    <div class="tr-head"><div><small>MY PROPERTY SUBMISSION</small><h3 id="tr-title">Property tracking</h3></div><button type="button" class="link-btn" id="tr-x" aria-label="Close">✕</button></div>
+    <div class="tr-sum"><b>${esc(p.title)}</b>
+      <span class="muted">Listing ID: <b>${esc(listingRef(p.id))}</b> · Submitted: ${esc(fmtDate(p.listedAt) || 'just now')}${ph === 'published' && p.reviewedAt ? ' · Published: ' + esc(fmtDate(p.reviewedAt)) : ''}</span>
+      <span class="track-chip ${ph}">${esc(trackLabel(p))}</span></div>
+    ${ph === 'published' && p.dealNote ? `<p class="tr-note">Latest update: ${esc(p.dealNote)}</p>` : ''}
+    <h4>Listing progress</h4>${timelineHtml(pre, true)}
+    ${post.length ? `<h4>After publishing</h4><p class="muted small">PropMithra updates these steps as agents take interest. Agent details stay private.</p>${timelineHtml(post, false)}` : ''}
+    <div class="modal-actions"><a class="btn btn-ghost" href="contact">Contact support</a><button class="btn btn-primary" type="button" id="tr-ok">Close</button></div></div>`;
+  document.body.appendChild(dlg);
+  const close = () => dlg.remove();
+  dlg.querySelector('#tr-x').onclick = close; dlg.querySelector('#tr-ok').onclick = close;
+  dlg.addEventListener('click', (e) => { if (e.target === dlg) close(); });
 }
 function interestFlow(c) {
   const m = c.commercial || {}, dlg = document.createElement('div');
