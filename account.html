@@ -1879,7 +1879,7 @@ function campImages(c) {
     const slides = await Promise.all(nums.map(async (n) => {
       const pick = (w) => banners.find(a => (a.bannerSlide || 1) === n && a.bannerFor === w);
       const [d, t, m] = await Promise.all([url(pick('desktop')), url(pick('tablet')), url(pick('mobile'))]);
-      return {desktop: d || t || m, tablet: t || d || m, mobile: m || t || d};
+      return {n, desktop: d || t || m, tablet: t || d || m, mobile: m || t || d};
     }));
     if (slides.length) return slides;
     const f = imgs[0] ? await url(imgs[0]) : null;
@@ -1918,15 +1918,18 @@ function drawBanners(slides) {
   track.innerHTML = slides.map(({c, img}, n) => {
     const m = c.commercial || {}, dl = toDate(c.requirements?.applicationDeadline);
     const where = [c.locality, c.city || 'Hyderabad'].filter(Boolean).join(', ');
-    const eyebrow = [c.developer, where].filter(Boolean).join(' · ');
-    const line = c.requirements?.objective || '';
+    // Each slide can have its own text (Admin → campaign → Banner slides);
+    // anything left empty uses the campaign's own details.
+    const tx = (img && c.bannerText?.[String(img.n)]) || {}, own = (k) => String(tx[k] || '').trim();
+    const eyebrow = own('kicker') || [c.developer, where].filter(Boolean).join(' · ');
+    const line = own('text') || c.requirements?.objective || '';
     return `<article class="cb-slide ${img ? 'has-img' : ''} ${n ? '' : 'active'}" data-id="${esc(c.id)}" role="group" aria-label="${n + 1} of ${slides.length}">
       <div class="cb-text">
         <span class="cb-eyebrow">${esc(eyebrow)}</span>
-        <h2>${esc(c.title || 'Campaign')}</h2>
+        <h2>${esc(own('title') || c.title || 'Campaign')}</h2>
         ${line ? `<p class="cb-line">${esc(line)}</p>` : ''}
         <div class="cb-row">
-          <button class="cb-cta" type="button" data-open="${esc(c.id)}">View campaign</button>
+          <button class="cb-cta" type="button" data-open="${esc(c.id)}">${esc(own('button') || 'View campaign')}</button>
           <div class="cb-price">
             <div class="cb-tags">${m.commission ? `<span class="cb-badge">Commission ${esc(m.commission)}</span>` : ''}${dl ? `<span class="cb-was">Apply by ${esc(fmtDate(dl))}</span>` : ''}</div>
             <b>${esc(campPrice(c))}</b>
