@@ -1108,6 +1108,103 @@ body.sv-open { overflow: hidden; }
 /* /add-property: only the form (and the status when not yet approved). */
 .add-page #d-banner, .add-page #d-listings-wrap, .add-page #q-form, .add-page .dash-tabs { display: none !important; }
 .add-page #d-form { max-width: 920px; margin-inline: auto; }
+/* ── Homepage v3 (centered hero + app mosaic) ───────────────────── */
+.hs-btn { border-radius: 999px; padding-inline: 24px; min-height: 48px; }
+.hs-hero { background: radial-gradient(1200px 520px at 50% -10%, #e7f8ef 0%, rgba(231,248,239,0) 70%), var(--canvas); padding: clamp(48px, 7vw, 88px) 0 0; overflow: hidden; }
+.hs-hero-copy { text-align: center; display: grid; justify-items: center; gap: 18px; }
+.hs-pill { display: inline-flex; padding: 6px 14px; border-radius: 999px; background: #fff; border: 1px solid var(--line); font-size: .85rem; font-weight: 600; color: var(--teal-dark); box-shadow: var(--shadow); }
+.hs-hero h1 { font-size: clamp(2rem, 4.6vw, 3.6rem); line-height: 1.08; letter-spacing: -.03em; max-width: 16ch; margin: 0; }
+.hs-hero h1 em { font-style: normal; color: var(--teal); }
+.hs-hero .lead { max-width: 56ch; margin: 0; }
+.hs-center { justify-content: center; }
+/* the stage: phone in the middle, floating cards around it */
+.hs-stage { position: relative; height: 470px; margin-top: 40px; }
+.hs-phone { position: absolute; left: 50%; bottom: -40px; transform: translateX(-50%); width: 270px; height: 500px; background: #0f1d1f; border-radius: 40px; padding: 12px; box-shadow: 0 40px 80px rgba(15,42,42,.25), 0 8px 20px rgba(15,42,42,.15); }
+.hs-notch { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); width: 90px; height: 22px; background: #0f1d1f; border-radius: 0 0 14px 14px; z-index: 2; }
+.hs-screen { height: 100%; background: #f4f7f6; border-radius: 30px; overflow: hidden; padding: 34px 12px 12px; display: grid; gap: 10px; align-content: start; }
+.hs-app-top { display: flex; justify-content: space-between; align-items: baseline; font-size: .8rem; }
+.hs-app-top small { color: var(--ink-3); }
+.hs-card { background: #fff; border-radius: 16px; padding: 8px; display: grid; gap: 4px; box-shadow: 0 2px 8px rgba(15,42,42,.08); font-size: .78rem; }
+.hs-card b { font-size: .82rem; }
+.hs-card small { color: var(--ink-3); }
+.hs-card-photo { position: relative; height: 120px; border-radius: 12px; background: #dfe7e4 center / cover; }
+.hs-card-photo.short { height: 60px; }
+.hs-tag { position: absolute; left: 8px; top: 8px; background: rgba(0,96,79,.92); color: #fff; font-size: .62rem; font-weight: 700; padding: 3px 8px; border-radius: 99px; }
+.hs-price { position: absolute; right: 8px; bottom: 8px; background: #fff; color: var(--ink); font-weight: 800; font-size: .74rem; padding: 3px 9px; border-radius: 99px; box-shadow: 0 2px 6px rgba(0,0,0,.15); }
+.hs-talk { margin-top: 4px; text-align: center; background: #22a23a; color: #fff; font-weight: 800; border-radius: 99px; padding: 7px; font-size: .74rem; letter-spacing: .02em; }
+.hs-float { position: absolute; background: #fff; border-radius: 18px; padding: 12px 14px; box-shadow: 0 18px 40px rgba(15,42,42,.12), 0 2px 6px rgba(15,42,42,.06); display: grid; gap: 6px; font-size: .85rem; width: 230px; }
+.hs-float small { color: var(--ink-3); }
+.hs-cap { text-transform: uppercase; letter-spacing: .06em; font-size: .68rem !important; font-weight: 700; }
+.hs-f1 { left: 4%; top: 30px; transform: rotate(-3deg); }
+.hs-f2 { left: 8%; top: 300px; }
+.hs-f3 { right: 4%; top: 40px; transform: rotate(2deg); }
+.hs-f4 { right: 9%; top: 290px; grid-template-columns: auto 1fr; align-items: center; }
+.hs-f4 span { display: grid; }
+.hs-ic { font-size: 1.4rem; }
+.hs-mini-photo { position: relative; height: 96px; border-radius: 12px; background: #dfe7e4 center / cover; }
+.hs-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.hs-chips span { border: 1px solid var(--line); border-radius: 99px; padding: 3px 10px; font-size: .78rem; }
+.hs-chips span.on { background: var(--teal); border-color: var(--teal); color: #fff; }
+.hs-steps { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; }
+.hs-steps i { height: 6px; border-radius: 99px; background: var(--line); }
+.hs-steps i.d { background: var(--green); }
+.hs-steps i.c { background: #1a56db; }
+@media (max-width: 980px) { .hs-f2, .hs-f4 { display: none; } .hs-f1 { left: 0; } .hs-f3 { right: 0; } }
+@media (max-width: 640px) {
+  .hs-stage { height: 420px; margin-top: 28px; }
+  .hs-phone { width: 230px; height: 440px; }
+  .hs-float { width: 160px; padding: 10px; font-size: .74rem; }
+  .hs-mini-photo { height: 60px; }
+  .hs-f1 { top: 10px; left: -6px; } .hs-f3 { top: 190px; right: -6px; }
+  .hs-hero .btn-row { flex-wrap: wrap; justify-content: center; }
+}
+/* strip + facts */
+.hs-strip { background: #fff; border-block: 1px solid var(--line); padding: 28px 0; text-align: center; position: relative; z-index: 1; }
+.hs-strip p { margin: 0 0 14px; color: var(--ink-3); font-size: .9rem; font-weight: 600; }
+.hs-corridors { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+.hs-corridors span { padding: 8px 16px; border-radius: 99px; background: var(--canvas); border: 1px solid var(--line); font-weight: 650; color: var(--ink-2); }
+.hs-facts { background: var(--night); color: #fff; padding: clamp(36px, 5vw, 56px) 0; }
+.hs-facts-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; text-align: center; }
+.hs-facts b { display: block; font-size: clamp(2.2rem, 4vw, 3.2rem); line-height: 1; color: #6ee38a; }
+.hs-facts span { display: block; margin-top: 8px; color: rgba(255,255,255,.75); font-size: .95rem; }
+@media (max-width: 760px) { .hs-facts-grid { grid-template-columns: 1fr 1fr; } }
+.hs-aud .card { display: grid; gap: 10px; align-content: start; text-align: center; justify-items: center; padding: 32px 24px; }
+/* alternating rows with mock UI */
+.hs-row { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(28px, 6vw, 80px); align-items: center; padding: clamp(24px, 4vw, 44px) 0; }
+.hs-row.flip .hs-row-copy { order: 2; }
+.hs-row-copy { display: grid; gap: 12px; justify-items: start; }
+.hs-row-copy h3 { font-size: clamp(1.4rem, 2.4vw, 1.9rem); margin: 0; }
+.hs-row-copy p { margin: 0; font-size: 1.05rem; }
+.hs-mock { background: linear-gradient(160deg, #e7f8ef, #f6f9f8); border-radius: 24px; padding: 28px; display: grid; gap: 10px; box-shadow: inset 0 0 0 1px var(--line); }
+.hs-mock > * { background: #fff; border-radius: 14px; box-shadow: 0 6px 18px rgba(15,42,42,.08); }
+.hs-m-head { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; }
+.hs-badge { font-size: .75rem; font-weight: 700; padding: 3px 10px; border-radius: 99px; background: var(--canvas); color: var(--ink-2); }
+.hs-badge.ok { background: var(--mint); color: var(--teal-dark); }
+.hs-m-list, .hs-m-track { list-style: none; margin: 0; padding: 14px 16px; display: grid; gap: 10px; }
+.hs-m-list li::before { content: "✓"; display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: var(--mint); color: var(--teal); font-weight: 800; font-size: .7rem; margin-right: 10px; }
+.hs-m-note { margin: 0; padding: 10px 16px; font-size: .82rem; color: var(--ink-3); }
+.hs-m-track { counter-reset: t; }
+.hs-m-track li { counter-increment: t; display: flex; align-items: center; gap: 10px; color: var(--ink-3); }
+.hs-m-track li::before { content: counter(t); width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--line); display: grid; place-items: center; font-size: .75rem; font-weight: 700; }
+.hs-m-track li.d { color: var(--ink); } .hs-m-track li.d::before { content: "✓"; background: var(--green); border-color: var(--green); color: #fff; }
+.hs-m-track li.c { color: var(--ink); font-weight: 700; } .hs-m-track li.c::before { background: #1a56db; border-color: #1a56db; color: #fff; }
+.hs-m-agent { display: grid; grid-template-columns: 36px 1fr auto; gap: 10px; align-items: center; padding: 10px 14px; }
+.hs-m-agent i { width: 36px; height: 36px; border-radius: 50%; background: var(--mint); color: var(--teal-dark); display: grid; place-items: center; font-style: normal; font-weight: 800; }
+.hs-m-agent span { display: grid; } .hs-m-agent small { color: var(--ink-3); }
+.hs-m-agent em { font-style: normal; font-size: .8rem; font-weight: 700; padding: 6px 12px; border-radius: 99px; }
+.hs-m-agent em.go { background: var(--teal); color: #fff; } .hs-m-agent em.done { background: var(--mint); color: var(--teal-dark); }
+@media (max-width: 860px) { .hs-row { grid-template-columns: 1fr; } .hs-row.flip .hs-row-copy { order: 0; } }
+.hs-terms .card { display: grid; gap: 10px; align-content: start; }
+/* three CTA columns */
+.hs-ctas { background: var(--night); color: #fff; padding: clamp(40px, 6vw, 72px) 0; }
+.hs-ctas-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; }
+.hs-ctas-grid > div { display: grid; gap: 10px; justify-items: center; text-align: center; padding: 8px 24px; }
+.hs-ctas-grid > div + div { border-left: 1px solid rgba(255,255,255,.12); }
+.hs-ctas h3 { color: #fff; margin: 0; } .hs-ctas p { margin: 0; color: rgba(255,255,255,.7); }
+@media (max-width: 760px) { .hs-ctas-grid { grid-template-columns: 1fr; gap: 28px; } .hs-ctas-grid > div + div { border-left: 0; border-top: 1px solid rgba(255,255,255,.12); padding-top: 28px; } }
+.hs-ctas + .m-cta { }
+/* Homepage ends on the dark CTA band: no light gap before the footer. */
+main:has(> .hs-ctas) + .site-footer, main:has(.hs-ctas) ~ .site-footer { margin-top: 0; border-top: 1px solid rgba(255,255,255,.08); }
 </style>
 <style>@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:700;font-display:swap;src:url(fonts/roboto-condensed-latin-700-italic.woff2) format("woff2")}@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:800;font-display:swap;src:url(fonts/roboto-condensed-latin-800-italic.woff2) format("woff2")}</style>
 </head>
@@ -1126,20 +1223,79 @@ body.sv-open { overflow: hidden; }
   </nav>
 </header>
 <main id="main">
-<section class="hero">
-  <div class="wrap hero-grid">
-    <div class="hero-copy">
-      <span class="eyebrow">Business growth</span>
-      <h1>Expand Your Network. <em>Unlock More Property Opportunities.</em></h1>
-      <p class="lead">Collaborate with fellow agents, discover relevant listings and work together to move property deals forward.</p>
-      <div class="btn-row">
-        <a class="btn btn-primary" href="register">Register as an agent</a>
-        <a class="btn btn-ghost" href="#how">See how it works</a>
-      </div>
-      <div class="hero-note"><span>Listings go live only after PropMithra review</span><span>Android app &amp; web</span></div>
+<section class="hs-hero">
+  <div class="wrap hs-hero-copy">
+    <span class="hs-pill">Business growth · Hyderabad</span>
+    <h1>Expand Your Network.<br><em>Unlock More Property Opportunities.</em></h1>
+    <p class="lead">Collaborate with fellow agents, discover relevant listings and work together to move property deals forward.</p>
+    <div class="btn-row hs-center">
+      <a class="btn btn-primary hs-btn" href="register">Register as an agent</a>
+      <a class="btn btn-ghost hs-btn" href="#how">See how it works</a>
     </div>
-    <div class="scene team">
-      <div class="photo cutout"><img src="img/hero-team.webp" alt="Two real estate agents in Hyderabad shaking hands after agreeing to collaborate" width="1400" height="981" loading="eager"></div>
+  </div>
+  <div class="wrap hs-stage" aria-hidden="true">
+    <div class="hs-float hs-f1">
+      <div class="hs-mini-photo" style="background-image:url(img/p2.jpg)"><span class="hs-price">₹95 L</span></div>
+      <b>2 BHK · Kondapur</b><small>1,250 sq.ft · Sale</small>
+    </div>
+    <div class="hs-float hs-f2">
+      <small class="hs-cap">Filters</small>
+      <div class="hs-chips"><span class="on">Gachibowli</span><span>3 BHK</span><span class="on">Sale</span><span>Ready</span></div>
+    </div>
+    <div class="hs-phone">
+      <div class="hs-notch"></div>
+      <div class="hs-screen">
+        <div class="hs-app-top"><b>Assigned by PropMithra</b><small>All · Mine</small></div>
+        <div class="hs-card">
+          <div class="hs-card-photo" style="background-image:url(img/p1.jpg)"><span class="hs-tag">Verified by PropMithra</span><span class="hs-price">₹1.2 Cr</span></div>
+          <b>3 BHK Apartment · Manikonda</b>
+          <small>1,850 sq.ft · South-West</small>
+          <span class="hs-talk">Talk to our team</span>
+        </div>
+        <div class="hs-card slim">
+          <div class="hs-card-photo short" style="background-image:url(img/p3.jpg)"><span class="hs-price">₹2.1 Cr</span></div>
+          <b>Villa · Kokapet</b>
+        </div>
+      </div>
+    </div>
+    <div class="hs-float hs-f3">
+      <small class="hs-cap">Property tracker</small>
+      <div class="hs-steps"><i class="d"></i><i class="d"></i><i class="c"></i><i></i><i></i></div>
+      <b>Customer Partner assigned</b><small>Next: site visit</small>
+    </div>
+    <div class="hs-float hs-f4">
+      <span class="hs-ic">📅</span>
+      <span><b>Office meeting</b><small>Sat · 11:00 AM · PropMithra</small></span>
+    </div>
+  </div>
+</section>
+
+<section class="hs-strip">
+  <div class="wrap">
+    <p>Built for Hyderabad's agent network, corridor by corridor</p>
+    <div class="hs-corridors"><span>North</span><span>North-East</span><span>East</span><span>South-East</span><span>South</span><span>South-West</span><span>West</span><span>North-West</span></div>
+  </div>
+</section>
+
+<section class="hs-facts">
+  <div class="wrap hs-facts-grid">
+    <div><b>2</b><span>partner roles: property and customer</span></div>
+    <div><b>6</b><span>clear steps from listing to deal</span></div>
+    <div><b>8</b><span>Hyderabad corridors covered</span></div>
+    <div><b>1</b><span>team coordinating every interest</span></div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap">
+    <div class="section-head center">
+      <h2>One platform for everyone in the deal</h2>
+      <p class="lead">Whichever side you are on, PropMithra keeps it simple.</p>
+    </div>
+    <div class="grid-3 hs-aud">
+      <div class="card" id="property-partners"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg></span><h3>Property Partners</h3><p class="muted">Have a property? Submit it once. We review, publish and find agents with customers.</p></div>
+      <div class="card" id="customer-partners"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></svg></span><h3>Customer Partners</h3><p class="muted">Have a buyer or tenant? Browse reviewed listings and tap "Talk to our team".</p></div>
+      <div class="card"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4M8 6h.01M16 6h.01M12 6h.01M12 10h.01M12 14h.01M16 10h.01M16 14h.01M8 10h.01M8 14h.01"/></svg></span><h3>Builders &amp; developers</h3><p class="muted">Launch project campaigns to registered agents in the right corridors.</p><a class="more" href="developers">For developers →</a></div>
     </div>
   </div>
 </section>
@@ -1147,134 +1303,81 @@ body.sv-open { overflow: hidden; }
 <section class="section band-white">
   <div class="wrap">
     <div class="section-head center">
-      <span class="eyebrow">The problem</span>
-      <h2>Good properties and serious customers often never meet</h2>
-      <p class="lead">One agent has the property, another has the customer, and they rarely find each other.</p>
+      <h2>Your competitive edge</h2>
+      <p class="lead">Less chasing. More coordinated deals.</p>
     </div>
-    <div class="grid-3 why">
-      <div class="card"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 21l1.9-5.4A8 8 0 1 1 21 12z"/></svg></span><h3>Listings get lost in group chats</h3><p class="muted">Photos without price, location or documents.</p></div>
-      <div class="card"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></svg></span><h3>You don't know who is on the other side</h3><p class="muted">Hard to trust an unknown agent.</p></div>
-      <div class="card"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.9-3.9a2 2 0 0 0-2.8 0l-.9.9a1 1 0 1 1-3-3l2.8-2.8a5.8 5.8 0 0 1 7 .9l.4.4L22 6"/><path d="m21 3 1 11h-2M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3M3 4h8"/></svg></span><h3>Terms are decided too late</h3><p class="muted">Commission is discussed only at the end.</p></div>
+
+    <div class="hs-row">
+      <div class="hs-row-copy">
+        <span class="eyebrow">Reviewed listings</span>
+        <h3>Every property is checked before it goes live</h3>
+        <p class="muted">Our team reviews the details and documents you submit. Owner details stay private.</p>
+        <a class="btn btn-ghost hs-btn" href="register">Get started</a>
+      </div>
+      <div class="hs-mock">
+        <div class="hs-m-head"><b>Review</b><span class="hs-badge ok">Approved</span></div>
+        <ul class="hs-m-list"><li class="ok">Details, photos and documents provided</li><li class="ok">Information is consistent</li><li class="ok">Follows PropMithra guidelines</li></ul>
+        <p class="hs-m-note">Not a legal title check. Buyers should do their own.</p>
+      </div>
+    </div>
+
+    <div class="hs-row flip">
+      <div class="hs-row-copy">
+        <span class="eyebrow">Live tracking</span>
+        <h3>Know exactly where your property stands</h3>
+        <p class="muted">From review to Customer Partner assigned to deal closed, every step on one tracker.</p>
+        <a class="btn btn-ghost hs-btn" href="register">Get started</a>
+      </div>
+      <div class="hs-mock">
+        <div class="hs-m-head"><b>3 BHK · Manikonda</b><span class="hs-badge">PL-7F3K2A</span></div>
+        <ol class="hs-m-track"><li class="d">Interest received</li><li class="c">Customer Partner assigned</li><li>Discussion &amp; negotiation</li><li>Deal closed</li><li>Commission</li></ol>
+      </div>
+    </div>
+
+    <div class="hs-row">
+      <div class="hs-row-copy">
+        <span class="eyebrow">Coordinated interest</span>
+        <h3>One team between both agents</h3>
+        <p class="muted">PropMithra calls interested agents, assigns Customer Partners and schedules meetings.</p>
+        <a class="btn btn-ghost hs-btn" href="register">Get started</a>
+      </div>
+      <div class="hs-mock">
+        <div class="hs-m-head"><b>Interested agents</b><span class="hs-badge">3</span></div>
+        <div class="hs-m-agent"><i>A</i><span><b>Agent · Buyer</b><small>₹1–1.2 Cr</small></span><em class="go">Assign</em></div>
+        <div class="hs-m-agent"><i>B</i><span><b>Agent · Buyer</b><small>Visit this weekend</small></span><em class="done">Assigned ✓</em></div>
+        <div class="hs-m-agent"><i>C</i><span><b>Agent · Tenant</b><small>Waiting</small></span><em class="go">Assign</em></div>
+      </div>
     </div>
   </div>
 </section>
 
-<section class="section">
+<section class="section" id="how">
   <div class="wrap">
     <div class="section-head center">
-      <span class="eyebrow">The solution</span>
-      <h2>One coordinated place for agent collaboration</h2>
-      <p class="lead">You submit or show interest. PropMithra reviews, publishes and coordinates.</p>
-    </div>
-    <div class="grid-2 partners">
-      <div class="card"><span class="tag">Property Partner</span><h3>Has a property for sale or rent</h3><ul class="checks"><li><span>Submits details, photos and documents</span></li><li><span>Tracks progress in the app</span></li></ul></div>
-      <div class="card"><span class="tag">Customer Partner</span><h3>Has a buyer or tenant</h3><ul class="checks"><li><span>Browses approved listings</span></li><li><span>Taps "Talk to our team"</span></li></ul></div>
-    </div>
-  </div>
-</section>
-
-<section class="section band-white" id="how">
-  <div class="wrap">
-    <div class="section-head">
-      <span class="eyebrow">How it works</span>
-      <h2>How PropMithra works, step by step</h2>
+      <h2>How it works</h2>
       <p class="lead">Six simple steps.</p>
     </div>
     <ol class="steps six">
       <li><h3>Register and verify</h3><p class="muted">Sign up with your ID and RERA details.</p></li>
       <li><h3>Submit a property</h3><p class="muted">Add details, photos and documents.</p></li>
       <li><h3>PropMithra review</h3><p class="muted">Our team checks it before approval.</p></li>
-      <li><h3>Published to registered agents</h3><p class="muted">Shown to all agents or a chosen corridor.</p></li>
-      <li><h3>Interest from Customer Partners</h3><p class="muted">Agents with a customer tap "Talk to our team".</p></li>
+      <li><h3>Published to agents</h3><p class="muted">Shown to all agents or a chosen corridor.</p></li>
+      <li><h3>Interest received</h3><p class="muted">Agents with a customer tap "Talk to our team".</p></li>
       <li><h3>PropMithra coordinates</h3><p class="muted">We assign partners and track progress.</p></li>
     </ol>
   </div>
 </section>
 
-<section class="section" id="partners">
-  <div class="wrap">
-    <div class="section-head center">
-      <span class="eyebrow">Benefits</span>
-      <h2>Built for both sides of the deal</h2>
-    </div>
-    <div class="grid-2 benefits">
-      <div class="card" id="property-partners">
-        <span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg></span><h3>For Property Partners <small>agents with properties</small></h3>
-        <ul class="checks">
-          <li><span><b>Reach agents beyond your circle</b>Across Hyderabad's corridors.</span></li>
-          <li><span><b>Share with confidence</b>Owner details are never shown.</span></li>
-          <li><span><b>Less back-and-forth</b>We screen interest first.</span></li>
-          <li><span><b>See where things stand</b>Live property tracker.</span></li>
-          <li><span><b>Clear terms in writing</b>Agreed before you proceed.</span></li>
-        </ul>
-      </div>
-      <div class="card" id="customer-partners">
-        <span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></svg></span><h3>For Customer Partners <small>agents with buyers or tenants</small></h3>
-        <ul class="checks">
-          <li><span><b>Reviewed listings, in one place</b>Checked by our team.</span></li>
-          <li><span><b>Your customer stays yours</b>No customer details needed.</span></li>
-          <li><span><b>One team to talk to</b>We coordinate for you.</span></li>
-          <li><span><b>Know your status</b>Review, assigned or closed.</span></li>
-          <li><span><b>Fair, documented terms</b>Paid only on actual closure.</span></li>
-        </ul>
-      </div>
-    </div>
-  </div>
-</section>
-
 <section class="section band-white">
-  <div class="wrap split top">
-    <div class="stack">
-      <span class="eyebrow">Document review</span>
-      <h2>What our document review covers, and what it doesn't</h2>
-      <p class="lead">We check every submission before it goes live.</p>
-    </div>
-    <div class="review-cmp">
-      <div class="card"><h3><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 15l2 2 4-4"/></svg></span> Our review looks at</h3><ul class="checks"><li><span>Details, photos and documents provided</span></li><li><span>Information is consistent</span></li><li><span>Follows PropMithra guidelines</span></li></ul></div>
-      <div class="card not"><h3>Our review is not</h3><ul class="nots"><li>A legal title check</li><li>A valuation</li><li>Legal or tax advice</li></ul></div>
-      <p class="demo-note">Buyers and tenants should do their own title checks.</p>
-    </div>
-  </div>
-</section>
-
-<section class="section">
-  <div class="wrap split top">
-    <div class="stack">
-      <span class="eyebrow">Commission transparency</span>
-      <h2>Commission terms, agreed in writing</h2>
-      <p class="lead">Set out in writing. Payable only when the deal actually closes.</p>
-      <div class="btn-row"><a class="more" href="terms">Read the terms →</a></div>
-    </div>
-    <ul class="checks big">
-      <li><span><b>In writing, up front</b>Not decided on a call later.</span></li>
-      <li><span><b>Linked to actual closure</b>As per the agreed conditions.</span></li>
-      <li><span><b>No promised earnings</b>Sales and commission are not guaranteed.</span></li>
-    </ul>
-  </div>
-</section>
-
-<section class="section band-white">
-  <div class="wrap">
-    <div class="section-head center">
-      <span class="eyebrow">Trust</span>
-      <h2>Why agents can work with PropMithra</h2>
-    </div>
-    <div class="grid-3 why trust">
-      <div class="card"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></span><h3>Registered agents only</h3><p class="muted">ID and RERA checked by our team.</p></div>
-      <div class="card"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 15l2 2 4-4"/></svg></span><h3>Human review before publishing</h3><p class="muted">Nothing goes live without approval.</p></div>
-      <div class="card"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span><h3>Private details stay private</h3><p class="muted">Owner and customer details are hidden.</p></div>
-      <div class="card"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 21l1.9-5.4A8 8 0 1 1 21 12z"/></svg></span><h3>A coordinated process</h3><p class="muted">One team handles every interest.</p></div>
-      <div class="card"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg></span><h3>Local focus</h3><p class="muted">Built for Hyderabad's corridors.</p></div>
-    </div>
+  <div class="wrap grid-2 hs-terms">
+    <div class="card"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m11 17 2 2a1 1 0 1 0 3-3"/><path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.9-3.9a2 2 0 0 0-2.8 0l-.9.9a1 1 0 1 1-3-3l2.8-2.8a5.8 5.8 0 0 1 7 .9l.4.4L22 6"/><path d="m21 3 1 11h-2M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3M3 4h8"/></svg></span><h3>Commission, agreed in writing</h3><p class="muted">Set out up front. Payable only when the deal actually closes. Sales and commission are not guaranteed.</p><a class="more" href="terms">Read the terms →</a></div>
+    <div class="card"><span class="icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span><h3>Private details stay private</h3><p class="muted">Owner and customer details are never shown on listings. Only registered agents see approved properties.</p></div>
   </div>
 </section>
 
 <section class="section" id="testimonials" hidden>
   <div class="wrap">
-    <div class="section-head">
-      <span class="eyebrow">Testimonials</span>
-      <h2>What agents say.</h2>
-    </div>
+    <div class="section-head center"><h2>What agents say</h2></div>
     <div class="htesti">
       <div class="testi-track" id="h-testi"></div>
       <div class="rail-dots show" id="h-testi-dots"></div>
@@ -1284,17 +1387,14 @@ body.sv-open { overflow: hidden; }
 
 <section class="section band-white" id="faq">
   <div class="wrap narrow-faq">
-    <div class="section-head">
-      <span class="eyebrow">FAQ</span>
-      <h2>Questions agents ask us</h2>
-    </div>
+    <div class="section-head center"><h2>Questions agents ask us</h2></div>
     <div class="tfaq">
-      <details><summary>Who can join PropMithra?</summary><p>Real estate agents and brokers working in Hyderabad and Telangana can register. Your account is reviewed before you can submit or view listings.</p></details>
-      <details><summary>Do agents contact each other directly?</summary><p>No. When a Customer Partner shows interest, PropMithra contacts them first and coordinates communication with the Property Partner.</p></details>
-      <details><summary>Does PropMithra verify property title?</summary><p>No. We review the details and documents submitted for completeness and consistency. Legal title verification should be done by the buyer or tenant with a qualified professional.</p></details>
-      <details><summary>Do I have to share my customer's details?</summary><p>No. You can show interest without publishing your customer's personal details on the platform.</p></details>
-      <details><summary>How does commission work?</summary><p>Any commission is set out in a written agreement and depends on the transaction actually closing under the agreed conditions. Commission is not guaranteed.</p></details>
-      <details><summary>Can I use PropMithra on my phone?</summary><p>Yes. Use the PropMithra Android app or this website. Your listings and interest requests appear in both.</p></details>
+      <details><summary>Who can join PropMithra?</summary><p>Real estate agents and brokers working in Hyderabad and Telangana. Your account is reviewed before you can submit or view listings.</p></details>
+      <details><summary>Do agents contact each other directly?</summary><p>No. PropMithra contacts interested agents first and coordinates with the Property Partner.</p></details>
+      <details><summary>Does PropMithra verify property title?</summary><p>No. We review submitted details and documents for completeness. Title checks should be done by the buyer or tenant with a qualified professional.</p></details>
+      <details><summary>Do I have to share my customer's details?</summary><p>No. You can show interest without sharing your customer's personal details.</p></details>
+      <details><summary>How does commission work?</summary><p>It is set out in a written agreement and depends on the deal actually closing. Commission is not guaranteed.</p></details>
+      <details><summary>Can I use PropMithra on my phone?</summary><p>Yes. Use the Android app or this website.</p></details>
     </div>
   </div>
 </section>
@@ -1337,17 +1437,16 @@ function photo(x) {
 })();
 </script>
 
-<section class="section">
-  <div class="wrap">
-    <div class="cta-band">
-      <div class="stack"><h2>Ready to collaborate with Hyderabad's agents?</h2><p>Register once. We connect you with agents who have customers.</p></div>
-      <div class="btn-row"><a class="btn btn-light" href="register">Register as an agent</a><a class="btn btn-ghost-light" href="contact">Talk to our team</a></div>
-    </div>
+<section class="hs-ctas">
+  <div class="wrap hs-ctas-grid">
+    <div><h3>Ready to grow your network?</h3><p>Register once and start collaborating.</p><a class="btn btn-light hs-btn" href="register">Register as an agent</a></div>
+    <div><h3>Need help?</h3><p>Our team is a call or a message away.</p><a class="btn btn-ghost-light hs-btn" href="contact">Talk to our team</a></div>
+    <div><h3>Launching a project?</h3><p>Reach agents in the right corridors.</p><a class="btn btn-ghost-light hs-btn" href="developers">For developers</a></div>
   </div>
 </section>
 
 <div class="m-cta" aria-hidden="true">
-  <div><b>PropMithra · Hyderabad</b><span>Agent collaboration, coordinated</span></div>
+  <div><b>PropMithra · Hyderabad</b><span>Grow your agent network</span></div>
   <a class="btn btn-primary" href="register" tabindex="-1">Register</a>
 </div>
 
