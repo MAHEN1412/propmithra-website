@@ -1311,29 +1311,12 @@ main:has(> .hs-ctas) + .site-footer, main:has(.hs-ctas) ~ .site-footer { margin-
   .hs-stage { height: 640px; }
   .hs-phone { transform: translateX(-50%) scale(1.2); transform-origin: 50% 100%; }
 }
-/* Mobile walkthrough (first visit): the Android app's first three screens */
-.wt { position: fixed; inset: 0; z-index: 1000; background: #fff; overflow: hidden; transition: opacity .3s ease; }
-.wt.out { opacity: 0; }
-.wt-track { display: flex; height: 100%; transition: transform .35s cubic-bezier(.2,.7,.2,1); }
-.wt-pg { flex: 0 0 100%; height: 100%; }
-.wt-pg img { width: 100%; height: 100%; object-fit: cover; object-position: top center; display: block; }
-.wt-skip { position: absolute; top: calc(12px + env(safe-area-inset-top)); right: 12px; background: rgba(255,255,255,.92); border: 0; border-radius: 999px; padding: 9px 18px; font: 700 .92rem var(--font); color: var(--ink); box-shadow: 0 2px 8px rgba(0,0,0,.08); }
-.wt.last .wt-skip { opacity: 0; pointer-events: none; }
-.wt-bar { position: absolute; left: 0; right: 0; bottom: 0; padding: 40px 20px calc(16px + env(safe-area-inset-bottom)); background: linear-gradient(180deg, rgba(255,255,255,0), rgba(255,255,255,.95) 32%, #fff); display: grid; gap: 12px; justify-items: center; }
-.wt-dots { display: flex; gap: 8px; }
-.wt-dots i { width: 8px; height: 8px; border-radius: 4px; background: rgba(15,42,42,.25); transition: width .25s, background .25s; cursor: pointer; }
-.wt-dots i.on { width: 24px; background: #2cb740; }
-.wt-nav { display: grid; grid-template-columns: 90px 1fr; gap: 8px; width: 100%; max-width: 380px; }
-.wt-back { background: none; border: 0; font: 700 1rem var(--font); color: var(--muted, #5b6b6b); }
-.wt-next { justify-content: center; min-height: 50px; }
-.wt-store { display: none; align-items: center; gap: 10px; background: #0b0f10; color: #fff; text-decoration: none; border-radius: 12px; padding: 9px 22px 9px 16px; min-height: 54px; box-shadow: 0 0 0 1px #3c4548; }
-.wt-store span { display: grid; line-height: 1.1; text-align: left; }
-.wt-store small { font: 600 .66rem var(--font); letter-spacing: .06em; opacity: .85; }
-.wt-store b { font: 700 1.25rem var(--font); }
-.wt-web { display: none; background: none; border: 0; font: 700 .95rem var(--font); color: var(--teal, #007a63); padding: 6px; }
-.wt.last .wt-nav { display: none; }
-.wt.last .wt-store { display: inline-flex; }
-.wt.last .wt-web { display: block; }
+/* App onboarding screens inside the hero phone (full screen, under the status bar) */
+.hs-screen { position: relative; display: flex; flex-direction: column; }
+.hs-slides { flex: 1; min-height: 0; height: auto; }
+.hs-status { position: relative; z-index: 2; }
+.hs-slide.hs-ob { position: absolute; inset: -30px -11px -12px; display: block; }
+.hs-slide.hs-ob img { width: 100%; height: 100%; object-fit: cover; object-position: top center; display: block; }
 </style>
 <style>@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:700;font-display:swap;src:url(fonts/roboto-condensed-latin-700-italic.woff2) format("woff2")}@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:800;font-display:swap;src:url(fonts/roboto-condensed-latin-800-italic.woff2) format("woff2")}</style>
 </head>
@@ -1397,8 +1380,11 @@ main:has(> .hs-ctas) + .site-footer, main:has(.hs-ctas) ~ .site-footer { margin-
       <div class="hs-screen">
         <div class="hs-status"><span>12:30</span><i class="hs-cam"></i><span class="hs-sys"><i></i><i></i><b></b></span></div>
         <div class="hs-slides" id="hs-slides">
+          <div class="hs-slide hs-ob on" data-name="Welcome 1"><img src="img/onboarding/wt1.jpg" alt="Your network. Your growth."></div>
+          <div class="hs-slide hs-ob" data-name="Welcome 2"><img src="img/onboarding/wt2.jpg" alt="Connect with a vast network." loading="lazy"></div>
+          <div class="hs-slide hs-ob" data-name="Welcome 3"><img src="img/onboarding/wt3.jpg" alt="Collaborate and close deals." loading="lazy"></div>
           <!-- 1 Register -->
-          <div class="hs-slide on" data-name="Register">
+          <div class="hs-slide" data-name="Register">
             <div class="hs-app-top"><b>Mithra registration</b><small>Step 2 of 4</small></div>
             <div class="hs-prog"><i class="d"></i><i class="c"></i><i></i><i></i></div>
             <div class="hs-form">
@@ -1491,50 +1477,23 @@ main:has(> .hs-ctas) + .site-footer, main:has(.hs-ctas) ~ .site-footer { margin-
 </script>
 
 
+
+
+
 <script>
-// Mobile walkthrough: the first three screens of the PropMithra Android app,
-// shown once on first visit, ending with the app download.
+// Agent photos drift a little as the page scrolls (each at its own pace).
 (() => {
-  const force = /[?&]walkthrough=1/.test(location.search);
-  if (!force && !matchMedia('(max-width: 640px)').matches) return;
-  try { if (!force && localStorage.getItem('pm_walk_v2')) return; } catch (e) {}
-  const R = '';
-  const pics = [
-    ['wt1.jpg', 'Your network. Your growth. Discover real estate professionals, build trusted connections and unlock new business opportunities.'],
-    ['wt2.jpg', 'Connect with a vast network. Network is networth.'],
-    ['wt3.jpg', 'Collaborate and close deals. Connect with other agents, coordinate site visits, agree on collaboration terms and move deals forward.']
-  ];
-  const android = '<svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path fill="#3ddc84" d="M17.6 9.48l1.84-3.18a.38.38 0 0 0-.66-.38l-1.86 3.22a11.4 11.4 0 0 0-9.84 0L5.22 5.92a.38.38 0 0 0-.66.38L6.4 9.48A10.8 10.8 0 0 0 1 18h22a10.8 10.8 0 0 0-5.4-8.52zM7 15.25a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5zm10 0a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5z"/></svg>';
-  const w = document.createElement('div');
-  w.className = 'wt'; w.setAttribute('role', 'dialog'); w.setAttribute('aria-modal', 'true'); w.setAttribute('aria-label', 'Welcome to PropMithra');
-  w.innerHTML = '<div class="wt-track">' + pics.map(([f, t]) => '<div class="wt-pg"><img src="' + R + 'img/onboarding/' + f + '" alt="' + t + '"></div>').join('') + '</div>' +
-    '<button class="wt-skip" type="button">Skip</button>' +
-    '<div class="wt-bar"><div class="wt-dots">' + pics.map(() => '<i></i>').join('') + '</div>' +
-    '<div class="wt-nav"><button class="wt-back" type="button">Back</button><button class="btn btn-primary wt-next" type="button">Next →</button></div>' +
-    '<a class="wt-store" href="' + R + 'app">' + android + '<span><small>GET THE APP FOR</small><b>Android</b></span></a>' +
-    '<button class="wt-web" type="button">Continue to website</button></div>';
-  const track = w.querySelector('.wt-track'), ds = [...w.querySelectorAll('.wt-dots i')], back = w.querySelector('.wt-back'), next = w.querySelector('.wt-next');
-  let i = 0;
-  const show = (n) => {
-    i = Math.max(0, Math.min(pics.length - 1, n));
-    track.style.transform = 'translateX(' + (-100 * i) + '%)';
-    ds.forEach((d, k) => d.classList.toggle('on', k === i));
-    back.style.visibility = i ? 'visible' : 'hidden';
-    w.classList.toggle('last', i === pics.length - 1);
-  };
-  const close = () => { try { localStorage.setItem('pm_walk_v2', '1'); } catch (e) {} w.classList.add('out'); document.documentElement.style.overflow = ''; setTimeout(() => w.remove(), 300); };
-  next.onclick = () => show(i + 1); back.onclick = () => show(i - 1);
-  w.querySelector('.wt-skip').onclick = () => show(pics.length - 1);
-  w.querySelector('.wt-web').onclick = close;
-  w.querySelector('.wt-store').addEventListener('click', () => { try { localStorage.setItem('pm_walk_v2', '1'); } catch (e) {} });
-  ds.forEach((d, k) => d.onclick = () => show(k));
-  let x0 = null;
-  w.addEventListener('touchstart', (e) => { x0 = e.touches[0].clientX; }, { passive: true });
-  w.addEventListener('touchend', (e) => { if (x0 == null) return; const dx = e.changedTouches[0].clientX - x0; if (dx < -40) show(i + 1); if (dx > 40) show(i - 1); x0 = null; });
-  document.body.appendChild(w); document.documentElement.style.overflow = 'hidden'; show(0);
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const ms = [...document.querySelectorAll('.hs-mover')].map((g, k) => {
+    const m = /translate\(([-\d.]+) ([-\d.]+)\)/.exec(g.getAttribute('transform')) || [0, 0, 0];
+    return { g, x: +m[1], y: +m[2], f: [-.22, -.14, -.3, -.18, -.26, -.12, -.2][k % 7], fx: [.05, -.06, .08, -.04, -.07, .03, .06][k % 7] };
+  });
+  let raf = 0;
+  const upd = () => { raf = 0; const y = Math.min(scrollY, 900);
+    ms.forEach(o => o.g.setAttribute('transform', 'translate(' + (o.x + y * o.fx).toFixed(1) + ' ' + (o.y + y * o.f).toFixed(1) + ')')); };
+  addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(upd); }, { passive: true });
 })();
 </script>
-
 <section class="hs-strip">
   <div class="wrap">
     <p>Built for Hyderabad's agent network, corridor by corridor</p>
