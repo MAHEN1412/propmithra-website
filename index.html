@@ -1262,6 +1262,44 @@ main:has(> .hs-ctas) + .site-footer, main:has(.hs-ctas) ~ .site-footer { margin-
   .hs-agent:nth-of-type(5) { display: grid; left: 92% !important; top: 12% !important; }
   .hs-agent:nth-of-type(6) { left: 91% !important; top: 88% !important; }
 }
+/* Phone screen slider */
+.hs-tabs { display: inline-flex; gap: 4px; padding: 4px; background: #fff; border: 1px solid var(--line); border-radius: 99px; box-shadow: var(--shadow); margin-top: 4px; }
+.hs-tabs button { border: 0; background: none; font: inherit; font-size: .85rem; font-weight: 650; color: var(--ink-2); padding: 7px 14px; border-radius: 99px; cursor: pointer; }
+.hs-tabs button.on { background: var(--teal); color: #fff; }
+.hs-slides { position: relative; height: 100%; }
+.hs-slide { position: absolute; inset: 0; display: grid; gap: 10px; align-content: start; opacity: 0; transform: translateX(18px); transition: opacity .45s ease, transform .45s ease; pointer-events: none; }
+.hs-slide.on { opacity: 1; transform: none; }
+.hs-prog { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+.hs-prog i { height: 4px; border-radius: 99px; background: var(--line); } .hs-prog i.d { background: var(--green); } .hs-prog i.c { background: var(--teal); }
+.hs-form { display: grid; gap: 8px; background: #fff; border-radius: 16px; padding: 10px; box-shadow: 0 2px 8px rgba(15,42,42,.08); }
+.hs-form label { display: grid; gap: 3px; font-size: .64rem; font-weight: 700; color: var(--ink-3); text-transform: uppercase; letter-spacing: .04em; }
+.hs-form label > span { display: flex; align-items: center; justify-content: space-between; gap: 6px; background: var(--canvas); border: 1px solid var(--line); border-radius: 9px; padding: 6px 8px; font-size: .76rem; font-weight: 600; color: var(--ink); text-transform: none; letter-spacing: 0; }
+.hs-form em { font-style: normal; color: var(--teal); font-size: .64rem; }
+.hs-form .hs-chips { justify-content: flex-start; background: none; border: 0; padding: 0; }
+.hs-form .hs-chips i { font-style: normal; border: 1px solid var(--line); border-radius: 99px; padding: 2px 8px; font-size: .66rem; background: #fff; }
+.hs-form .hs-chips i.on { background: var(--teal); border-color: var(--teal); color: #fff; }
+.hs-talk.dark { background: var(--teal); }
+.hs-talk.soft { background: #e7f8ef; color: #0b6b3a; }
+.hs-now { background: #e8f0fe; border-radius: 14px; padding: 10px; display: grid; gap: 2px; font-size: .74rem; }
+.hs-now small { text-transform: uppercase; letter-spacing: .05em; font-size: .6rem; font-weight: 700; color: #1a56db; }
+.hs-now span { color: var(--ink-2); }
+.hs-vtrack { list-style: none; margin: 0; padding: 10px; background: #fff; border-radius: 14px; display: grid; gap: 8px; box-shadow: 0 2px 8px rgba(15,42,42,.08); counter-reset: v; }
+.hs-vtrack li { counter-increment: v; display: grid; grid-template-columns: 20px 1fr; column-gap: 8px; font-size: .72rem; color: var(--ink-3); }
+.hs-vtrack li::before { content: counter(v); grid-row: span 2; width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--line); display: grid; place-items: center; font-size: .6rem; font-weight: 700; }
+.hs-vtrack li.d { color: var(--ink); } .hs-vtrack li.d::before { content: "✓"; background: var(--green); border-color: var(--green); color: #fff; }
+.hs-vtrack li.c { color: var(--ink); } .hs-vtrack li.c::before { background: #1a56db; border-color: #1a56db; color: #fff; }
+.hs-vtrack small { font-size: .64rem; color: var(--ink-3); }
+.hs-adm { background: #fff; border-radius: 14px; padding: 9px; display: grid; gap: 7px; box-shadow: 0 2px 8px rgba(15,42,42,.08); font-size: .72rem; }
+.hs-adm > div { display: grid; grid-template-columns: 30px 1fr; gap: 8px; align-items: center; }
+.hs-adm span:last-child { display: grid; } .hs-adm small { color: var(--ink-3); font-size: .64rem; }
+.hs-ini { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: .68rem; }
+.hs-adm em { font-style: normal; text-align: center; font-weight: 700; font-size: .66rem; padding: 6px; border-radius: 99px; }
+.hs-adm em.go { background: var(--teal); color: #fff; } .hs-adm em.done { background: var(--mint); color: var(--teal-dark); }
+.hs-note { margin: 0; font-size: .72rem; color: var(--ink-2); text-align: center; }
+.hs-meet { display: grid; grid-template-columns: auto 1fr; gap: 8px; align-items: center; background: #e8f0fe; border: 1px solid #c7d7fb; border-radius: 14px; padding: 10px; font-size: .72rem; }
+.hs-meet span:last-child { display: grid; } .hs-meet small { color: var(--ink-2); font-size: .66rem; }
+.hs-meet > span:first-child { font-size: 1.3rem; }
+@media (max-width: 640px) { .hs-tabs { flex-wrap: wrap; justify-content: center; } .hs-tabs button { padding: 6px 11px; font-size: .8rem; } }
 </style>
 <style>@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:700;font-display:swap;src:url(fonts/roboto-condensed-latin-700-italic.woff2) format("woff2")}@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:800;font-display:swap;src:url(fonts/roboto-condensed-latin-800-italic.woff2) format("woff2")}</style>
 </head>
@@ -1296,6 +1334,13 @@ main:has(> .hs-ctas) + .site-footer, main:has(.hs-ctas) ~ .site-footer { margin-
       <a class="btn btn-primary hs-btn" href="register">Register as an agent</a>
       <a class="btn btn-ghost hs-btn" href="#how">See how it works</a>
     </div>
+    <div class="hs-tabs" role="tablist" aria-label="See the app in action">
+      <button type="button" role="tab" class="on" data-i="0">Register</button>
+      <button type="button" role="tab" data-i="1">Browse</button>
+      <button type="button" role="tab" data-i="2">Track</button>
+      <button type="button" role="tab" data-i="3">Admin</button>
+      <button type="button" role="tab" data-i="4">Meet</button>
+    </div>
   </div>
   <div class="wrap hs-stage" aria-hidden="true">
     <svg class="hs-links" viewBox="0 0 1000 540" preserveAspectRatio="none"><path d="M310 65 Q 405 5 500 300"/><path d="M310 238 Q 405 178 500 300"/><path d="M330 475 Q 415 415 500 300"/><path d="M690 54 Q 595 -6 500 300"/><path d="M690 238 Q 595 178 500 300"/><path d="M670 475 Q 585 415 500 300"/></svg>
@@ -1312,16 +1357,69 @@ main:has(> .hs-ctas) + .site-footer, main:has(.hs-ctas) ~ .site-footer { margin-
       <span class="hs-btn-side vol"></span><span class="hs-btn-side pwr"></span>
       <div class="hs-screen">
         <div class="hs-status"><span>12:30</span><i class="hs-cam"></i><span class="hs-sys"><i></i><i></i><b></b></span></div>
-        <div class="hs-app-top"><b>Assigned by PropMithra</b><small>All · Mine</small></div>
-        <div class="hs-card">
-          <div class="hs-card-photo" style="background-image:url(img/p1.jpg)"><span class="hs-tag">Verified by PropMithra</span><span class="hs-price">₹1.2 Cr</span></div>
-          <b>3 BHK Apartment · Manikonda</b>
-          <small>1,850 sq.ft · South-West</small>
-          <span class="hs-talk">Talk to our team</span>
-        </div>
-        <div class="hs-card slim">
-          <div class="hs-card-photo short" style="background-image:url(img/p3.jpg)"><span class="hs-price">₹2.1 Cr</span></div>
-          <b>Villa · Kokapet</b>
+        <div class="hs-slides" id="hs-slides">
+          <!-- 1 Register -->
+          <div class="hs-slide on" data-name="Register">
+            <div class="hs-app-top"><b>Mithra registration</b><small>Step 2 of 4</small></div>
+            <div class="hs-prog"><i class="d"></i><i class="c"></i><i></i><i></i></div>
+            <div class="hs-form">
+              <label>Full name<span>Ravi Kumar</span></label>
+              <label>Mobile<span>+91 98480 12345 <em>✓ Verified</em></span></label>
+              <label>RERA number<span>P02400001234</span></label>
+              <label>PAN<span>ABCDE1234F</span></label>
+              <label>Corridors<span class="hs-chips"><i class="on">West</i><i class="on">South-West</i><i>North</i></span></label>
+            </div>
+            <span class="hs-talk dark">Continue</span>
+          </div>
+          <!-- 2 Browse -->
+          <div class="hs-slide" data-name="Browse">
+            <div class="hs-app-top"><b>Assigned by PropMithra</b><small>All · Mine</small></div>
+            <div class="hs-card">
+              <div class="hs-card-photo" style="background-image:url(img/p1.jpg)"><span class="hs-tag">Verified by PropMithra</span><span class="hs-price">₹1.2 Cr</span></div>
+              <b>3 BHK Apartment · Manikonda</b>
+              <small>1,850 sq.ft · South-West</small>
+              <span class="hs-talk">Talk to our team</span>
+            </div>
+            <div class="hs-card slim">
+              <div class="hs-card-photo short" style="background-image:url(img/p3.jpg)"><span class="hs-price">₹2.1 Cr</span></div>
+              <b>Villa · Kokapet</b>
+            </div>
+          </div>
+          <!-- 3 Track -->
+          <div class="hs-slide" data-name="Track">
+            <div class="hs-app-top"><b>Property tracking</b><small>PL-7F3K2A</small></div>
+            <div class="hs-now"><small>Current stage</small><b>Customer Partner assigned</b><span>Next: follow-up and site visit</span></div>
+            <ol class="hs-vtrack">
+              <li class="d"><b>Submitted</b><small>Details and photos received</small></li>
+              <li class="d"><b>Approved &amp; published</b><small>Visible to registered agents</small></li>
+              <li class="d"><b>Interest received</b><small>3 agents interested</small></li>
+              <li class="c"><b>Customer Partner assigned</b><small>Agent with a buyer</small></li>
+              <li><b>Deal closed</b><small>Then commission</small></li>
+            </ol>
+          </div>
+          <!-- 4 Admin -->
+          <div class="hs-slide" data-name="Admin">
+            <div class="hs-app-top"><b>Admin · Interested agents</b><small>3</small></div>
+            <div class="hs-adm">
+              <div><span class="hs-ini" style="background:#e0f2fe;color:#075985">RK</span><span><b>Ravi K.</b><small>📞 +91 98480 1••••</small><small>Buyer · ₹1–1.2 Cr</small></span></div>
+              <em class="go">Approve as Customer Partner</em>
+            </div>
+            <div class="hs-adm">
+              <div><span class="hs-ini" style="background:#fef3c7;color:#92400e">SP</span><span><b>Sunita P.</b><small>📞 +91 90000 2••••</small><small>Buyer · visit this week</small></span></div>
+              <em class="done">✓ Approved · Assigned</em>
+            </div>
+            <div class="hs-adm">
+              <div><span class="hs-ini" style="background:#ede9fe;color:#5b21b6">AM</span><span><b>Arjun M.</b><small>📞 +91 97000 3••••</small><small>Tenant</small></span></div>
+              <em class="go">Approve as Customer Partner</em>
+            </div>
+          </div>
+          <!-- 5 Meet -->
+          <div class="hs-slide" data-name="Meet">
+            <div class="hs-app-top"><b>3 BHK · Manikonda</b><small>Your status</small></div>
+            <span class="hs-talk soft">YOU'RE ASSIGNED ✓</span>
+            <p class="hs-note">PropMithra approved you as the Customer Partner. Our team will call you.</p>
+            <div class="hs-meet"><span>📅</span><span><b>Office meeting with PropMithra</b><small>Sat, 31 Oct · 11:00 AM</small><small>PropMithra office, Nacharam</small></span></div>
+          </div>
         </div>
       </div>
     </div>
@@ -1336,6 +1434,21 @@ main:has(> .hs-ctas) + .site-footer, main:has(.hs-ctas) ~ .site-footer { margin-
     </div>
   </div>
 </section>
+
+<script>
+// Phone screens: auto-advance every 3.5 s; tabs pick a screen; pauses on hover.
+(() => {
+  const slides = [...document.querySelectorAll('#hs-slides .hs-slide')], tabs = [...document.querySelectorAll('.hs-tabs button')];
+  if (!slides.length) return;
+  let i = 0, t = null;
+  const go = (n) => { i = (n + slides.length) % slides.length; slides.forEach((s, k) => s.classList.toggle('on', k === i)); tabs.forEach((b, k) => { b.classList.toggle('on', k === i); b.setAttribute('aria-selected', k === i); }); };
+  const play = () => { clearInterval(t); if (!matchMedia('(prefers-reduced-motion: reduce)').matches) t = setInterval(() => go(i + 1), 3500); };
+  tabs.forEach(b => b.onclick = () => { go(+b.dataset.i); play(); });
+  const stage = document.querySelector('.hs-stage');
+  stage.addEventListener('mouseenter', () => clearInterval(t)); stage.addEventListener('mouseleave', play);
+  go(0); play();
+})();
+</script>
 
 <section class="hs-strip">
   <div class="wrap">
