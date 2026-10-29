@@ -1481,17 +1481,21 @@ main:has(> .hs-ctas) + .site-footer, main:has(.hs-ctas) ~ .site-footer { margin-
 
 
 <script>
-// Agent photos drift a little as the page scrolls (each at its own pace).
+// Agent photos travel along their arch line as the page scrolls.
 (() => {
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  // [arch, start position along the line (0-1), how far it travels]
+  const plan = [[0, .31, .07], [0, .74, -.07], [1, .08, .1], [2, .88, -.1], [2, .972, -.12], [3, .88, .08], [3, .028, .14]];
   const ms = [...document.querySelectorAll('.hs-mover')].map((g, k) => {
-    const m = /translate\(([-\d.]+) ([-\d.]+)\)/.exec(g.getAttribute('transform')) || [0, 0, 0];
-    return { g, x: +m[1], y: +m[2], f: [-.22, -.14, -.3, -.18, -.26, -.12, -.2][k % 7], fx: [.05, -.06, .08, -.04, -.07, .03, .06][k % 7] };
-  });
+    const [a, f, d] = plan[k % plan.length], path = document.getElementById('arch' + a);
+    return path && { g, path, len: path.getTotalLength(), f, d };
+  }).filter(Boolean);
   let raf = 0;
-  const upd = () => { raf = 0; const y = Math.min(scrollY, 900);
-    ms.forEach(o => o.g.setAttribute('transform', 'translate(' + (o.x + y * o.fx).toFixed(1) + ' ' + (o.y + y * o.f).toFixed(1) + ')')); };
+  const upd = () => { raf = 0; const t = Math.min(scrollY / 700, 1);
+    ms.forEach(o => { const f = Math.max(0, Math.min(1, o.f + o.d * t)), pt = o.path.getPointAtLength(f * o.len);
+      o.g.setAttribute('transform', 'translate(' + pt.x.toFixed(1) + ' ' + pt.y.toFixed(1) + ')'); }); };
   addEventListener('scroll', () => { if (!raf) raf = requestAnimationFrame(upd); }, { passive: true });
+  upd();
 })();
 </script>
 <section class="hs-strip">
