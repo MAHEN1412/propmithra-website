@@ -1099,6 +1099,10 @@ body.sv-open { overflow: hidden; }
 .page-hero .lead { font-size: 1rem; color: var(--ink-3); }
 .page-hero + .section.tight, .page-hero + .section { padding-top: clamp(16px, 2.5vw, 28px); }
 @media (max-width: 620px) { .page-hero h1 { font-size: 1.5rem; } }
+@media (max-width: 620px) {
+  .hero .lead { display: block; font-size: 1rem; }
+  .hero h1 em { padding-left: 0; }
+}
 </style>
 <style>@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:700;font-display:swap;src:url(fonts/roboto-condensed-latin-700-italic.woff2) format("woff2")}@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:800;font-display:swap;src:url(fonts/roboto-condensed-latin-800-italic.woff2) format("woff2")}</style>
 </head>
@@ -1120,10 +1124,9 @@ body.sv-open { overflow: hidden; }
 <section class="hero">
   <div class="wrap hero-grid">
     <div class="hero-copy">
-      <span class="eyebrow">Now live in Hyderabad</span>
-      <h1>Real estate agent collaboration in Hyderabad, coordinated by PropMithra</h1>
-      <p class="hero-display">Your property. Their customer. <em>One team in between.</em></p>
-      <p class="lead">Agents with properties meet agents with buyers and tenants. PropMithra reviews every listing and coordinates every interest.</p>
+      <span class="eyebrow">Business growth</span>
+      <h1>Expand Your Network. <em>Unlock More Property Opportunities.</em></h1>
+      <p class="lead">Collaborate with fellow agents, discover relevant listings and work together to move property deals forward.</p>
       <div class="btn-row">
         <a class="btn btn-primary" href="register">Register as an agent</a>
         <a class="btn btn-ghost" href="#how">See how it works</a>

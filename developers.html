@@ -1099,6 +1099,10 @@ body.sv-open { overflow: hidden; }
 .page-hero .lead { font-size: 1rem; color: var(--ink-3); }
 .page-hero + .section.tight, .page-hero + .section { padding-top: clamp(16px, 2.5vw, 28px); }
 @media (max-width: 620px) { .page-hero h1 { font-size: 1.5rem; } }
+@media (max-width: 620px) {
+  .hero .lead { display: block; font-size: 1rem; }
+  .hero h1 em { padding-left: 0; }
+}
 </style>
 <style>@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:700;font-display:swap;src:url(fonts/roboto-condensed-latin-700-italic.woff2) format("woff2")}@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:800;font-display:swap;src:url(fonts/roboto-condensed-latin-800-italic.woff2) format("woff2")}</style>
 </head>
