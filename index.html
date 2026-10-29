@@ -1300,6 +1300,8 @@ main:has(> .hs-ctas) + .site-footer, main:has(.hs-ctas) ~ .site-footer { margin-
 .hs-meet span:last-child { display: grid; } .hs-meet small { color: var(--ink-2); font-size: .66rem; }
 .hs-meet > span:first-child { font-size: 1.3rem; }
 @media (max-width: 640px) { .hs-tabs { flex-wrap: wrap; justify-content: center; } .hs-tabs button { padding: 6px 11px; font-size: .8rem; } }
+.hs-mover text { font: 800 15px var(--font); }
+.hs-mover > circle:first-of-type { filter: drop-shadow(0 4px 8px rgba(15,42,42,.18)); }
 </style>
 <style>@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:700;font-display:swap;src:url(fonts/roboto-condensed-latin-700-italic.woff2) format("woff2")}@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:800;font-display:swap;src:url(fonts/roboto-condensed-latin-800-italic.woff2) format("woff2")}</style>
 </head>
@@ -1320,11 +1322,25 @@ main:has(> .hs-ctas) + .site-footer, main:has(.hs-ctas) ~ .site-footer { margin-
 <main id="main">
 <section class="hs-hero">
   <svg class="hs-arches" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-    <path d="M40 1000V820A760 760 0 0 1 1560 820V1000"/>
-    <path d="M200 1000V760A600 600 0 0 1 1400 760V1000"/>
-    <path d="M360 1000V700A440 440 0 0 1 1240 700V1000"/>
-    <path d="M520 1000V640A280 280 0 0 1 1080 640V1000"/>
-    <path d="M660 1000V600A140 140 0 0 1 940 600V1000"/>
+    <path id="arch0" d="M40 1000V820A760 760 0 0 1 1560 820V1000"/>
+    <path id="arch1" d="M200 1000V760A600 600 0 0 1 1400 760V1000"/>
+    <path id="arch2" d="M360 1000V700A440 440 0 0 1 1240 700V1000"/>
+    <path id="arch3" d="M520 1000V640A280 280 0 0 1 1080 640V1000"/>
+    <path id="arch4" d="M660 1000V600A140 140 0 0 1 940 600V1000"/>
+    <g class="hs-mover"><animateMotion dur="34s" begin="-0s" repeatCount="indefinite" keyPoints="0;0.3;0" keyTimes="0;0.5;1" calcMode="linear"><mpath href="#arch0"/></animateMotion>
+      <circle r="23" fill="#e0f2fe" stroke="#fff" stroke-width="4"/><text text-anchor="middle" dy="6" fill="#075985">RK</text><circle cx="16" cy="16" r="6" fill="#2cb740" stroke="#fff" stroke-width="2.5"/></g>
+    <g class="hs-mover"><animateMotion dur="34s" begin="-17s" repeatCount="indefinite" keyPoints="1;0.70;1" keyTimes="0;0.5;1" calcMode="linear"><mpath href="#arch0"/></animateMotion>
+      <circle r="23" fill="#fce7f3" stroke="#fff" stroke-width="4"/><text text-anchor="middle" dy="6" fill="#9d174d">MS</text><circle cx="16" cy="16" r="6" fill="#2cb740" stroke="#fff" stroke-width="2.5"/></g>
+    <g class="hs-mover"><animateMotion dur="28s" begin="-5s" repeatCount="indefinite" keyPoints="0;0.3;0" keyTimes="0;0.5;1" calcMode="linear"><mpath href="#arch1"/></animateMotion>
+      <circle r="23" fill="#fef3c7" stroke="#fff" stroke-width="4"/><text text-anchor="middle" dy="6" fill="#92400e">SP</text><circle cx="16" cy="16" r="6" fill="#2cb740" stroke="#fff" stroke-width="2.5"/></g>
+    <g class="hs-mover"><animateMotion dur="24s" begin="-12s" repeatCount="indefinite" keyPoints="1;0.78;1" keyTimes="0;0.5;1" calcMode="linear"><mpath href="#arch2"/></animateMotion>
+      <circle r="23" fill="#ede9fe" stroke="#fff" stroke-width="4"/><text text-anchor="middle" dy="6" fill="#5b21b6">AM</text><circle cx="16" cy="16" r="6" fill="#2cb740" stroke="#fff" stroke-width="2.5"/></g>
+    <g class="hs-mover"><animateMotion dur="28s" begin="-19s" repeatCount="indefinite" keyPoints="0;0.3;0" keyTimes="0;0.5;1" calcMode="linear"><mpath href="#arch1"/></animateMotion>
+      <circle r="23" fill="#dcfce7" stroke="#fff" stroke-width="4"/><text text-anchor="middle" dy="6" fill="#166534">VR</text><circle cx="16" cy="16" r="6" fill="#2cb740" stroke="#fff" stroke-width="2.5"/></g>
+    <g class="hs-mover"><animateMotion dur="20s" begin="-3s" repeatCount="indefinite" keyPoints="1;0.78;1" keyTimes="0;0.5;1" calcMode="linear"><mpath href="#arch3"/></animateMotion>
+      <circle r="23" fill="#ffe4e6" stroke="#fff" stroke-width="4"/><text text-anchor="middle" dy="6" fill="#9f1239">NS</text><circle cx="16" cy="16" r="6" fill="#2cb740" stroke="#fff" stroke-width="2.5"/></g>
+    <g class="hs-mover"><animateMotion dur="24s" begin="-0s" repeatCount="indefinite" keyPoints="0;0.22;0" keyTimes="0;0.5;1" calcMode="linear"><mpath href="#arch2"/></animateMotion>
+      <circle r="23" fill="#e0e7ff" stroke="#fff" stroke-width="4"/><text text-anchor="middle" dy="6" fill="#3730a3">PK</text><circle cx="16" cy="16" r="6" fill="#2cb740" stroke="#fff" stroke-width="2.5"/></g>
   </svg>
   <div class="wrap hs-hero-copy">
     <span class="hs-pill">Business growth · Hyderabad</span>
@@ -1334,17 +1350,8 @@ main:has(> .hs-ctas) + .site-footer, main:has(.hs-ctas) ~ .site-footer { margin-
       <a class="btn btn-primary hs-btn" href="register">Register as an agent</a>
       <a class="btn btn-ghost hs-btn" href="#how">See how it works</a>
     </div>
-    <div class="hs-tabs" role="tablist" aria-label="See the app in action">
-      <button type="button" role="tab" class="on" data-i="0">Register</button>
-      <button type="button" role="tab" data-i="1">Browse</button>
-      <button type="button" role="tab" data-i="2">Track</button>
-      <button type="button" role="tab" data-i="3">Admin</button>
-      <button type="button" role="tab" data-i="4">Meet</button>
-    </div>
   </div>
   <div class="wrap hs-stage" aria-hidden="true">
-    <svg class="hs-links" viewBox="0 0 1000 540" preserveAspectRatio="none"><path d="M310 65 Q 405 5 500 300"/><path d="M310 238 Q 405 178 500 300"/><path d="M330 475 Q 415 415 500 300"/><path d="M690 54 Q 595 -6 500 300"/><path d="M690 238 Q 595 178 500 300"/><path d="M670 475 Q 585 415 500 300"/></svg>
-    <div class="hs-agent" style="left:31%;top:12%"><span class="hs-av" style="background:#e0f2fe;color:#075985">RK</span><small>Agent · Kondapur</small></div><div class="hs-agent" style="left:31%;top:44%"><span class="hs-av" style="background:#fef3c7;color:#92400e">SP</span><small>Agent · Gachibowli</small></div><div class="hs-agent" style="left:33%;top:88%"><span class="hs-av" style="background:#ede9fe;color:#5b21b6">AM</span><small>Agent · Kokapet</small></div><div class="hs-agent" style="left:69%;top:10%"><span class="hs-av" style="background:#dcfce7;color:#166534">VR</span><small>Agent · Kompally</small></div><div class="hs-agent" style="left:69%;top:44%"><span class="hs-av" style="background:#ffe4e6;color:#9f1239">NS</span><small>Agent · Uppal</small></div><div class="hs-agent" style="left:67%;top:88%"><span class="hs-av" style="background:#e0e7ff;color:#3730a3">PK</span><small>Agent · Miyapur</small></div>
     <div class="hs-float hs-f1">
       <div class="hs-mini-photo" style="background-image:url(img/p2.jpg)"><span class="hs-price">₹95 L</span></div>
       <b>2 BHK · Kondapur</b><small>1,250 sq.ft · Sale</small>
@@ -1447,6 +1454,7 @@ main:has(> .hs-ctas) + .site-footer, main:has(.hs-ctas) ~ .site-footer { margin-
   const stage = document.querySelector('.hs-stage');
   stage.addEventListener('mouseenter', () => clearInterval(t)); stage.addEventListener('mouseleave', play);
   go(0); play();
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) document.querySelector('.hs-arches')?.pauseAnimations?.();
 })();
 </script>
 
