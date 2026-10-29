@@ -1311,6 +1311,19 @@ main:has(> .hs-ctas) + .site-footer, main:has(.hs-ctas) ~ .site-footer { margin-
   .hs-stage { height: 640px; }
   .hs-phone { transform: translateX(-50%) scale(1.2); transform-origin: 50% 100%; }
 }
+/* Mobile walkthrough (first visit) */
+.wt { position: fixed; inset: 0; z-index: 1000; background: linear-gradient(180deg, #eef7f3, #fff 70%); display: grid; grid-template-rows: auto 1fr auto auto auto; justify-items: center; align-items: center; gap: 14px; padding: 14px 20px calc(22px + env(safe-area-inset-bottom)); transition: opacity .3s ease; }
+.wt.out { opacity: 0; }
+.wt-skip { justify-self: end; background: none; border: 0; font: 700 .95rem var(--font); color: var(--muted, #5b6b6b); padding: 6px 4px; cursor: pointer; }
+.wt .wt-phone { position: relative; left: auto; bottom: auto; transform: none; height: min(54vh, 470px); width: calc(min(54vh, 470px) * .462); border-radius: 34px; }
+.wt .wt-phone .hs-screen { border-radius: 29px; }
+.wt-copy { text-align: center; max-width: 320px; }
+.wt-copy h2 { font-size: 1.35rem; margin: 0 0 6px; }
+.wt-copy p { margin: 0; color: var(--muted, #5b6b6b); font-size: .95rem; line-height: 1.45; min-height: 2.9em; }
+.wt-dots { display: flex; gap: 7px; }
+.wt-dots i { width: 7px; height: 7px; border-radius: 4px; background: #cfdcd8; transition: width .3s, background .3s; }
+.wt-dots i.on { width: 22px; background: var(--teal, #007a63); }
+.wt-next { width: 100%; max-width: 340px; justify-content: center; }
 </style>
 <style>@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:700;font-display:swap;src:url(fonts/roboto-condensed-latin-700-italic.woff2) format("woff2")}@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:800;font-display:swap;src:url(fonts/roboto-condensed-latin-800-italic.woff2) format("woff2")}</style>
 </head>
@@ -1336,7 +1349,7 @@ main:has(> .hs-ctas) + .site-footer, main:has(.hs-ctas) ~ .site-footer { margin-
     <path id="arch2" d="M360 1000V700A440 440 0 0 1 1240 700V1000"/>
     <path id="arch3" d="M520 1000V640A280 280 0 0 1 1080 640V1000"/>
     <path id="arch4" d="M660 1000V600A140 140 0 0 1 940 600V1000"/>
-    <defs><clipPath id="hs-avclip"><circle r="21"/></clipPath></defs><g class="hs-mover" transform="translate(238 308)"><g class="hs-bob" style="animation-delay:-0.9s">
+    <defs><clipPath id="hs-avclip"><circle r="21"/></clipPath></defs><g class="hs-mover" transform="translate(318 232)"><g class="hs-bob" style="animation-delay:-0.9s">
       <circle r="23" fill="#e0f2fe" stroke="#fff" stroke-width="4"/><image href="img/agents/a1.jpg" x="-21" y="-21" width="42" height="42" clip-path="url(#hs-avclip)" preserveAspectRatio="xMidYMid slice"/><circle cx="16" cy="16" r="6" fill="#2cb740" stroke="#fff" stroke-width="2.5"/></g></g>
     <g class="hs-mover" transform="translate(1380 329)"><g class="hs-bob" style="animation-delay:-1.8s">
       <circle r="23" fill="#fce7f3" stroke="#fff" stroke-width="4"/><image href="img/agents/a2.jpg" x="-21" y="-21" width="42" height="42" clip-path="url(#hs-avclip)" preserveAspectRatio="xMidYMid slice"/><circle cx="16" cy="16" r="6" fill="#2cb740" stroke="#fff" stroke-width="2.5"/></g></g>
@@ -1344,11 +1357,11 @@ main:has(> .hs-ctas) + .site-footer, main:has(.hs-ctas) ~ .site-footer { margin-
       <circle r="23" fill="#fef3c7" stroke="#fff" stroke-width="4"/><image href="img/agents/a3.jpg" x="-21" y="-21" width="42" height="42" clip-path="url(#hs-avclip)" preserveAspectRatio="xMidYMid slice"/><circle cx="16" cy="16" r="6" fill="#2cb740" stroke="#fff" stroke-width="2.5"/></g></g>
     <g class="hs-mover" transform="translate(1240 762)"><g class="hs-bob" style="animation-delay:-3.6s">
       <circle r="23" fill="#ede9fe" stroke="#fff" stroke-width="4"/><image href="img/agents/a4.jpg" x="-21" y="-21" width="42" height="42" clip-path="url(#hs-avclip)" preserveAspectRatio="xMidYMid slice"/><circle cx="16" cy="16" r="6" fill="#2cb740" stroke="#fff" stroke-width="2.5"/></g></g>
-    <g class="hs-mover" transform="translate(287 448)"><g class="hs-bob" style="animation-delay:-4.5s">
+    <g class="hs-mover" transform="translate(1240 945)"><g class="hs-bob" style="animation-delay:-4.5s">
       <circle r="23" fill="#dcfce7" stroke="#fff" stroke-width="4"/><image href="img/agents/a5.jpg" x="-21" y="-21" width="42" height="42" clip-path="url(#hs-avclip)" preserveAspectRatio="xMidYMid slice"/><circle cx="16" cy="16" r="6" fill="#2cb740" stroke="#fff" stroke-width="2.5"/></g></g>
     <g class="hs-mover" transform="translate(1080 808)"><g class="hs-bob" style="animation-delay:-5.4s">
       <circle r="23" fill="#ffe4e6" stroke="#fff" stroke-width="4"/><image href="img/agents/a6.jpg" x="-21" y="-21" width="42" height="42" clip-path="url(#hs-avclip)" preserveAspectRatio="xMidYMid slice"/><circle cx="16" cy="16" r="6" fill="#2cb740" stroke="#fff" stroke-width="2.5"/></g></g>
-    <g class="hs-mover" transform="translate(541 345)"><g class="hs-bob" style="animation-delay:-6.3s">
+    <g class="hs-mover" transform="translate(520 955)"><g class="hs-bob" style="animation-delay:-6.3s">
       <circle r="23" fill="#e0e7ff" stroke="#fff" stroke-width="4"/><image href="img/agents/a7.jpg" x="-21" y="-21" width="42" height="42" clip-path="url(#hs-avclip)" preserveAspectRatio="xMidYMid slice"/><circle cx="16" cy="16" r="6" fill="#2cb740" stroke="#fff" stroke-width="2.5"/></g></g>
   </svg>
   <div class="wrap hs-hero-copy">
@@ -1464,6 +1477,47 @@ main:has(> .hs-ctas) + .site-footer, main:has(.hs-ctas) ~ .site-footer { margin-
   stage.addEventListener('mouseenter', () => clearInterval(t)); stage.addEventListener('mouseleave', play);
   go(0); play();
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) document.querySelector('.hs-arches')?.pauseAnimations?.();
+})();
+</script>
+
+
+<script>
+// Mobile walkthrough: the same app screens as the hero phone, shown once on first visit.
+(() => {
+  const force = /[?&]walkthrough=1/.test(location.search);
+  if (!force && !matchMedia('(max-width: 640px)').matches) return;
+  try { if (!force && localStorage.getItem('pm_walk_v1')) return; } catch (e) {}
+  const src = [...document.querySelectorAll('#hs-slides .hs-slide')];
+  if (!src.length) return;
+  const copy = {
+    Register: ['Register as a Mithra', 'Sign up with your mobile, RERA number and the corridors you work in.'],
+    Browse: ['Find verified properties', 'See properties shared by fellow agents, checked by PropMithra.'],
+    Track: ['Track your property', 'Know where your property is: review, interest, Customer Partner, deal.'],
+    Admin: ['PropMithra team works it', 'We call interested agents and approve the right Customer Partner.'],
+    Meet: ['Meet and move forward', 'Office meetings and site visits, scheduled by our team.']
+  };
+  const w = document.createElement('div');
+  w.className = 'wt'; w.setAttribute('role', 'dialog'); w.setAttribute('aria-modal', 'true'); w.setAttribute('aria-label', 'How PropMithra works');
+  w.innerHTML = '<button class="wt-skip" type="button">Skip</button>' +
+    '<div class="hs-phone wt-phone"><div class="hs-screen"><div class="hs-status"><span>12:30</span><i class="hs-cam"></i><span class="hs-sys"><i></i><i></i><b></b></span></div><div class="hs-slides wt-slides"></div></div></div>' +
+    '<div class="wt-copy"><h2></h2><p></p></div><div class="wt-dots"></div>' +
+    '<button class="btn btn-primary wt-next" type="button">Continue</button>';
+  const box = w.querySelector('.wt-slides'), dots = w.querySelector('.wt-dots');
+  src.forEach((sl) => { const c = sl.cloneNode(true); c.classList.remove('on'); box.appendChild(c); dots.appendChild(document.createElement('i')); });
+  const slides = [...box.children], ds = [...dots.children], h = w.querySelector('h2'), para = w.querySelector('.wt-copy p'), next = w.querySelector('.wt-next');
+  let i = 0;
+  const show = (n) => {
+    i = n; slides.forEach((s, k) => s.classList.toggle('on', k === i)); ds.forEach((d, k) => d.classList.toggle('on', k === i));
+    const t = copy[slides[i].dataset.name] || ['', '']; h.textContent = t[0]; para.textContent = t[1];
+    next.textContent = i === slides.length - 1 ? 'Get started' : 'Continue';
+  };
+  const close = () => { try { localStorage.setItem('pm_walk_v1', '1'); } catch (e) {} w.classList.add('out'); document.documentElement.style.overflow = ''; setTimeout(() => w.remove(), 300); };
+  next.onclick = () => i < slides.length - 1 ? show(i + 1) : close();
+  w.querySelector('.wt-skip').onclick = close;
+  let x0 = null;
+  w.addEventListener('touchstart', (e) => { x0 = e.touches[0].clientX; }, { passive: true });
+  w.addEventListener('touchend', (e) => { if (x0 == null) return; const dx = e.changedTouches[0].clientX - x0; if (dx < -40 && i < slides.length - 1) show(i + 1); if (dx > 40 && i > 0) show(i - 1); x0 = null; });
+  document.body.appendChild(w); document.documentElement.style.overflow = 'hidden'; show(0);
 })();
 </script>
 
