@@ -1105,6 +1105,9 @@ body.sv-open { overflow: hidden; }
 }
 .site-actions { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 6px; font-size: .88rem; }
 .site-actions .link-btn { text-decoration: none; }
+/* /add-property: only the form (and the status when not yet approved). */
+.add-page #d-banner, .add-page #d-listings-wrap, .add-page #q-form, .add-page .dash-tabs { display: none !important; }
+.add-page #d-form { max-width: 920px; margin-inline: auto; }
 </style>
 <style>@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:700;font-display:swap;src:url(fonts/roboto-condensed-latin-700-italic.woff2) format("woff2")}@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:800;font-display:swap;src:url(fonts/roboto-condensed-latin-800-italic.woff2) format("woff2")}</style>
 </head>
@@ -1529,7 +1532,7 @@ $('otp-form').addEventListener('submit', async (ev) => {
         + '<a role="menuitem" href="' + acct + '#contact">Change email / phone</a>'
         + '<a role="menuitem" class="am-out" href="' + acct + '#logout">Log out</a>'
         + '</div></div>'
-        + '<a class="btn btn-primary add-btn" href="' + acct + '#add">+ Add property</a>';
+        + '<a class="btn btn-primary add-btn" href="' + acct.replace(/account(\.html)?$/, 'add-property$1') + '">+ Add property</a>';
       var btn = cta.querySelector('.acct-btn'), menu = cta.querySelector('.acct-menu');
       var setOpen = function (on) { menu.hidden = !on; btn.setAttribute('aria-expanded', on ? 'true' : 'false'); };
       btn.addEventListener('click', function (e) { e.stopPropagation(); setOpen(menu.hidden); });

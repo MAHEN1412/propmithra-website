@@ -1105,6 +1105,9 @@ body.sv-open { overflow: hidden; }
 }
 .site-actions { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 6px; font-size: .88rem; }
 .site-actions .link-btn { text-decoration: none; }
+/* /add-property: only the form (and the status when not yet approved). */
+.add-page #d-banner, .add-page #d-listings-wrap, .add-page #q-form, .add-page .dash-tabs { display: none !important; }
+.add-page #d-form { max-width: 920px; margin-inline: auto; }
 </style>
 <style>@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:700;font-display:swap;src:url(fonts/roboto-condensed-latin-700-italic.woff2) format("woff2")}@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:800;font-display:swap;src:url(fonts/roboto-condensed-latin-800-italic.woff2) format("woff2")}</style>
 </head>
@@ -1248,7 +1251,7 @@ body.sv-open { overflow: hidden; }
       <!-- Add property form -->
       <form class="listing-form" id="d-form" hidden novalidate>
         <div class="dash-head">
-          <div><h2>Add a property</h2><p class="muted">Other brokers see the property; owner details stay private to you.</p></div>
+          <div><h2>Add a property</h2><p class="muted">PropMithra reviews it before agents see it. Owner details stay private to you.</p></div>
           <button class="btn btn-ghost" type="button" id="d-cancel">Cancel</button>
         </div>
 
@@ -1339,6 +1342,10 @@ const VIS = {network: 'My network', collaboration: 'On collaboration', private: 
 const MAX_PHOTOS = 5, MAX_BYTES = 900 * 1024;
 
 let fb, uid, user, mithra = {}, broker = {}, listings = [], photos = [], reqs = [];
+// /add-property: the same account code, showing only the Add property form.
+const ADD_PAGE = /\/add-property(\.html)?$/.test(location.pathname);
+const ADD_URL = 'add-property', ACCOUNT_URL = 'account';
+const goAdd = () => { location.href = ADD_URL; };
 const PURPOSE = {residential: 'To live in', investment: 'Investment', commercial: 'Commercial', office: 'Office', retail: 'Retail'};
 const URGENCY = {immediate: 'Immediately', days30: 'Within 30 days', months3: 'Within 3 months', flexible: 'Flexible'};
 const WANTS = {sale: 'buy', rent: 'rent', lease: 'lease'};
@@ -1396,7 +1403,8 @@ function menuHash() {
   if (location.hash === '#contact') { history.replaceState(null, '', location.pathname); contactFlow(); }
   else if (location.hash === '#logout') { history.replaceState(null, '', location.pathname); signOutNow(); }
   // Top bar "+ Add property" while already on this page.
-  else if (location.hash === '#add' && approved()) { history.replaceState(null, '', location.pathname); openForm(); }
+  else if (location.hash === '#add') { location.replace(ADD_URL); }
+  else if (location.hash === '#added') { history.replaceState(null, '', location.pathname); tab('listings'); setTimeout(() => { $('d-count').textContent = '✓ Sent to PropMithra for approval — agents see it once our team approves it.'; }, 600); }
 }
 window.addEventListener('hashchange', () => { if (fb && uid) menuHash(); });
 const blobCache = new Map();
@@ -1422,7 +1430,7 @@ function renderListings() {
   $('d-count').textContent = listings.length ? `${listings.length} propert${listings.length > 1 ? 'ies' : 'y'} by you · visible in the PropMithra app too.` : 'Your properties on the PropMithra network.';
   if (!listings.length) {
     box.innerHTML = `<div class="empty-card"><b>No properties yet</b><span>Add your first property — it takes about two minutes.</span><button class="btn btn-primary" type="button" data-add>+ Add property</button></div>`;
-    box.querySelector('[data-add]').onclick = openForm; return;
+    box.querySelector('[data-add]').onclick = goAdd; return;
   }
   box.innerHTML = listings.map(p => {
     const hidden = p.moderation === 'hidden', pending = p.moderation === 'pending';
@@ -1677,7 +1685,7 @@ function setupForm() {
   $('l-price').oninput = hint; $('l-unit').onchange = hint;
   $('l-transaction').onchange = () => { if ($('l-transaction').value !== 'sale' && $('l-unit').value !== '1') $('l-unit').value = '1'; hint(); };
   ['l-area', 'l-baths', 'l-floor', 'l-floors', 'l-parking', 'l-age', 'l-pincode'].forEach(id => $(id).addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g, ''); }));
-  if ($('d-add')) $('d-add').onclick = openForm; $('d-cancel').onclick = closeForm; $('d-cancel2').onclick = closeForm;
+  if ($('d-add')) $('d-add').onclick = ADD_PAGE ? openForm : goAdd; $('d-cancel').onclick = closeForm; $('d-cancel2').onclick = closeForm;
   $('d-form').onsubmit = save;
   bindSite();
   const clear = (id) => () => { fieldErr(id, ''); if (!$('d-form').querySelector('.err:not(:empty)')) $('l-msg').textContent = ''; };
@@ -1722,8 +1730,8 @@ function bindSite() {
       {enableHighAccuracy: true, timeout: 15000});
   };
 }
-function openForm() { $('q-form').hidden = true; $('d-form').hidden = false; $('d-listings-wrap').hidden = true; $('d-form').scrollIntoView({behavior: 'smooth'}); }
-function closeForm() { $('d-form').reset(); photos = []; renderPhotos(); $('l-other-wrap').hidden = true; $('l-msg').textContent = ''; $('l-site-err').textContent = ''; $('l-site-hint').textContent = 'At the site? Tap "Use my current location".'; $('d-form').hidden = true; $('d-listings-wrap').hidden = false; $('l-type').onchange(); tab('listings'); }
+function openForm() { if (!ADD_PAGE) return goAdd(); $('q-form').hidden = true; $('d-form').hidden = false; $('d-listings-wrap').hidden = true; $('d-form').scrollIntoView({behavior: 'smooth'}); }
+function closeForm() { if (ADD_PAGE) { location.href = ACCOUNT_URL + '#listings'; return; } $('d-form').reset(); photos = []; renderPhotos(); $('l-other-wrap').hidden = true; $('l-msg').textContent = ''; $('l-site-err').textContent = ''; $('l-site-hint').textContent = 'At the site? Tap "Use my current location".'; $('d-form').hidden = true; $('d-listings-wrap').hidden = false; $('l-type').onchange(); tab('listings'); }
 
 function renderPhotos() {
   const row = $('l-photos');
@@ -1808,6 +1816,7 @@ async function save(ev) {
       siteMapUrl: site.url, siteLat: site.lat, siteLng: site.lng});
     const who = broker.name || user.displayName || 'A broker';
     fs.addDoc(fs.collection(db, 'activity'), {type: 'property_listed', actorId: uid, actorName: who, summary: `${who} listed ${title} (website)`, targetId: ref.id, targetType: 'property', at: fs.serverTimestamp()}).catch(() => {});
+    if (ADD_PAGE) { location.href = ACCOUNT_URL + '#added'; return; }
     listings.unshift({id: ref.id, ...doc, listedAt: null});
     closeForm(); renderListings();
     $('d-count').textContent = '✓ Sent to PropMithra for approval — agents see it once our team approves it.';
@@ -2448,13 +2457,20 @@ function interestFlow(c) {
       window.pmSession?.({name: [mithra.personal?.firstName, mithra.personal?.lastName].filter(Boolean).join(' ') || broker.name || u.displayName || ''});
       await ensureProfile().catch(e => console.warn('profile', e));
       show('d-app'); setupForm(); setupReqForm(); renderStatus();
+      if (ADD_PAGE) {
+        document.body.classList.add('add-page');
+        document.querySelector('.dash-hero .crumb').innerHTML = `<a href="./">Home</a> / <a href="${ACCOUNT_URL}">My account</a> / Add property`;
+        if (approved()) { $('d-listings-wrap').hidden = true; $('d-form').hidden = false; }
+        if (!curPhone() || !curEmail()) contactRequired();
+        return;
+      }
       if (!curPhone() || !curEmail()) contactRequired();
       menuHash();
       document.querySelectorAll('.tab').forEach(t => t.onclick = () => tab(t.dataset.tab));
       if (!approved() && broker.uid !== undefined) await loadCamps().catch(e => console.warn('campaigns', e));
       if (approved()) {
         await Promise.all([loadListings(), loadTeam().catch(e => console.warn('team', e)), loadCamps().catch(e => console.warn('campaigns', e))]);
-        if (location.hash === '#add') openForm(); else if (location.hash === '#requirement') openReq(); else if (location.hash === '#assigned') tab('team'); else if (location.hash === '#campaigns') tab('camps');
+        if (location.hash === '#listings') tab('listings'); else if (location.hash === '#requirement') openReq(); else if (location.hash === '#assigned') tab('team'); else if (location.hash === '#campaigns') tab('camps');
       }
       // Live: approval appears the moment the admin approves.
       fs.onSnapshot(fs.doc(db, 'mithras', uid), async (s) => {
@@ -2524,7 +2540,7 @@ function interestFlow(c) {
         + '<a role="menuitem" href="' + acct + '#contact">Change email / phone</a>'
         + '<a role="menuitem" class="am-out" href="' + acct + '#logout">Log out</a>'
         + '</div></div>'
-        + '<a class="btn btn-primary add-btn" href="' + acct + '#add">+ Add property</a>';
+        + '<a class="btn btn-primary add-btn" href="' + acct.replace(/account(\.html)?$/, 'add-property$1') + '">+ Add property</a>';
       var btn = cta.querySelector('.acct-btn'), menu = cta.querySelector('.acct-menu');
       var setOpen = function (on) { menu.hidden = !on; btn.setAttribute('aria-expanded', on ? 'true' : 'false'); };
       btn.addEventListener('click', function (e) { e.stopPropagation(); setOpen(menu.hidden); });
