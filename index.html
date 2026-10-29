@@ -1302,6 +1302,15 @@ main:has(> .hs-ctas) + .site-footer, main:has(.hs-ctas) ~ .site-footer { margin-
 @media (max-width: 640px) { .hs-tabs { flex-wrap: wrap; justify-content: center; } .hs-tabs button { padding: 6px 11px; font-size: .8rem; } }
 .hs-mover text { font: 800 15px var(--font); }
 .hs-mover > circle:first-of-type { filter: drop-shadow(0 4px 8px rgba(15,42,42,.18)); }
+/* Agents float gently in place on the arches (no travelling) */
+.hs-bob { animation: hsBob 5.5s ease-in-out infinite; }
+@keyframes hsBob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
+@media (prefers-reduced-motion: reduce) { .hs-bob { animation: none; } }
+/* Bigger phone on desktop */
+@media (min-width: 901px) {
+  .hs-stage { height: 640px; }
+  .hs-phone { transform: translateX(-50%) scale(1.2); transform-origin: 50% 100%; }
+}
 </style>
 <style>@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:700;font-display:swap;src:url(fonts/roboto-condensed-latin-700-italic.woff2) format("woff2")}@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:800;font-display:swap;src:url(fonts/roboto-condensed-latin-800-italic.woff2) format("woff2")}</style>
 </head>
@@ -1327,20 +1336,20 @@ main:has(> .hs-ctas) + .site-footer, main:has(.hs-ctas) ~ .site-footer { margin-
     <path id="arch2" d="M360 1000V700A440 440 0 0 1 1240 700V1000"/>
     <path id="arch3" d="M520 1000V640A280 280 0 0 1 1080 640V1000"/>
     <path id="arch4" d="M660 1000V600A140 140 0 0 1 940 600V1000"/>
-    <defs><clipPath id="hs-avclip"><circle r="21"/></clipPath></defs><g class="hs-mover"><animateMotion dur="76s" begin="-0s" repeatCount="indefinite" keyPoints="0;0.3;0" keyTimes="0;0.5;1" calcMode="linear"><mpath href="#arch0"/></animateMotion>
-      <circle r="23" fill="#e0f2fe" stroke="#fff" stroke-width="4"/><image href="img/agents/a1.jpg" x="-21" y="-21" width="42" height="42" clip-path="url(#hs-avclip)" preserveAspectRatio="xMidYMid slice"/><circle cx="16" cy="16" r="6" fill="#2cb740" stroke="#fff" stroke-width="2.5"/></g>
-    <g class="hs-mover"><animateMotion dur="76s" begin="-34s" repeatCount="indefinite" keyPoints="1;0.70;1" keyTimes="0;0.5;1" calcMode="linear"><mpath href="#arch0"/></animateMotion>
-      <circle r="23" fill="#fce7f3" stroke="#fff" stroke-width="4"/><image href="img/agents/a2.jpg" x="-21" y="-21" width="42" height="42" clip-path="url(#hs-avclip)" preserveAspectRatio="xMidYMid slice"/><circle cx="16" cy="16" r="6" fill="#2cb740" stroke="#fff" stroke-width="2.5"/></g>
-    <g class="hs-mover"><animateMotion dur="64s" begin="-10s" repeatCount="indefinite" keyPoints="0;0.3;0" keyTimes="0;0.5;1" calcMode="linear"><mpath href="#arch1"/></animateMotion>
-      <circle r="23" fill="#fef3c7" stroke="#fff" stroke-width="4"/><image href="img/agents/a3.jpg" x="-21" y="-21" width="42" height="42" clip-path="url(#hs-avclip)" preserveAspectRatio="xMidYMid slice"/><circle cx="16" cy="16" r="6" fill="#2cb740" stroke="#fff" stroke-width="2.5"/></g>
-    <g class="hs-mover"><animateMotion dur="56s" begin="-24s" repeatCount="indefinite" keyPoints="1;0.78;1" keyTimes="0;0.5;1" calcMode="linear"><mpath href="#arch2"/></animateMotion>
-      <circle r="23" fill="#ede9fe" stroke="#fff" stroke-width="4"/><image href="img/agents/a4.jpg" x="-21" y="-21" width="42" height="42" clip-path="url(#hs-avclip)" preserveAspectRatio="xMidYMid slice"/><circle cx="16" cy="16" r="6" fill="#2cb740" stroke="#fff" stroke-width="2.5"/></g>
-    <g class="hs-mover"><animateMotion dur="64s" begin="-38s" repeatCount="indefinite" keyPoints="0;0.3;0" keyTimes="0;0.5;1" calcMode="linear"><mpath href="#arch1"/></animateMotion>
-      <circle r="23" fill="#dcfce7" stroke="#fff" stroke-width="4"/><image href="img/agents/a5.jpg" x="-21" y="-21" width="42" height="42" clip-path="url(#hs-avclip)" preserveAspectRatio="xMidYMid slice"/><circle cx="16" cy="16" r="6" fill="#2cb740" stroke="#fff" stroke-width="2.5"/></g>
-    <g class="hs-mover"><animateMotion dur="48s" begin="-6s" repeatCount="indefinite" keyPoints="1;0.78;1" keyTimes="0;0.5;1" calcMode="linear"><mpath href="#arch3"/></animateMotion>
-      <circle r="23" fill="#ffe4e6" stroke="#fff" stroke-width="4"/><image href="img/agents/a6.jpg" x="-21" y="-21" width="42" height="42" clip-path="url(#hs-avclip)" preserveAspectRatio="xMidYMid slice"/><circle cx="16" cy="16" r="6" fill="#2cb740" stroke="#fff" stroke-width="2.5"/></g>
-    <g class="hs-mover"><animateMotion dur="56s" begin="-0s" repeatCount="indefinite" keyPoints="0;0.22;0" keyTimes="0;0.5;1" calcMode="linear"><mpath href="#arch2"/></animateMotion>
-      <circle r="23" fill="#e0e7ff" stroke="#fff" stroke-width="4"/><image href="img/agents/a7.jpg" x="-21" y="-21" width="42" height="42" clip-path="url(#hs-avclip)" preserveAspectRatio="xMidYMid slice"/><circle cx="16" cy="16" r="6" fill="#2cb740" stroke="#fff" stroke-width="2.5"/></g>
+    <defs><clipPath id="hs-avclip"><circle r="21"/></clipPath></defs><g class="hs-mover" transform="translate(238 308)"><g class="hs-bob" style="animation-delay:-0.9s">
+      <circle r="23" fill="#e0f2fe" stroke="#fff" stroke-width="4"/><image href="img/agents/a1.jpg" x="-21" y="-21" width="42" height="42" clip-path="url(#hs-avclip)" preserveAspectRatio="xMidYMid slice"/><circle cx="16" cy="16" r="6" fill="#2cb740" stroke="#fff" stroke-width="2.5"/></g></g>
+    <g class="hs-mover" transform="translate(1380 329)"><g class="hs-bob" style="animation-delay:-1.8s">
+      <circle r="23" fill="#fce7f3" stroke="#fff" stroke-width="4"/><image href="img/agents/a2.jpg" x="-21" y="-21" width="42" height="42" clip-path="url(#hs-avclip)" preserveAspectRatio="xMidYMid slice"/><circle cx="16" cy="16" r="6" fill="#2cb740" stroke="#fff" stroke-width="2.5"/></g></g>
+    <g class="hs-mover" transform="translate(200 811)"><g class="hs-bob" style="animation-delay:-2.7s">
+      <circle r="23" fill="#fef3c7" stroke="#fff" stroke-width="4"/><image href="img/agents/a3.jpg" x="-21" y="-21" width="42" height="42" clip-path="url(#hs-avclip)" preserveAspectRatio="xMidYMid slice"/><circle cx="16" cy="16" r="6" fill="#2cb740" stroke="#fff" stroke-width="2.5"/></g></g>
+    <g class="hs-mover" transform="translate(1240 762)"><g class="hs-bob" style="animation-delay:-3.6s">
+      <circle r="23" fill="#ede9fe" stroke="#fff" stroke-width="4"/><image href="img/agents/a4.jpg" x="-21" y="-21" width="42" height="42" clip-path="url(#hs-avclip)" preserveAspectRatio="xMidYMid slice"/><circle cx="16" cy="16" r="6" fill="#2cb740" stroke="#fff" stroke-width="2.5"/></g></g>
+    <g class="hs-mover" transform="translate(287 448)"><g class="hs-bob" style="animation-delay:-4.5s">
+      <circle r="23" fill="#dcfce7" stroke="#fff" stroke-width="4"/><image href="img/agents/a5.jpg" x="-21" y="-21" width="42" height="42" clip-path="url(#hs-avclip)" preserveAspectRatio="xMidYMid slice"/><circle cx="16" cy="16" r="6" fill="#2cb740" stroke="#fff" stroke-width="2.5"/></g></g>
+    <g class="hs-mover" transform="translate(1080 808)"><g class="hs-bob" style="animation-delay:-5.4s">
+      <circle r="23" fill="#ffe4e6" stroke="#fff" stroke-width="4"/><image href="img/agents/a6.jpg" x="-21" y="-21" width="42" height="42" clip-path="url(#hs-avclip)" preserveAspectRatio="xMidYMid slice"/><circle cx="16" cy="16" r="6" fill="#2cb740" stroke="#fff" stroke-width="2.5"/></g></g>
+    <g class="hs-mover" transform="translate(541 345)"><g class="hs-bob" style="animation-delay:-6.3s">
+      <circle r="23" fill="#e0e7ff" stroke="#fff" stroke-width="4"/><image href="img/agents/a7.jpg" x="-21" y="-21" width="42" height="42" clip-path="url(#hs-avclip)" preserveAspectRatio="xMidYMid slice"/><circle cx="16" cy="16" r="6" fill="#2cb740" stroke="#fff" stroke-width="2.5"/></g></g>
   </svg>
   <div class="wrap hs-hero-copy">
     <span class="hs-pill">Business growth · Hyderabad</span>

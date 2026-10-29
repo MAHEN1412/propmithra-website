@@ -1302,6 +1302,15 @@ main:has(> .hs-ctas) + .site-footer, main:has(.hs-ctas) ~ .site-footer { margin-
 @media (max-width: 640px) { .hs-tabs { flex-wrap: wrap; justify-content: center; } .hs-tabs button { padding: 6px 11px; font-size: .8rem; } }
 .hs-mover text { font: 800 15px var(--font); }
 .hs-mover > circle:first-of-type { filter: drop-shadow(0 4px 8px rgba(15,42,42,.18)); }
+/* Agents float gently in place on the arches (no travelling) */
+.hs-bob { animation: hsBob 5.5s ease-in-out infinite; }
+@keyframes hsBob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
+@media (prefers-reduced-motion: reduce) { .hs-bob { animation: none; } }
+/* Bigger phone on desktop */
+@media (min-width: 901px) {
+  .hs-stage { height: 640px; }
+  .hs-phone { transform: translateX(-50%) scale(1.2); transform-origin: 50% 100%; }
+}
 </style>
 <style>@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:700;font-display:swap;src:url(fonts/roboto-condensed-latin-700-italic.woff2) format("woff2")}@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:800;font-display:swap;src:url(fonts/roboto-condensed-latin-800-italic.woff2) format("woff2")}</style>
 </head>
