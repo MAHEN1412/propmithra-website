@@ -1321,6 +1321,34 @@ main:has(> .hs-ctas) + .site-footer, main:has(.hs-ctas) ~ .site-footer { margin-
 /* Mithra ID under the agent's name (registration sidebar) */
 .reg-who .who-id:not([hidden]) { display: block; margin: 2px 0; padding: 1px 8px; border-radius: 6px; font-size: .75rem; font-weight: 700; letter-spacing: .03em; color: var(--teal, #007a63); background: rgba(0,122,99,.08); border: 1px solid rgba(0,122,99,.25); width: max-content; }
 .reg-who #r-who-phone { display: block; }
+/* ── Registration form: simple, clean, easy to fill ───────────────────── */
+.reg-main .field { gap: 6px; align-content: start; }
+.reg-main .field > label { font-size: .9rem; color: var(--ink-2); }
+.opt-l { font-weight: 500; font-size: .78rem; color: var(--ink-3); margin-left: 6px; }
+.reg-main .field input, .reg-main .field select { background: var(--surface); border-color: color-mix(in srgb, var(--line) 80%, #000 6%); min-height: 48px; transition: border-color .15s, box-shadow .15s; }
+.reg-main .field input:focus, .reg-main .field select:focus { outline: none; border-color: var(--teal); box-shadow: 0 0 0 3px color-mix(in srgb, var(--teal) 16%, transparent); }
+.reg-main .field input::placeholder { color: #9aa7a6; }
+.reg-main .field input:disabled { background: var(--canvas); }
+.reg-group legend { font-size: 1rem; letter-spacing: -.005em; }
+.reg-group:first-of-type { border-top: 0; padding-top: 4px; }
+.reg-group > .hint { color: var(--ink-3); }
+.in-suffix { position: relative; }
+.in-suffix input { padding-right: 64px; }
+.in-suffix span { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--ink-3); font-size: .9rem; pointer-events: none; }
+#pin-hint.ok, .hint.ok { color: var(--teal); font-weight: 600; }
+.err:empty { display: none; }
+@media (max-width: 640px) {
+  .reg-hero { padding-bottom: 8px; }
+  .reg-main { padding: 18px 16px 0; border-radius: 16px; }
+  .reg-steps { overflow: visible; justify-content: space-between; }
+  .reg-steps li { flex: 1; }
+  .reg-steps button { justify-content: center; padding: 7px 8px; font-size: .86rem; }
+  .reg-steps .n { width: 22px; height: 22px; }
+  .reg-foot { position: sticky; bottom: 0; z-index: 5; margin: 22px -16px 0; padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); background: var(--surface); border-top: 1px solid var(--line); box-shadow: 0 -6px 18px rgba(15,42,42,.06); border-radius: 0 0 16px 16px; }
+  .reg-foot .btn { flex: 1; justify-content: center; }
+  .reg-foot #r-prev { flex: 0 0 auto; }
+  .reg-nav .save-state, .reg-nav #r-signout { display: none; }
+}
 </style>
 <style>@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:700;font-display:swap;src:url(fonts/roboto-condensed-latin-700-italic.woff2) format("woff2")}@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:800;font-display:swap;src:url(fonts/roboto-condensed-latin-800-italic.woff2) format("woff2")}</style>
 </head>
@@ -1344,7 +1372,7 @@ main:has(> .hs-ctas) + .site-footer, main:has(.hs-ctas) ~ .site-footer { margin-
     <span class="crumb"><a href="./">Home</a> / Mithra registration</span>
     <span class="eyebrow">Become a Mithra</span>
     <h1>Mithra registration</h1>
-    <p class="lead">Fill in your details once. Everything saves automatically as you type, so you can stop and continue any time.</p>
+    <p class="lead">3 short steps, about 3 minutes. Everything saves as you type.</p>
   </div>
 </section>
 
@@ -1392,6 +1420,7 @@ main:has(> .hs-ctas) + .site-footer, main:has(.hs-ctas) ~ .site-footer { margin-
   </div>
 </section>
 
+<datalist id="dl-po"></datalist>
 <datalist id="dl-districts">
   <option>Adilabad</option><option>Bhadradri Kothagudem</option><option>Hanumakonda</option><option>Hyderabad</option><option>Jagtial</option><option>Jangaon</option><option>Jayashankar Bhupalpally</option><option>Jogulamba Gadwal</option><option>Kamareddy</option><option>Karimnagar</option><option>Khammam</option><option>Kumuram Bheem Asifabad</option><option>Mahabubabad</option><option>Mahabubnagar</option><option>Mancherial</option><option>Medak</option><option>Medchal–Malkajgiri</option><option>Mulugu</option><option>Nagarkurnool</option><option>Nalgonda</option><option>Narayanpet</option><option>Nirmal</option><option>Nizamabad</option><option>Peddapalli</option><option>Rajanna Sircilla</option><option>Rangareddy</option><option>Sangareddy</option><option>Siddipet</option><option>Suryapet</option><option>Vikarabad</option><option>Wanaparthy</option><option>Warangal</option><option>Yadadri Bhuvanagiri</option>
 </datalist>
@@ -1427,40 +1456,40 @@ const RX = {
 // Every field. k = where it is saved: "bank.*" goes to a private document,
 // "docs.*" is an uploaded file. req = needed before submitting.
 const SECTIONS = [
-  {id: 'personal', title: 'Personal information', short: 'Personal', groups: [
+  {id: 'personal', title: 'Personal details', short: 'Personal', groups: [
     {title: 'About you', fields: [
-      {k: 'personal.firstName', label: 'First name', req: 1, ac: 'given-name'},
-      {k: 'personal.lastName', label: 'Last name', req: 1, ac: 'family-name'},
-      {k: 'personal.fatherSpouseName', label: 'Father / Spouse name', req: 1},
+      {k: 'personal.firstName', label: 'First name', req: 1, ac: 'given-name', ph: 'As on your Aadhaar'},
+      {k: 'personal.lastName', label: 'Last name', req: 1, ac: 'family-name', ph: 'As on your Aadhaar'},
+      {k: 'personal.fatherSpouseName', label: 'Father / spouse name', req: 1},
       {k: 'personal.dob', label: 'Date of birth', type: 'date', req: 1, ac: 'bday'},
-      {k: 'personal.stateOfBirth', label: 'State of birth', type: 'select', options: STATES, req: 1},
-      {k: 'professional.totalYears', label: 'Total years of experience', type: 'number', req: 1, min: 0, max: 60},
-    ]},
-    {title: 'Address', fields: [
-      {k: 'personal.address.houseNo', label: 'House No / Sy. No / Block No / Plot No', req: 1, wide: 1},
-      {k: 'personal.address.building', label: 'Building name'},
-      {k: 'personal.address.street', label: 'Street name', req: 1},
-      {k: 'personal.address.locality', label: 'Locality', req: 1},
-      {k: 'personal.address.landmark', label: 'Landmark'},
-      {k: 'personal.address.state', label: 'State', type: 'select', options: STATES, req: 1, def: 'Telangana'},
-      {k: 'personal.address.district', label: 'District', req: 1, list: 'dl-districts'},
-      {k: 'personal.address.mandal', label: 'Mandal', req: 1},
-      {k: 'personal.address.village', label: 'Village / City / Town', req: 1, ac: 'address-level2'},
-      {k: 'personal.address.pincode', label: 'Pin code', req: 1, rx: 'pincode', digits: 6, ac: 'postal-code'},
+      {k: 'professional.totalYears', label: 'Years of experience', type: 'number', req: 1, min: 0, max: 60, ph: 'e.g. 5', suffix: 'years'},
+      {k: 'personal.stateOfBirth', label: 'State of birth', type: 'select', options: STATES},
     ]},
     {title: 'Contact', fields: [
       {k: 'personal.mobile', label: 'Mobile number', req: 1, rx: 'mobile10'},
-      {k: 'personal.email', label: 'Business email address', type: 'email', req: 1, rx: 'email', ac: 'email'},
+      {k: 'personal.email', label: 'Email', type: 'email', req: 1, rx: 'email', ac: 'email', ph: 'name@example.com'},
+    ]},
+    {title: 'Address', note: 'Start with your pin code — we fill in the area, district and state for you.', fields: [
+      {k: 'personal.address.pincode', label: 'Pin code', req: 1, rx: 'pincode', digits: 6, ac: 'postal-code', ph: '500076'},
+      {k: 'personal.address.houseNo', label: 'House / flat / plot no.', req: 1, ph: 'e.g. 4-12, Flat 302'},
+      {k: 'personal.address.building', label: 'Building / apartment', ph: 'e.g. Sri Sai Residency'},
+      {k: 'personal.address.street', label: 'Street / road', req: 1, ph: 'e.g. Mallapur Road'},
+      {k: 'personal.address.locality', label: 'Area / locality', req: 1, list: 'dl-po', ph: 'e.g. Nacharam'},
+      {k: 'personal.address.landmark', label: 'Landmark', ph: 'e.g. Beside Bajaj Electronics'},
+      {k: 'personal.address.village', label: 'City / town / village', req: 1, ac: 'address-level2', ph: 'e.g. Secunderabad'},
+      {k: 'personal.address.mandal', label: 'Mandal'},
+      {k: 'personal.address.district', label: 'District', req: 1, list: 'dl-districts'},
+      {k: 'personal.address.state', label: 'State', type: 'select', options: STATES, req: 1, def: 'Telangana'},
     ]},
   ]},
-  {id: 'identity', title: 'Identification information', short: 'Identification', groups: [
-    {title: 'Aadhaar card', note: 'For your privacy we only keep the last 4 digits. You can upload a masked Aadhaar (first 8 digits hidden) from the UIDAI website.', fields: [
+  {id: 'identity', title: 'Aadhaar & photo', short: 'Aadhaar', groups: [
+    {title: 'Aadhaar card', note: 'We keep only the last 4 digits. A masked Aadhaar (first 8 digits hidden) is fine.', fields: [
       {k: '_digilocker', label: 'Verify Aadhaar with DigiLocker', type: 'digilocker'},
       {k: '_aadhaarqr', label: 'Read Aadhaar QR code', type: 'aadhaarqr'},
       {k: 'identity.aadhaarLast4', label: 'Aadhaar — last 4 digits', req: 1, rx: 'last4', digits: 4},
       {k: 'docs.aadhaar', label: 'Upload Aadhaar (front & back in one photo or PDF)', type: 'doc', req: 1},
     ]},
-    {title: 'Your photo', optional: 1, note: 'A clear, recent passport-size photo. It appears on your Mithra ID card.', fields: [
+    {title: 'Your photo', optional: 1, note: 'A clear, recent photo for your Mithra ID card.', fields: [
       {k: 'docs.photo', label: 'Individual photo', type: 'doc', imageOnly: 1},
     ]},
   ]},
@@ -1768,7 +1797,7 @@ function inputHtml(f) {
   if (f.type === 'aadhaarqr') return aadhaarQrHtml();
   const dis = (locked || f.admin || f.locked || (aadhaarOk() && f.k === 'identity.aadhaarLast4')) ? ' disabled' : '';
   const viaDl = aadhaarOk() && (f.k === 'docs.aadhaar' || f.k === 'identity.aadhaarLast4');
-  const req = f.req && !f.group.optional && !viaDl ? '<span class="req" aria-hidden="true">*</span>' : (viaDl && f.type === 'doc' ? ' <span class="opt">Optional — verified</span>' : '');
+  const req = viaDl && f.type === 'doc' ? ' <span class="opt-l">Optional — verified</span>' : (!f.req && !f.group.optional && !locked ? ' <span class="opt-l">Optional</span>' : '');
   const label = `<label for="${id}">${esc(f.label)}${req}</label>`;
   const err = `<span class="err" id="${id}-err"></span>`;
   const help = f.help ? `<span class="hint">${esc(f.help)}</span>` : '';
@@ -1799,7 +1828,7 @@ function inputHtml(f) {
   }
   const type = f.type === 'number' ? 'text' : (f.type || 'text');
   const mode = f.digits || f.type === 'number' ? ' inputmode="numeric"' : (f.type === 'email' ? ' inputmode="email"' : '');
-  const val = f.type === 'date' && v ? String(v).slice(0, 10) : (v ?? '');
+  const val = f.type === 'date' && v ? String(v).slice(0, 10) : (f.k === 'personal.mobile' && /^\+91\d{10}$/.test(v || '') ? '+91 ' + v.slice(3, 8) + ' ' + v.slice(8) : (v ?? ''));
   const today = new Date().toISOString().slice(0, 10);
   const attrs = [
     f.list && `list="${f.list}"`,
@@ -1808,8 +1837,10 @@ function inputHtml(f) {
     f.maxlen && `maxlength="${f.maxlen}"`,
     f.type === 'date' && !f.k.endsWith('validTill') && `max="${today}"`,
     f.k.endsWith('validTill') && `min="${today}"`,
+    f.ph && `placeholder="${esc(f.ph)}"`,
   ].filter(Boolean).join(' ');
-  return `<div class="${cls}">${label}<input id="${id}" type="${type}" data-k="${f.k}" value="${esc(val)}"${mode} ${attrs}${dis}>${help}${err}</div>`;
+  const input = `<input id="${id}" type="${type}" data-k="${f.k}" value="${esc(val)}"${mode} ${attrs}${dis}>`;
+  return `<div class="${cls}">${label}${f.suffix ? `<div class="in-suffix">${input}<span>${esc(f.suffix)}</span></div>` : input}${f.k === 'personal.address.pincode' ? '<span class="hint" id="pin-hint"></span>' : ''}${help}${err}</div>`;
 }
 function fmtDate(v) { const d = v?.toDate ? v.toDate() : new Date(v); return isNaN(d) ? String(v) : d.toLocaleDateString('en-IN', {day: 'numeric', month: 'short', year: 'numeric'}); }
 
@@ -1826,6 +1857,7 @@ function render() {
         (hidden && !locked ? `<button type="button" class="link-btn add-more" data-show="${esc(g.title)}">+ Add another previous company</button>` : '');
     }).join('');
     bindFields(); loadThumbs();
+    const pc = String(valueOf('personal.address.pincode') || ''); if (pc && $('pin-hint')) { pinInfo = {code: ''}; checkPin(pc, false); }
   }
   renderNav(); showErrors(false); warned = -1;
   for (const [k, m] of docErrors) { const e = $('r-form').querySelector(`[data-doc="${k}"] .err`); if (e) e.textContent = m; }
@@ -1864,6 +1896,7 @@ function bindFields() {
       if (f.digits) { v = v.replace(/\D/g, '').slice(0, f.digits); if (el.value !== v) el.value = v; }
       if (f.maxlen) { v = v.replace(/[^A-Z0-9]/g, '').slice(0, f.maxlen); if (el.value !== v) el.value = v; }
       if (f.k === 'bank.ifsc') checkIfsc(v, true);
+      if (f.k === 'personal.address.pincode') checkPin(v, true);
       if (f.type === 'number') { v = v.replace(/[^\d]/g, ''); if (el.value !== v) el.value = v; v = v === '' ? '' : Number(v); }
       if (typeof v === 'string' && el.tagName !== 'SELECT' && el.type !== 'date') v = v.replace(/^\s+/, '');
       if (f.k === '_confirmAccount') confirmAccount = v;
@@ -1902,6 +1935,31 @@ async function loadThumbs() {
     if (!meta?.url || meta.type === 'application/pdf') continue;
     try { const u = await previewUrl(key); const t = box.querySelector('.doc-thumb'); if (u && t) t.innerHTML = `<img src="${u}" alt="">`; } catch (e) { console.warn(e); }
   }
+}
+// Pin code → area, mandal, district and state (India Post directory).
+// Only empty fields are filled; the agent can change anything.
+let pinInfo = {code: ''};
+async function checkPin(code, typed) {
+  const hint = $('pin-hint'); if (!hint) return;
+  if (!/^[1-9]\d{5}$/.test(code)) { hint.textContent = ''; hint.classList.remove('ok'); return; }
+  if (pinInfo.code === code) return;
+  pinInfo = {code}; hint.textContent = 'Finding your area…'; hint.classList.remove('ok');
+  try {
+    const j = await (await fetch('https://api.postalpincode.in/pincode/' + code)).json();
+    if (pinInfo.code !== code) return;
+    const po = j?.[0]?.Status === 'Success' ? j[0].PostOffice || [] : [];
+    if (!po.length) { hint.textContent = "We couldn't find this pin code — please check it, or fill in the address below."; return; }
+    const first = po[0];
+    $('dl-po').innerHTML = [...new Set(po.map(x => x.Name))].map(n => `<option>${esc(n)}</option>`).join('');
+    const fill = (k, v) => { const el = $('f-' + k.replace(/\./g, '-')); if (!v || !el || locked || String(valueOf(k) || '').trim() && !(typed && k === 'personal.address.state')) return;
+      if (el.tagName === 'SELECT' && ![...el.options].some(o => o.value === v)) return; el.value = v; queue(k, v); markField(FIELD[k], true); };
+    fill('personal.address.state', first.State);
+    fill('personal.address.district', first.District);
+    if (first.Block && first.Block !== 'NA') fill('personal.address.mandal', first.Block);
+    if (po.length === 1) fill('personal.address.locality', first.Name);
+    hint.textContent = `✓ ${po.length > 1 ? po.length + ' areas' : first.Name} · ${first.District}, ${first.State}`; hint.classList.add('ok');
+    renderNav();
+  } catch (_) { hint.textContent = ''; }
 }
 // PAN: exactly 10 characters — 5 letters, 4 numbers, 1 letter.
 function panError(v) {
