@@ -1349,6 +1349,33 @@ main:has(> .hs-ctas) + .site-footer, main:has(.hs-ctas) ~ .site-footer { margin-
   .reg-foot #r-prev { flex: 0 0 auto; }
   .reg-nav .save-state, .reg-nav #r-signout { display: none; }
 }
+/* ── Registration: one centred column, steps on top ───────────────────── */
+.reg { max-width: 760px; margin-left: auto; margin-right: auto; }
+.reg-hero .wrap { max-width: 792px; }
+.reg { display: block; }
+.reg[hidden] { display: none; }
+.reg-stepper { margin: 0 0 18px; }
+.reg-stepper .reg-steps { display: flex; gap: 0; overflow: visible; padding: 0; }
+.reg-stepper .reg-steps li { flex: 1; display: flex; align-items: center; min-width: 0; }
+.reg-stepper .reg-steps li:last-child { flex: 0 0 auto; }
+.reg-stepper .reg-steps li:not(:last-child)::after { content: ""; flex: 1; height: 2px; margin: 0 10px; border-radius: 2px; background: var(--line); }
+.reg-stepper .reg-steps li.done:not(:last-child)::after { background: var(--teal); }
+.reg-stepper .reg-steps button { width: auto; padding: 4px 2px; gap: 9px; border: 0; border-radius: 99px; background: none; font: 600 .95rem var(--font); color: var(--ink-3); }
+.reg-stepper .reg-steps button:hover { background: none; color: var(--ink); }
+.reg-stepper .reg-steps .n { width: 30px; height: 30px; font-size: .85rem; background: var(--surface); border: 1.5px solid var(--line); color: var(--ink-3); transition: background .2s, border-color .2s, color .2s; }
+.reg-stepper .reg-steps li.done .n { background: color-mix(in srgb, var(--teal) 12%, var(--surface)); border-color: var(--teal); color: var(--teal); }
+.reg-stepper .reg-steps li.on .n { background: var(--teal); border-color: var(--teal); color: #fff; box-shadow: 0 0 0 4px color-mix(in srgb, var(--teal) 15%, transparent); }
+.reg-stepper .reg-steps li.on button { color: var(--ink); background: none; }
+.reg-stepper .reg-steps li.done button { color: var(--ink-2); }
+.reg-stepper .reg-steps i { display: none !important; }
+.reg-meta { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 12px 4px 0; }
+@media (max-width: 900px) { .reg-stepper .reg-steps { overflow: visible; } .reg-stepper .reg-steps li { flex: 1; } .reg-stepper .reg-steps li:last-child { flex: 0 0 auto; } }
+@media (max-width: 640px) {
+  .reg-stepper .reg-steps button { padding: 4px 0; gap: 6px; font-size: .85rem; }
+  .reg-stepper .reg-steps .n { width: 26px; height: 26px; font-size: .78rem; }
+  .reg-stepper .reg-steps li:not(:last-child)::after { margin: 0 6px; }
+  .reg-meta .save-state, .reg-meta #r-signout { display: block; }
+}
 </style>
 <style>@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:700;font-display:swap;src:url(fonts/roboto-condensed-latin-700-italic.woff2) format("woff2")}@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:800;font-display:swap;src:url(fonts/roboto-condensed-latin-800-italic.woff2) format("woff2")}</style>
 </head>

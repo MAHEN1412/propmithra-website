@@ -1349,6 +1349,33 @@ main:has(> .hs-ctas) + .site-footer, main:has(.hs-ctas) ~ .site-footer { margin-
   .reg-foot #r-prev { flex: 0 0 auto; }
   .reg-nav .save-state, .reg-nav #r-signout { display: none; }
 }
+/* ── Registration: one centred column, steps on top ───────────────────── */
+.reg { max-width: 760px; margin-left: auto; margin-right: auto; }
+.reg-hero .wrap { max-width: 792px; }
+.reg { display: block; }
+.reg[hidden] { display: none; }
+.reg-stepper { margin: 0 0 18px; }
+.reg-stepper .reg-steps { display: flex; gap: 0; overflow: visible; padding: 0; }
+.reg-stepper .reg-steps li { flex: 1; display: flex; align-items: center; min-width: 0; }
+.reg-stepper .reg-steps li:last-child { flex: 0 0 auto; }
+.reg-stepper .reg-steps li:not(:last-child)::after { content: ""; flex: 1; height: 2px; margin: 0 10px; border-radius: 2px; background: var(--line); }
+.reg-stepper .reg-steps li.done:not(:last-child)::after { background: var(--teal); }
+.reg-stepper .reg-steps button { width: auto; padding: 4px 2px; gap: 9px; border: 0; border-radius: 99px; background: none; font: 600 .95rem var(--font); color: var(--ink-3); }
+.reg-stepper .reg-steps button:hover { background: none; color: var(--ink); }
+.reg-stepper .reg-steps .n { width: 30px; height: 30px; font-size: .85rem; background: var(--surface); border: 1.5px solid var(--line); color: var(--ink-3); transition: background .2s, border-color .2s, color .2s; }
+.reg-stepper .reg-steps li.done .n { background: color-mix(in srgb, var(--teal) 12%, var(--surface)); border-color: var(--teal); color: var(--teal); }
+.reg-stepper .reg-steps li.on .n { background: var(--teal); border-color: var(--teal); color: #fff; box-shadow: 0 0 0 4px color-mix(in srgb, var(--teal) 15%, transparent); }
+.reg-stepper .reg-steps li.on button { color: var(--ink); background: none; }
+.reg-stepper .reg-steps li.done button { color: var(--ink-2); }
+.reg-stepper .reg-steps i { display: none !important; }
+.reg-meta { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 12px 4px 0; }
+@media (max-width: 900px) { .reg-stepper .reg-steps { overflow: visible; } .reg-stepper .reg-steps li { flex: 1; } .reg-stepper .reg-steps li:last-child { flex: 0 0 auto; } }
+@media (max-width: 640px) {
+  .reg-stepper .reg-steps button { padding: 4px 0; gap: 6px; font-size: .85rem; }
+  .reg-stepper .reg-steps .n { width: 26px; height: 26px; font-size: .78rem; }
+  .reg-stepper .reg-steps li:not(:last-child)::after { margin: 0 6px; }
+  .reg-meta .save-state, .reg-meta #r-signout { display: block; }
+}
 </style>
 <style>@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:700;font-display:swap;src:url(fonts/roboto-condensed-latin-700-italic.woff2) format("woff2")}@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:800;font-display:swap;src:url(fonts/roboto-condensed-latin-800-italic.woff2) format("woff2")}</style>
 </head>
@@ -1397,17 +1424,12 @@ main:has(> .hs-ctas) + .site-footer, main:has(.hs-ctas) ~ .site-footer { margin-
 
     <!-- The form -->
     <div class="reg" id="r-app" hidden>
-      <aside class="reg-nav">
-        <div class="reg-who">
-          <div class="reg-avatar" id="r-avatar">?</div>
-          <div><b id="r-who-name">New Mithra</b><span id="r-who-id" class="who-id" hidden></span><span id="r-who-phone"></span></div>
-        </div>
-        <div class="reg-progress"><div><span id="r-pct">0%</span> complete</div><div class="bar"><i id="r-bar"></i></div></div>
-        <ol class="reg-steps" id="r-steps"></ol>
-        <p class="save-state" id="r-save" aria-live="polite">All changes saved</p>
-        <button class="link-btn small" type="button" id="r-signout">Sign out</button>
-      </aside>
-
+      <!-- Name / progress: kept for the script, not shown -->
+      <div class="reg-hidden" hidden>
+        <div class="reg-avatar" id="r-avatar">?</div><b id="r-who-name">New Mithra</b><span id="r-who-id" hidden></span><span id="r-who-phone"></span>
+        <span id="r-pct">0%</span><i id="r-bar"></i>
+      </div>
+      <nav class="reg-stepper" aria-label="Registration steps"><ol class="reg-steps" id="r-steps"></ol></nav>
       <div class="reg-main">
         <div class="notice reg-banner" id="r-banner" hidden></div>
         <form id="r-form" novalidate autocomplete="on"></form>
@@ -1416,6 +1438,7 @@ main:has(> .hs-ctas) + .site-footer, main:has(.hs-ctas) ~ .site-footer { margin-
           <button class="btn btn-primary" type="button" id="r-next">Save &amp; continue</button>
         </div>
       </div>
+      <div class="reg-meta"><p class="save-state" id="r-save" aria-live="polite">All changes saved</p><button class="link-btn small" type="button" id="r-signout">Sign out</button></div>
     </div>
   </div>
 </section>
@@ -1872,7 +1895,8 @@ function renderNav() {
     const st = s.id === 'review' ? null : sectionStatus(s);
     if (st && !s.optional) { total += st.need; done += st.done; }
     const mark = !st ? '' : st.complete ? (s.optional && st.need === 0 && !sectionTouched(s) ? '<i class="opt-mark">optional</i>' : '<i class="ok">✓</i>') : `<i>${st.done}/${st.need}</i>`;
-    return `<li class="${i === current ? 'on' : ''}"><button type="button" data-go="${i}"><span class="n">${i + 1}</span><span class="t">${esc(s.short)}</span>${mark}</button></li>`;
+    const doneCls = st && st.complete && !(s.optional && st.need === 0 && !sectionTouched(s)) ? ' done' : '';
+    return `<li class="${i === current ? 'on' : ''}${doneCls}"><button type="button" data-go="${i}"><span class="n">${doneCls && i !== current ? '✓' : i + 1}</span><span class="t">${esc(s.short)}</span>${mark}</button></li>`;
   }).join('');
   const pct = total ? Math.round(done / total * 100) : 0;
   $('r-pct').textContent = pct + '%'; $('r-bar').style.width = pct + '%';
