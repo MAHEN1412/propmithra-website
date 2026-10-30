@@ -1820,6 +1820,8 @@ function render() {
   if (s.id === 'review') { form.innerHTML = reviewHtml(); bindReview(); }
   else {
     form.innerHTML = `<h2 class="reg-title">${esc(s.title)}${s.optional ? ' <span class="opt">Optional</span>' : ''}</h2>` + s.groups.map(g => {
+      // Mithra ID box: only once PropMithra has assigned an ID (on approval).
+      if (g.fields.every(f => f.admin) && !g.fields.some(f => filled(get(data, f.k)))) return '';
       const hidden = g.collapsed && !filled(get(data, g.collapsed));
       return `<fieldset class="reg-group" ${hidden ? 'hidden' : ''} data-group="${esc(g.title)}"><legend>${esc(g.title)}${g.optional && !s.optional ? ' <span class="opt">Optional</span>' : ''}</legend>${g.note ? `<p class="hint">${esc(g.note)}</p>` : ''}<div class="reg-fields">${g.fields.map(f => inputHtml(FIELD[f.k])).join('')}</div></fieldset>` +
         (hidden && !locked ? `<button type="button" class="link-btn add-more" data-show="${esc(g.title)}">+ Add another previous company</button>` : '');
