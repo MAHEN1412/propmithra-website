@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script>(function(){var q=new URLSearchParams(location.search).get('lang'),l;try{if(q)localStorage.setItem('pm-lang',q);l=localStorage.getItem('pm-lang')}catch(e){l=q}l=/^(te|hi)$/.test(l||'')?l:'en';window.PM_LANG=l;var h=document.documentElement;h.lang=l==='en'?'en-IN':l+'-IN';if(l!=='en'){h.classList.add('i18n-wait')}})();</script>
 <title>RERA Registration for Real Estate Agents — PropMithra Blog</title>
 <meta name="description" content="What RERA registration means for real estate agents in India and Telangana, and why buyers and developers look for it.">
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -1467,8 +1468,24 @@ main:has(> .hs-ctas) + .site-footer, main:has(.hs-ctas) ~ .site-footer { margin-
 .reg-main .in-suffix span { top: auto; bottom: 9px; transform: none; }
 .reg-main .field .hint, .reg-main .field .err { padding-left: 14px; }
 .reg-fields { gap: 20px 26px; }
+/* ── Languages ─────────────────────────────────────────────────────────── */
+html.i18n-wait main, html.i18n-wait .site-header .nav-links, html.i18n-wait .site-footer { opacity: 0; }
+html[lang^="te"] { --font: "Inter", "Noto Sans Telugu", system-ui, sans-serif; }
+html[lang^="hi"] { --font: "Inter", "Noto Sans Devanagari", system-ui, sans-serif; }
+html[lang^="te"] body, html[lang^="hi"] body { line-height: 1.65; }
+.lang-sw { position: relative; display: flex; align-items: center; margin-left: 4px; }
+.lang-btn { display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 12px; border: 1px solid var(--line); border-radius: 99px; background: var(--surface); color: var(--ink-2); font: 600 .88rem var(--font); cursor: pointer; }
+.lang-btn:hover { border-color: #b9cbc6; color: var(--ink); }
+.lang-sw [role=menu] { position: absolute; right: 0; top: calc(100% + 8px); z-index: 60; min-width: 150px; padding: 6px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); display: grid; gap: 2px; }
+.lang-sw [role=menu][hidden] { display: none; }
+.lang-sw [role=menu] button { text-align: left; padding: 9px 12px; border: 0; border-radius: 10px; background: none; font: 500 .98rem "Inter", "Noto Sans Telugu", "Noto Sans Devanagari", system-ui, sans-serif; color: var(--ink); cursor: pointer; }
+.lang-sw [role=menu] button:hover { background: var(--canvas); }
+.lang-sw [role=menu] button[aria-checked="true"] { color: var(--teal); font-weight: 700; background: var(--mint); }
+@media (max-width: 900px) { .lang-sw { margin-left: auto; margin-right: 6px; } .lang-btn { height: 36px; padding: 0 10px; } }
+@media (max-width: 860px) { .lang-sw { margin-left: auto; margin-right: 0; } .lang-sw ~ .menu-btn, .lang-sw + .menu-btn { margin-left: 8px; } .nav .menu-btn { margin-left: 8px; } }
+@media (max-width: 620px) { .lang-sw { position: absolute; left: 0; top: 50%; transform: translateY(-50%); margin: 0; } .nav.open .lang-sw { top: 12px; transform: none; } .lang-sw [role=menu] { left: 0; right: auto; } }
 </style>
-<style>@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:700;font-display:swap;src:url(../fonts/roboto-condensed-latin-700-italic.woff2) format("woff2")}@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:800;font-display:swap;src:url(../fonts/roboto-condensed-latin-800-italic.woff2) format("woff2")}</style>
+<style>@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:700;font-display:swap;src:url(../fonts/roboto-condensed-latin-700-italic.woff2) format("woff2")}@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:800;font-display:swap;src:url(../fonts/roboto-condensed-latin-800-italic.woff2) format("woff2")}@font-face{font-family:"Noto Sans Telugu";font-weight:400;font-display:swap;src:url(../fonts/noto-sans-telugu-400.woff2) format("woff2");unicode-range:U+0951-0952,U+0964-0965,U+0C00-0C7F,U+1CDA,U+1CF2,U+200C-200D,U+25CC}@font-face{font-family:"Noto Sans Telugu";font-weight:600;font-display:swap;src:url(../fonts/noto-sans-telugu-600.woff2) format("woff2");unicode-range:U+0951-0952,U+0964-0965,U+0C00-0C7F,U+1CDA,U+1CF2,U+200C-200D,U+25CC}@font-face{font-family:"Noto Sans Telugu";font-weight:700;font-display:swap;src:url(../fonts/noto-sans-telugu-700.woff2) format("woff2");unicode-range:U+0951-0952,U+0964-0965,U+0C00-0C7F,U+1CDA,U+1CF2,U+200C-200D,U+25CC}@font-face{font-family:"Noto Sans Devanagari";font-weight:400;font-display:swap;src:url(../fonts/noto-sans-devanagari-400.woff2) format("woff2");unicode-range:U+0900-097F,U+1CD0-1CF9,U+200C-200D,U+20F0,U+25CC,U+A830-A839,U+A8E0-A8FF}@font-face{font-family:"Noto Sans Devanagari";font-weight:600;font-display:swap;src:url(../fonts/noto-sans-devanagari-600.woff2) format("woff2");unicode-range:U+0900-097F,U+1CD0-1CF9,U+200C-200D,U+20F0,U+25CC,U+A830-A839,U+A8E0-A8FF}@font-face{font-family:"Noto Sans Devanagari";font-weight:700;font-display:swap;src:url(../fonts/noto-sans-devanagari-700.woff2) format("woff2");unicode-range:U+0900-097F,U+1CD0-1CF9,U+200C-200D,U+20F0,U+25CC,U+A830-A839,U+A8E0-A8FF}</style>
 </head>
 <body>
 <header class="site-header">
@@ -1478,6 +1495,7 @@ main:has(> .hs-ctas) + .site-footer, main:has(.hs-ctas) ~ .site-footer { margin-
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
     </button>
     <ul class="nav-links"><li><a href="../">Home</a></li><li><a href="../brokers">For Brokers</a></li><li><a href="../developers">For Developers</a></li><li><a href="../clients">Clients</a></li><li><a href="../contact">Contact</a></li><li><a href="../blog/" aria-current="page">Blog</a></li></ul>
+    <div class="lang-sw" translate="no"><button type="button" class="lang-btn" aria-haspopup="menu" aria-expanded="false" aria-label="Language"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z"/></svg><span class="lang-cur">EN</span></button><div role="menu" hidden></div></div>
     <div class="nav-cta" data-root="../" data-account="../account">
       <a class="btn btn-ghost" href="../join?signin=1&amp;next=account">Log in</a>
       <a class="btn btn-primary" href="../join">Join free</a>
@@ -1744,6 +1762,88 @@ main:has(> .hs-ctas) + .site-footer, main:has(.hs-ctas) ~ .site-footer { margin-
 
   var y = document.getElementById('year');
   if (y) y.textContent = new Date().getFullYear();
+})();
+
+/* PropMithra website languages: English (source), Telugu, Hindi.
+   Text is written in English in the pages. For Telugu / Hindi we load
+   i18n/<lang>.json — { "strings": {English: translation},
+   "patterns": {"Step {0} of {1}": "…{0}…{1}"} } — and swap every visible
+   text, placeholder and label, including text the page adds later. */
+(function () {
+  var LANGS = {en: 'English', te: 'తెలుగు', hi: 'हिन्दी'};
+  var lang = window.PM_LANG || 'en';
+  var root = (document.querySelector('.nav-cta') || {}).dataset ? (document.querySelector('.nav-cta').dataset.root || '') : '';
+
+  // Language switch in the top bar.
+  var sw = document.querySelector('.lang-sw');
+  if (sw) {
+    var btn = sw.querySelector('button'), menu = sw.querySelector('[role=menu]');
+    btn.querySelector('.lang-cur').textContent = {en: 'EN', te: 'తె', hi: 'हि'}[lang];
+    menu.innerHTML = Object.keys(LANGS).map(function (k) {
+      return '<button type="button" role="menuitemradio" aria-checked="' + (k === lang) + '" data-lang="' + k + '" lang="' + k + '" translate="no">' + LANGS[k] + '</button>';
+    }).join('');
+    var open = function (on) { menu.hidden = !on; btn.setAttribute('aria-expanded', on ? 'true' : 'false'); };
+    btn.addEventListener('click', function (e) { e.stopPropagation(); open(menu.hidden); });
+    document.addEventListener('click', function () { open(false); });
+    menu.addEventListener('click', function (e) {
+      var k = e.target.closest('[data-lang]'); if (!k) return;
+      try { localStorage.setItem('pm-lang', k.dataset.lang); } catch (x) {}
+      var u = new URL(location.href); u.searchParams.delete('lang'); location.replace(u.toString());
+    });
+  }
+  if (lang === 'en') return;
+
+  var done = function () { document.documentElement.classList.remove('i18n-wait'); };
+  setTimeout(done, 2500);
+  fetch(root + 'i18n/' + lang + '.json', {cache: 'no-cache'}).then(function (r) { return r.json(); }).then(function (d) {
+    var S = d.strings || {}, P = [];
+    Object.keys(d.patterns || {}).forEach(function (k) {
+      var names = [], rx = '^' + k.replace(/[.*+?^$()|[\]\\]/g, '\\$&').replace(/\\?\{(\d)\\?\}/g, function (_, n) { names.push(+n); return '(.+?)'; }) + '$';
+      P.push({rx: new RegExp(rx), names: names, out: d.patterns[k]});
+    });
+    var one = function (t) {
+      if (S[t] != null) return S[t];
+      for (var i = 0; i < P.length; i++) {
+        var m = P[i].rx.exec(t); if (!m) continue;
+        var out = P[i].out;
+        P[i].names.forEach(function (n, j) { var v = m[j + 1]; out = out.split('{' + n + '}').join(tr(v) || v); });
+        return out;
+      }
+      return null;
+    };
+    var tr = function (raw) {
+      var t = raw.replace(/\s+/g, ' ').trim(); if (!t || !/[A-Za-z]/.test(t)) return null;
+      var r = one(t); if (r != null) return r;
+      if (t.indexOf(', ') > 0) { var parts = t.split(', '), any = false; parts = parts.map(function (p) { var x = one(p); if (x != null) any = true; return x != null ? x : p; }); if (any) return parts.join(', '); }
+      return null;
+    };
+    var SKIP = /^(SCRIPT|STYLE|NOSCRIPT|TEXTAREA|CODE)$/;
+    var skipEl = function (el) { return !el || SKIP.test(el.tagName) || el.closest('[translate=no],.notranslate,svg'); };
+    var ATTR = ['placeholder', 'aria-label', 'title', 'alt'];
+    var doText = function (n) {
+      var pe = n.parentElement; if (skipEl(pe)) return;
+      if (pe.tagName === 'OPTION' && !pe.hasAttribute('value')) pe.setAttribute('value', pe.textContent);
+      if (pe.closest('datalist')) return;
+      var v = n.nodeValue, r = tr(v); if (r == null) return;
+      var lead = v.match(/^\s*/)[0], tail = v.match(/\s*$/)[0];
+      if (v !== lead + r + tail) n.nodeValue = lead + r + tail;
+    };
+    var doEl = function (el) {
+      if (el.nodeType !== 1 || skipEl(el)) return;
+      ATTR.forEach(function (a) { var v = el.getAttribute(a); if (v && v.trim() !== ' ') { var r = tr(v); if (r != null && r !== v) el.setAttribute(a, r); } });
+      var w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT), n;
+      while ((n = w.nextNode())) { if (n.nodeType === 3) doText(n); else if (!skipEl(n)) ATTR.forEach(function (a) { var v = n.getAttribute(a); if (v && v !== ' ') { var r = tr(v); if (r != null && r !== v) n.setAttribute(a, r); } }); }
+    };
+    doEl(document.body); document.title = tr(document.title) || document.title;
+    new MutationObserver(function (ms) {
+      ms.forEach(function (m) {
+        if (m.type === 'characterData') doText(m.target);
+        else if (m.type === 'attributes') { var el = m.target, v = el.getAttribute(m.attributeName); var r = v && tr(v); if (r != null && r !== v) el.setAttribute(m.attributeName, r); }
+        else m.addedNodes.forEach(function (n) { if (n.nodeType === 3) doText(n); else doEl(n); });
+      });
+    }).observe(document.body, {subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ATTR});
+    done();
+  }).catch(done);
 })();
 </script>
 </body>
