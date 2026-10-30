@@ -1447,6 +1447,26 @@ main:has(> .hs-ctas) + .site-footer, main:has(.hs-ctas) ~ .site-footer { margin-
   .mcard-top img { height: 22px; }
   .mcard-mob { display: none; }
 }
+/* ── Registration fields: underline style with floating labels ─────────── */
+.reg-main .field { position: relative; gap: 4px; }
+.reg-main .field.fl > label, .reg-main .field.fixed:not(.doc):not(.yesno) > label { position: absolute; left: 14px; top: 17px; z-index: 1; margin: 0; pointer-events: none; font-size: .98rem; font-weight: 400; color: #7b8a88; transition: top .16s ease, font-size .16s ease, color .16s ease; white-space: nowrap; }
+.reg-main .field.fixed:not(.doc):not(.yesno) > label,
+.reg-main .field.fl:has(input:focus) > label,
+.reg-main .field.fl:has(input:not(:placeholder-shown)) > label,
+.reg-main .field.fl:has(input:disabled) > label { top: 3px; font-size: .74rem; font-weight: 600; color: var(--ink-3); }
+.reg-main .field.fl:has(input:focus) > label, .reg-main .field.fixed:has(select:focus, input:focus) > label { color: var(--teal); }
+.reg-main .field input, .reg-main .field select { min-height: 56px; padding: 22px 14px 6px; border: 0; border-bottom: 1.5px solid #c4cfcc; border-radius: 0; background: transparent; box-shadow: none; font-size: 1rem; color: var(--ink); transition: border-color .15s, background .15s; }
+.reg-main .field select { padding-left: 10px; padding-right: 34px; }
+.reg-main .field input:hover:not(:disabled), .reg-main .field select:hover:not(:disabled) { border-color: #93a5a1; background: transparent; }
+.reg-main .field input:focus, .reg-main .field select:focus { outline: none; box-shadow: none; border-bottom: 2px solid var(--teal); background: color-mix(in srgb, var(--mint) 45%, transparent); }
+.reg-main .field input[aria-invalid="true"], .reg-main .field select[aria-invalid="true"] { border-bottom-color: #c4320a; }
+.reg-main .field input::placeholder { color: transparent; transition: color .15s; }
+.reg-main .field input:focus::placeholder { color: #a6b2b0; }
+.reg-main .field input:disabled { background: transparent; color: var(--ink-2); border-bottom-style: dashed; }
+.reg-main .field .opt-l { font-weight: 400; }
+.reg-main .in-suffix span { top: auto; bottom: 9px; transform: none; }
+.reg-main .field .hint, .reg-main .field .err { padding-left: 14px; }
+.reg-fields { gap: 20px 26px; }
 </style>
 <style>@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:700;font-display:swap;src:url(../fonts/roboto-condensed-latin-700-italic.woff2) format("woff2")}@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:800;font-display:swap;src:url(../fonts/roboto-condensed-latin-800-italic.woff2) format("woff2")}</style>
 </head>
