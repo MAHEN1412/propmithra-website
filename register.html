@@ -1317,6 +1317,10 @@ main:has(> .hs-ctas) + .site-footer, main:has(.hs-ctas) ~ .site-footer { margin-
 .hs-status { position: relative; z-index: 2; }
 .hs-slide.hs-ob { position: absolute; inset: -30px -11px -12px; display: block; }
 .hs-slide.hs-ob img { width: 100%; height: 100%; object-fit: cover; object-position: top center; display: block; }
+
+/* Mithra ID under the agent's name (registration sidebar) */
+.reg-who .who-id:not([hidden]) { display: block; margin: 2px 0; padding: 1px 8px; border-radius: 6px; font-size: .75rem; font-weight: 700; letter-spacing: .03em; color: var(--teal, #007a63); background: rgba(0,122,99,.08); border: 1px solid rgba(0,122,99,.25); width: max-content; }
+.reg-who #r-who-phone { display: block; }
 </style>
 <style>@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:700;font-display:swap;src:url(fonts/roboto-condensed-latin-700-italic.woff2) format("woff2")}@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:800;font-display:swap;src:url(fonts/roboto-condensed-latin-800-italic.woff2) format("woff2")}</style>
 </head>
@@ -1368,7 +1372,7 @@ main:has(> .hs-ctas) + .site-footer, main:has(.hs-ctas) ~ .site-footer { margin-
       <aside class="reg-nav">
         <div class="reg-who">
           <div class="reg-avatar" id="r-avatar">?</div>
-          <div><b id="r-who-name">New Mithra</b><span id="r-who-phone"></span></div>
+          <div><b id="r-who-name">New Mithra</b><span id="r-who-id" class="who-id" hidden></span><span id="r-who-phone"></span></div>
         </div>
         <div class="reg-progress"><div><span id="r-pct">0%</span> complete</div><div class="bar"><i id="r-bar"></i></div></div>
         <ol class="reg-steps" id="r-steps"></ol>
@@ -1424,11 +1428,6 @@ const RX = {
 // "docs.*" is an uploaded file. req = needed before submitting.
 const SECTIONS = [
   {id: 'personal', title: 'Personal information', short: 'Personal', groups: [
-    {title: 'Mithra ID', note: 'Assigned by PropMithra when your registration is approved.', fields: [
-      {k: 'mithraId', label: 'Mithra Unique Identification Number', admin: 1},
-      {k: 'validFrom', label: 'Mithra valid date from', admin: 1, type: 'date'},
-      {k: 'validTo', label: 'Mithra valid date to', admin: 1, type: 'date'},
-    ]},
     {title: 'About you', fields: [
       {k: 'personal.firstName', label: 'First name', req: 1, ac: 'given-name'},
       {k: 'personal.lastName', label: 'Last name', req: 1, ac: 'family-name'},
@@ -1849,6 +1848,7 @@ function renderNav() {
   const first = get(data, 'personal.firstName'), last = get(data, 'personal.lastName');
   const nm = [first, last].filter(Boolean).join(' ');
   $('r-who-name').textContent = nm || 'New Mithra';
+  const idEl = $('r-who-id'); idEl.hidden = !(data.status === 'approved' && data.mithraId); idEl.textContent = data.mithraId ? 'Mithra ID · ' + data.mithraId : '';
   $('r-avatar').textContent = (nm || '?').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
 }
 const sectionTouched = (s) => FIELDS.some(f => f.section === s.id && filled(valueOf(f.k)));
@@ -2024,7 +2024,7 @@ function idCard() {
   const name = [get(data, 'personal.firstName'), get(data, 'personal.lastName')].filter(Boolean).join(' ');
   return `<div class="id-card"><div class="id-photo" id="r-card-photo">${esc((name || '?')[0])}</div>
     <div><span class="eyebrow">PropMithra · Approved Mithra</span><h3>${esc(name)}</h3>
-    <p class="id-no">${esc(data.mithraId || '')}</p><p class="muted">Valid ${esc(fmtDate(data.validFrom))} – ${esc(fmtDate(data.validTo))}</p></div></div>
+    <p class="id-no">${esc(data.mithraId || '')}</p>${data.validFrom && data.validTo ? `<p class="muted">Valid ${esc(fmtDate(data.validFrom))} – ${esc(fmtDate(data.validTo))}</p>` : ''}</div></div>
     <div class="next-card">
       <div><b>You can now add properties</b>
         <span>Your Aadhaar and mobile number are verified, so adding properties is unlocked. Add properties here on the website — they also appear in the PropMithra app.</span></div>

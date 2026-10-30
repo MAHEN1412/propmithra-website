@@ -1317,6 +1317,10 @@ main:has(> .hs-ctas) + .site-footer, main:has(.hs-ctas) ~ .site-footer { margin-
 .hs-status { position: relative; z-index: 2; }
 .hs-slide.hs-ob { position: absolute; inset: -30px -11px -12px; display: block; }
 .hs-slide.hs-ob img { width: 100%; height: 100%; object-fit: cover; object-position: top center; display: block; }
+
+/* Mithra ID under the agent's name (registration sidebar) */
+.reg-who .who-id:not([hidden]) { display: block; margin: 2px 0; padding: 1px 8px; border-radius: 6px; font-size: .75rem; font-weight: 700; letter-spacing: .03em; color: var(--teal, #007a63); background: rgba(0,122,99,.08); border: 1px solid rgba(0,122,99,.25); width: max-content; }
+.reg-who #r-who-phone { display: block; }
 </style>
 <style>@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:700;font-display:swap;src:url(fonts/roboto-condensed-latin-700-italic.woff2) format("woff2")}@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:800;font-display:swap;src:url(fonts/roboto-condensed-latin-800-italic.woff2) format("woff2")}</style>
 </head>
