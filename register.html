@@ -1435,6 +1435,7 @@ const SECTIONS = [
       {k: 'personal.fatherSpouseName', label: 'Father / Spouse name', req: 1},
       {k: 'personal.dob', label: 'Date of birth', type: 'date', req: 1, ac: 'bday'},
       {k: 'personal.stateOfBirth', label: 'State of birth', type: 'select', options: STATES, req: 1},
+      {k: 'professional.totalYears', label: 'Total years of experience', type: 'number', req: 1, min: 0, max: 60},
     ]},
     {title: 'Address', fields: [
       {k: 'personal.address.houseNo', label: 'House No / Sy. No / Block No / Plot No', req: 1, wide: 1},
@@ -1462,54 +1463,6 @@ const SECTIONS = [
     ]},
     {title: 'Your photo', optional: 1, note: 'A clear, recent passport-size photo. It appears on your Mithra ID card.', fields: [
       {k: 'docs.photo', label: 'Individual photo', type: 'doc', imageOnly: 1},
-    ]},
-  ]},
-  {id: 'professional', title: 'Professional experience', short: 'Experience', groups: [
-    {title: 'Current company', fields: [
-      {k: 'professional.current.company', label: 'Company name', req: 1},
-      {k: 'professional.current.role', label: 'Role played', type: 'select', options: ROLES, req: 1},
-      {k: 'professional.current.project', label: 'Project name'},
-      {k: 'professional.current.projectType', label: 'Project type', type: 'select', options: PROJECT_TYPES},
-      {k: 'professional.current.promoter', label: 'Promoter name'},
-    ]},
-    {title: 'Previous company', optional: 1, fields: [
-      {k: 'professional.previous1.company', label: 'Company name'},
-      {k: 'professional.previous1.role', label: 'Role played', type: 'select', options: ROLES},
-      {k: 'professional.previous1.project', label: 'Project name'},
-      {k: 'professional.previous1.projectType', label: 'Project type', type: 'select', options: PROJECT_TYPES},
-      {k: 'professional.previous1.promoter', label: 'Promoter name'},
-    ]},
-    {title: 'Another previous company', optional: 1, collapsed: 'professional.previous2.company', fields: [
-      {k: 'professional.previous2.company', label: 'Company name'},
-      {k: 'professional.previous2.role', label: 'Role played', type: 'select', options: ROLES},
-      {k: 'professional.previous2.project', label: 'Project name'},
-      {k: 'professional.previous2.projectType', label: 'Project type', type: 'select', options: PROJECT_TYPES},
-      {k: 'professional.previous2.promoter', label: 'Promoter name'},
-    ]},
-    {title: 'Your experience', fields: [
-      {k: 'professional.totalYears', label: 'Total years of experience', type: 'number', req: 1, min: 0, max: 60},
-      {k: 'professional.propertiesSold', label: 'Properties sold (approx.)', type: 'number', req: 1, min: 0, max: 100000},
-      {k: 'professional.title', label: 'Role / Title', type: 'select', options: TITLES, req: 1},
-    ]},
-  ]},
-  {id: 'other', title: 'Other information', short: 'Other', groups: [
-    {title: 'Declarations', note: 'Answer honestly — a "Yes" does not automatically reject your registration.', fields: [
-      {k: 'other.criminalCase', label: 'Any criminal or police case(s) pending against you?', type: 'yesno', req: 1, details: 'other.criminalCaseDetails', detailsLabel: 'Please give details (case number, police station, status)'},
-      {k: 'other.otherStates', label: 'Do you have associations in other states?', type: 'yesno', req: 1, details: 'other.otherStatesDetails', detailsLabel: 'Which states, and with whom?'},
-      {k: 'other.memberships', label: 'Are you a member of any club, association or group?', type: 'yesno', req: 1, details: 'other.membershipsDetails', detailsLabel: 'Names of the clubs / associations / groups'},
-    ]},
-  ]},
-  {id: 'family', title: 'Family information', short: 'Family', optional: 1, groups: [
-    {title: 'Family (optional)', note: 'You can skip this section.', optional: 1, fields: [
-      {k: 'family.maritalStatus', label: 'Marital status', type: 'select', options: ['Single', 'Married', 'Widowed', 'Divorced', 'Prefer not to say']},
-      {k: 'family.spouseName', label: 'Spouse name'},
-      {k: 'family.spouseOccupation', label: 'Spouse occupation'},
-      {k: 'family.children', label: 'Number of children', type: 'number', min: 0, max: 20},
-    ]},
-    {title: 'Emergency contact', optional: 1, fields: [
-      {k: 'family.emergencyName', label: 'Contact name'},
-      {k: 'family.emergencyRelation', label: 'Relationship'},
-      {k: 'family.emergencyMobile', label: 'Mobile number', rx: 'mobile', digits: 10},
     ]},
   ]},
   {id: 'review', title: 'Review & submit', short: 'Review', groups: []},
