@@ -1460,41 +1460,8 @@ const SECTIONS = [
       {k: 'identity.aadhaarLast4', label: 'Aadhaar — last 4 digits', req: 1, rx: 'last4', digits: 4},
       {k: 'docs.aadhaar', label: 'Upload Aadhaar (front & back in one photo or PDF)', type: 'doc', req: 1},
     ]},
-    {title: 'PAN card', fields: [
-      {k: 'identity.pan', label: 'PAN number', req: 1, rx: 'pan', upper: 1, maxlen: 10, help: '10 characters: 5 letters, 4 numbers, 1 letter — e.g. ABCDE1234F'},
-      {k: 'docs.pan', label: 'Upload PAN card', type: 'doc', req: 1},
-    ]},
-    {title: 'RERA registration', note: 'Your real estate agent registration with RERA. We check it on the RERA portal before approving.', fields: [
-      {k: 'identity.rera.authority', label: 'Registered with', type: 'select', options: ['Telangana RERA (TG-RERA)', 'Andhra Pradesh RERA', 'Karnataka RERA', 'Maharashtra RERA', 'Tamil Nadu RERA', 'Other state'], req: 1, def: 'Telangana RERA (TG-RERA)'},
-      {k: 'identity.rera.number', label: 'RERA registration number', req: 1, rx: 'rera', upper: 1},
-      {k: 'identity.rera.validTill', label: 'Valid till', type: 'date', req: 1},
-      {k: 'docs.rera', label: 'Upload RERA certificate', type: 'doc', req: 1},
-    ]},
-    {title: 'Voter ID card', optional: 1, fields: [
-      {k: 'identity.voterId', label: 'Voter ID (EPIC) number', rx: 'voter', upper: 1},
-      {k: 'docs.voter', label: 'Upload Voter ID', type: 'doc'},
-    ]},
-    {title: 'Driving licence', optional: 1, fields: [
-      {k: 'identity.licence.number', label: 'Licence number', rx: 'dl', upper: 1},
-      {k: 'identity.licence.validTill', label: 'Valid till', type: 'date'},
-      {k: 'docs.licence', label: 'Upload driving licence', type: 'doc'},
-    ]},
-    {title: 'Business documents', optional: 1, note: 'Only if you work as a registered firm or company.', fields: [
-      {k: 'identity.gstin', label: 'GSTIN', rx: 'gst', upper: 1},
-      {k: 'docs.gst', label: 'Upload GST registration certificate', type: 'doc'},
-      {k: 'identity.cin', label: 'Company CIN', rx: 'cin', upper: 1},
-      {k: 'docs.incorporation', label: 'Upload certificate of incorporation', type: 'doc'},
-    ]},
-    {title: 'Your photo', note: 'A clear, recent passport-size photo. It appears on your Mithra ID card.', fields: [
-      {k: 'docs.photo', label: 'Individual photo', type: 'doc', req: 1, imageOnly: 1},
-    ]},
-    {title: 'Bank account details', note: 'Used only to pay your commissions. Visible only to you and the PropMithra team.', fields: [
-      {k: 'bank.holder', label: 'Account holder name', req: 1},
-      {k: 'bank.accountNumber', label: 'Account number', req: 1, rx: 'account', digits: 18, secret: 1},
-      {k: '_confirmAccount', label: 'Confirm account number', req: 1, digits: 18, confirm: 'bank.accountNumber'},
-      {k: 'bank.ifsc', label: 'IFSC code', req: 1, rx: 'ifsc', upper: 1, maxlen: 11, help: '11 characters, printed on your cheque book or passbook. We fill in the bank and branch.'},
-      {k: 'bank.bankName', label: 'Bank name', req: 1},
-      {k: 'bank.branch', label: 'Branch'},
+    {title: 'Your photo', optional: 1, note: 'A clear, recent passport-size photo. It appears on your Mithra ID card.', fields: [
+      {k: 'docs.photo', label: 'Individual photo', type: 'doc', imageOnly: 1},
     ]},
   ]},
   {id: 'professional', title: 'Professional experience', short: 'Experience', groups: [
@@ -2105,7 +2072,7 @@ function idCard() {
     <p class="id-no">${esc(data.mithraId || '')}</p><p class="muted">Valid ${esc(fmtDate(data.validFrom))} – ${esc(fmtDate(data.validTo))}</p></div></div>
     <div class="next-card">
       <div><b>You can now add properties</b>
-        <span>Your RERA, PAN and Aadhaar are verified, so adding properties is unlocked. Add properties here on the website — they also appear in the PropMithra app.</span></div>
+        <span>Your Aadhaar and mobile number are verified, so adding properties is unlocked. Add properties here on the website — they also appear in the PropMithra app.</span></div>
       <div class="btn-row"><a class="btn btn-primary" href="account#add">Add your first property</a>
         <a class="btn btn-ghost" href="account">My properties</a></div>
     </div>`;
