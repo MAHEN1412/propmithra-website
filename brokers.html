@@ -1376,6 +1376,77 @@ main:has(> .hs-ctas) + .site-footer, main:has(.hs-ctas) ~ .site-footer { margin-
   .reg-stepper .reg-steps li:not(:last-child)::after { margin: 0 6px; }
   .reg-meta .save-state, .reg-meta #r-signout { display: block; }
 }
+/* ── Registration v3: form + live Mithra card ─────────────────────────── */
+.reg { max-width: 1080px; display: grid; grid-template-columns: minmax(0, 1fr) 340px; grid-template-areas: "step side" "main side" "meta side"; grid-template-rows: auto auto 1fr; row-gap: 0; column-gap: 32px; align-items: start; }
+.reg[hidden] { display: none; }
+.reg-hero .wrap { max-width: 1112px; }
+.reg-stepper { grid-area: step; margin-bottom: 20px; }
+.reg-main { grid-area: main; border-radius: 22px; border-color: #dfe8e5; box-shadow: 0 1px 2px rgba(15,42,42,.04), 0 14px 40px rgba(15,42,42,.06); padding: clamp(20px, 3.4vw, 36px); }
+.reg-meta { grid-area: meta; }
+.reg-side { grid-area: side; position: sticky; top: 96px; display: grid; gap: 16px; }
+.reg-head { margin: 0 0 8px; }
+.reg-stepno { display: inline-block; font-size: .8rem; font-weight: 600; color: var(--teal); background: var(--mint); padding: 3px 10px; border-radius: 99px; }
+.reg-head .reg-title { margin: 10px 0 4px; font-size: clamp(1.4rem, 2.6vw, 1.75rem); letter-spacing: -.015em; }
+.reg-head p { margin: 0; color: var(--ink-2); }
+.reg-group { margin-top: 26px; padding-top: 22px; }
+.reg-group:first-of-type { border-top: 1px solid var(--line); padding-top: 22px; }
+.reg-group legend { display: flex; align-items: center; gap: 8px; font-size: 1.02rem; }
+.reg-fields { gap: 16px 18px; }
+.reg-main .field input, .reg-main .field select { border-radius: 12px; min-height: 50px; padding: 12px 15px; background: #fbfdfc; }
+.reg-main .field input:hover:not(:disabled), .reg-main .field select:hover:not(:disabled) { border-color: #b9cbc6; }
+.reg-main .field input:focus, .reg-main .field select:focus { background: #fff; }
+/* uploads */
+.reg-main .doc-box { border: 1.5px dashed #c9d8d4; border-radius: 16px; background: #fbfdfc; padding: 14px; transition: border-color .15s, background .15s; }
+.reg-main .doc-box:hover, .reg-main .doc-box.drag { border-color: var(--teal); background: var(--mint); }
+.reg-main .doc-box.has { border-style: solid; border-color: color-mix(in srgb, var(--teal) 40%, var(--line)); background: #f5fbf8; }
+.reg-main .doc-thumb { border-radius: 12px; }
+/* footer buttons */
+.reg-foot { margin-top: 30px; }
+.reg-foot .btn { min-height: 50px; padding-left: 26px; padding-right: 26px; border-radius: 14px; font-size: 1rem; }
+/* live card */
+.mcard { position: relative; overflow: hidden; border-radius: 22px; padding: 18px 18px 16px; color: #fff; min-height: 210px; display: grid; gap: 16px; align-content: space-between;
+  background: radial-gradient(120% 90% at 100% 0%, #13a387 0%, transparent 55%), linear-gradient(150deg, #00735e 0%, #004b3e 100%);
+  box-shadow: 0 18px 40px rgba(0, 75, 62, .28), inset 0 0 0 1px rgba(255,255,255,.08); }
+.mcard-arcs { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.mcard-arcs path { fill: none; stroke: rgba(255,255,255,.09); stroke-width: 1.2; }
+.mcard > *:not(svg) { position: relative; }
+.mcard-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.mcard-top img { height: 26px; width: auto; }
+.mcard-id { font-size: .72rem; font-weight: 600; color: rgba(255,255,255,.75); text-align: right; }
+.mcard-body { display: flex; gap: 14px; align-items: center; }
+.mcard-photo { width: 64px; height: 76px; border-radius: 14px; flex: none; display: grid; place-items: center; overflow: hidden; background: rgba(255,255,255,.14); border: 2px solid rgba(255,255,255,.55); font-size: 1.4rem; font-weight: 800; }
+.mcard-photo img { width: 100%; height: 100%; object-fit: cover; }
+.mcard-who { display: grid; gap: 2px; min-width: 0; }
+.mcard-who b { font-size: 1.22rem; letter-spacing: -.01em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mcard-who span { font-size: .86rem; color: rgba(255,255,255,.85); }
+.mcard-who .ph { color: rgba(255,255,255,.45); }
+.mcard-foot { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.mchip { font-size: .74rem; font-weight: 600; padding: 4px 10px; border-radius: 99px; background: rgba(255,255,255,.1); color: rgba(255,255,255,.7); border: 1px dashed rgba(255,255,255,.35); }
+.mchip.on { background: #fff; color: var(--teal-dark); border: 1px solid #fff; }
+.mchip.on::before { content: "✓ "; color: var(--green); font-weight: 800; }
+.mcard-mob { margin-left: auto; font-size: .78rem; color: rgba(255,255,255,.8); font-variant-numeric: tabular-nums; }
+.mcard-cap { margin: -4px 4px 0; font-size: .82rem; color: var(--ink-3); }
+.reg-next { list-style: none; margin: 0; padding: 18px 18px 18px 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; display: grid; gap: 14px; counter-reset: nx; }
+.reg-next li { counter-increment: nx; display: grid; grid-template-columns: 26px 1fr; column-gap: 12px; position: relative; }
+.reg-next li::before { content: counter(nx); grid-row: span 2; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-size: .78rem; font-weight: 700; color: var(--teal); background: var(--mint); }
+.reg-next li:not(:last-child)::after { content: ""; position: absolute; left: 12px; top: 30px; bottom: -12px; width: 2px; background: var(--line); }
+.reg-next b { font-size: .92rem; }
+.reg-next span { font-size: .84rem; color: var(--ink-2); }
+.reg-help { margin: 0 4px; font-size: .86rem; color: var(--ink-2); }
+.reg-help a { color: var(--teal); font-weight: 700; }
+@media (max-width: 960px) {
+  .reg { grid-template-columns: minmax(0, 1fr); grid-template-areas: "step" "side" "main" "meta"; max-width: 720px; }
+  .reg-side { position: static; margin-bottom: 16px; }
+  .reg-next, .reg-help, .mcard-cap { display: none; }
+  .mcard { min-height: 0; padding: 14px 16px; gap: 12px; border-radius: 18px; }
+  .mcard-photo { width: 48px; height: 56px; border-radius: 11px; font-size: 1.1rem; }
+  .mcard-who b { font-size: 1.05rem; }
+}
+@media (max-width: 640px) {
+  .reg-main { border-radius: 18px; }
+  .mcard-top img { height: 22px; }
+  .mcard-mob { display: none; }
+}
 </style>
 <style>@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:700;font-display:swap;src:url(fonts/roboto-condensed-latin-700-italic.woff2) format("woff2")}@font-face{font-family:"Roboto Condensed";font-style:italic;font-weight:800;font-display:swap;src:url(fonts/roboto-condensed-latin-800-italic.woff2) format("woff2")}</style>
 </head>
