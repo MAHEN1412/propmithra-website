@@ -501,6 +501,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .price-input span { display: grid; place-items: center; padding: 0 12px; font-weight: 700; color: var(--ink-2); }
 .price-input input { border: 0 !important; background: transparent !important; flex: 1; min-width: 0; }
 .price-input select { border: 0 !important; border-left: 1px solid var(--line) !important; border-radius: 0 !important; width: auto !important; background: var(--surface) !important; }
+#d-form [data-types][hidden], #d-form [data-bhk][hidden] { display: none !important; }
 .price-input:focus-within { outline: 3px solid var(--green); outline-offset: 2px; }
 .field .q { font-weight: 600; font-size: .92rem; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -1644,7 +1645,9 @@ html[lang^="te"] body, html[lang^="hi"] body { line-height: 1.65; }
             <div class="field"><label for="l-transaction">For<span class="req">*</span></label><select id="l-transaction"><option value="sale">Sale</option><option value="rent">Rent</option><option value="lease">Lease</option></select></div>
             <div class="field" data-bhk><label for="l-bhk">Bedrooms (BHK)<span class="req">*</span></label><select id="l-bhk"><option value="1">1 BHK</option><option value="2">2 BHK</option><option value="3" selected>3 BHK</option><option value="4">4 BHK</option><option value="5">5 BHK</option><option value="6">6+ BHK</option></select></div>
             <div class="field" data-bhk><label for="l-baths">Bathrooms</label><input id="l-baths" inputmode="numeric" placeholder="e.g. 3"></div>
-            <div class="field"><label for="l-area">Area (sq.ft)<span class="req">*</span></label><input id="l-area" inputmode="numeric" placeholder="e.g. 1850"><span class="err" data-err-for="l-area"></span></div>
+            <div class="field"><label for="l-area"><span id="l-area-label">Built-up area</span><span class="req">*</span></label>
+              <div class="price-input"><input id="l-area" inputmode="decimal" placeholder="e.g. 1850"><select id="l-area-unit" aria-label="Area unit"><option value="sqft">sq.ft</option><option value="sqyd">sq.yd</option><option value="acre">acres</option></select></div>
+              <span class="hint" id="l-area-hint"></span><span class="err" data-err-for="l-area"></span></div>
             <div class="field"><label for="l-price">Price<span class="req">*</span></label>
               <div class="price-input"><span>₹</span><input id="l-price" inputmode="decimal" placeholder="e.g. 1.2"><select id="l-unit" aria-label="Price unit"><option value="10000000">Crore</option><option value="100000" selected>Lakh</option><option value="1">Rupees</option></select></div>
               <span class="hint" id="l-price-hint"></span><span class="err" data-err-for="l-price"></span></div>
@@ -1662,14 +1665,14 @@ html[lang^="te"] body, html[lang^="hi"] body { line-height: 1.65; }
 
         <fieldset class="reg-group"><legend>Details</legend>
           <div class="reg-fields">
-            <div class="field"><label for="l-furnishing">Furnishing</label><select id="l-furnishing"><option value="unfurnished">Unfurnished</option><option value="semi">Semi-furnished</option><option value="full">Fully furnished</option></select></div>
-            <div class="field"><label for="l-facing">Facing</label><select id="l-facing"><option value="">—</option><option>East</option><option>West</option><option>North</option><option>South</option><option>North-East</option><option>North-West</option><option>South-East</option><option>South-West</option></select></div>
-            <div class="field"><label for="l-floor">Floor</label><input id="l-floor" inputmode="numeric" placeholder="e.g. 7"></div>
-            <div class="field"><label for="l-floors">Total floors</label><input id="l-floors" inputmode="numeric" placeholder="e.g. 20"></div>
-            <div class="field"><label for="l-parking">Car parking</label><input id="l-parking" inputmode="numeric" placeholder="e.g. 2"></div>
-            <div class="field"><label for="l-age">Age of property (years)</label><input id="l-age" inputmode="numeric" placeholder="0 = new"></div>
-            <label class="check wide"><input type="checkbox" id="l-uc"><span>Under construction</span></label>
-            <div class="field wide"><span class="q">Amenities</span><div class="chips" id="l-amenities"></div></div>
+            <div class="field" data-types="apartment villa house office shop commercial"><label for="l-furnishing">Furnishing</label><select id="l-furnishing"><option value="unfurnished">Unfurnished</option><option value="semi">Semi-furnished</option><option value="full">Fully furnished</option></select></div>
+            <div class="field" data-types="apartment villa house plot land shop commercial"><label for="l-facing">Facing</label><select id="l-facing"><option value="">—</option><option>East</option><option>West</option><option>North</option><option>South</option><option>North-East</option><option>North-West</option><option>South-East</option><option>South-West</option></select></div>
+            <div class="field" data-types="apartment office shop commercial"><label for="l-floor">Floor</label><input id="l-floor" inputmode="numeric" placeholder="e.g. 7"></div>
+            <div class="field" data-types="apartment villa house office commercial"><label for="l-floors" id="l-floors-label">Total floors</label><input id="l-floors" inputmode="numeric" placeholder="e.g. 20"></div>
+            <div class="field" data-types="apartment villa house office shop commercial warehouse"><label for="l-parking">Car parking</label><input id="l-parking" inputmode="numeric" placeholder="e.g. 2"></div>
+            <div class="field" data-types="apartment villa house office shop commercial warehouse"><label for="l-age">Age of property (years)</label><input id="l-age" inputmode="numeric" placeholder="0 = new"></div>
+            <div class="field" data-types="apartment office shop commercial"><label for="s-carpet">Carpet area (sq.ft)</label><input id="s-carpet" data-spec inputmode="numeric" placeholder="e.g. 1400"></div><div class="field" data-types="apartment villa house"><label for="s-balconies">Balconies</label><input id="s-balconies" data-spec inputmode="numeric" placeholder="e.g. 2"></div><div class="field" data-types="villa house"><label for="s-plotyd">Plot area (sq.yd)</label><input id="s-plotyd" data-spec inputmode="numeric" placeholder="e.g. 200"></div><div class="field" data-types="plot"><label for="s-dims">Plot size (ft)</label><input id="s-dims" data-spec placeholder="e.g. 40 x 60"></div><div class="field" data-types="plot land agricultural villa house shop warehouse"><label for="s-road">Road width (ft)</label><input id="s-road" data-spec inputmode="numeric" placeholder="e.g. 30"></div><div class="field" data-types="plot land agricultural villa house"><label for="s-approval">Approval</label><select id="s-approval" data-spec><option value="">—</option><option>HMDA</option><option>DTCP</option><option>GHMC</option><option>Gram Panchayat</option><option>RERA registered</option><option>Not approved</option></select></div><div class="field" data-types="land"><label for="s-zone">Land use / zone</label><select id="s-zone" data-spec><option value="">—</option><option>Residential</option><option>Commercial</option><option>Industrial</option><option>Agricultural</option><option>Mixed use</option></select></div><div class="field" data-types="agricultural"><label for="s-water">Water source</label><select id="s-water" data-spec><option value="">—</option><option>Borewell</option><option>Canal</option><option>Open well</option><option>River / tank</option><option>None</option></select></div><div class="field" data-types="office shop commercial"><label for="s-power">Power backup</label><select id="s-power" data-spec><option value="">—</option><option>Full</option><option>Partial</option><option>None</option></select></div><div class="field" data-types="office shop commercial warehouse"><label for="s-washrooms">Washrooms</label><input id="s-washrooms" data-spec inputmode="numeric" placeholder="e.g. 2"></div><div class="field" data-types="office"><label for="s-seats">Workstations / seats</label><input id="s-seats" data-spec inputmode="numeric" placeholder="e.g. 60"></div><div class="field" data-types="office"><label for="s-cabins">Cabins</label><input id="s-cabins" data-spec inputmode="numeric" placeholder="e.g. 4"></div><div class="field" data-types="shop"><label for="s-frontage">Frontage (ft)</label><input id="s-frontage" data-spec inputmode="numeric" placeholder="e.g. 20"></div><div class="field" data-types="warehouse"><label for="s-ceiling">Ceiling height (ft)</label><input id="s-ceiling" data-spec inputmode="numeric" placeholder="e.g. 30"></div><div class="field" data-types="warehouse"><label for="s-docks">Loading docks</label><input id="s-docks" data-spec inputmode="numeric" placeholder="e.g. 2"></div><div class="field" data-types="warehouse"><label for="s-load">Power load (kVA)</label><input id="s-load" data-spec inputmode="numeric" placeholder="e.g. 100"></div><label class="check" data-types="villa house plot"><input type="checkbox" id="s-gated" data-spec><span>Gated community / layout</span></label><label class="check" data-types="plot"><input type="checkbox" id="s-corner" data-spec><span>Corner plot</span></label><label class="check" data-types="shop commercial land"><input type="checkbox" id="s-mainroad" data-spec><span>On the main road</span></label><label class="check" data-types="land agricultural"><input type="checkbox" id="s-passbook" data-spec><span>Pattadar passbook available</span></label><label class="check wide" data-types="apartment villa house office shop commercial warehouse"><input type="checkbox" id="l-uc"><span>Under construction</span></label>
+            <div class="field wide" data-types="apartment villa house"><span class="q">Amenities</span><div class="chips" id="l-amenities"></div></div>
             <div class="field wide"><label for="l-title">Property title</label><input id="l-title" placeholder="Left empty, we write one, e.g. 3 BHK Apartment in Gachibowli" maxlength="90"></div>
             <div class="field wide"><label for="l-desc">Description</label><textarea id="l-desc" rows="3" maxlength="1500" placeholder="What makes this property good: view, layout, nearby schools, metro…"></textarea></div>
           </div>
@@ -2058,7 +2061,17 @@ function setupForm() {
   $('l-type').innerHTML = TYPES.map(t => `<option value="${t[0]}">${t[1]}</option>`).join('');
   $('l-locality').innerHTML = '<option value="">Choose…</option>' + LOCALITIES.map(l => `<option>${l[0]}</option>`).join('') + '<option value="__other">Other…</option>';
   $('l-amenities').innerHTML = AMENITIES.map(a => `<label class="chip"><input type="checkbox" value="${esc(a)}"><span>${esc(a)}</span></label>`).join('');
-  const syncType = () => document.querySelectorAll('[data-bhk]').forEach(e => e.hidden = !HAS_BHK.has($('l-type').value));
+  const syncType = () => {
+    const t = $('l-type').value;
+    document.querySelectorAll('[data-bhk]').forEach(e => e.hidden = !HAS_BHK.has(t));
+    document.querySelectorAll('#d-form [data-types]').forEach(e => e.hidden = !e.dataset.types.split(' ').includes(t));
+    $('l-area-label').textContent = AREA_LABEL[t] || 'Built-up area';
+    $('l-area-unit').value = AREA_UNIT[t] || 'sqft';
+    $('l-floors-label').textContent = t === 'villa' || t === 'house' ? 'Floors (e.g. G+1 = 2)' : 'Total floors';
+    areaHint();
+  };
+  const areaHint = () => { const v = areaValue(), u = $('l-area-unit').value; $('l-area-hint').textContent = v && u !== 'sqft' ? '= ' + Math.round(v * AREA_FACTOR[u]).toLocaleString('en-IN') + ' sq.ft' : ''; };
+  $('l-area').addEventListener('input', areaHint); $('l-area-unit').onchange = areaHint;
   $('l-type').onchange = syncType; syncType();
   $('l-locality').onchange = () => {
     const v = $('l-locality').value; $('l-other-wrap').hidden = v !== '__other';
@@ -2067,7 +2080,7 @@ function setupForm() {
   const hint = () => { const r = priceRupees(); $('l-price-hint').textContent = r ? '= ' + inr(r) + ($('l-transaction').value !== 'sale' ? ' per month' : '') : ''; };
   $('l-price').oninput = hint; $('l-unit').onchange = hint;
   $('l-transaction').onchange = () => { if ($('l-transaction').value !== 'sale' && $('l-unit').value !== '1') $('l-unit').value = '1'; hint(); };
-  ['l-area', 'l-baths', 'l-floor', 'l-floors', 'l-parking', 'l-age', 'l-pincode'].forEach(id => $(id).addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g, ''); }));
+  ['l-baths', 'l-floor', 'l-floors', 'l-parking', 'l-age', 'l-pincode'].forEach(id => $(id).addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g, ''); }));
   if ($('d-add')) $('d-add').onclick = ADD_PAGE ? openForm : goAdd; $('d-cancel').onclick = closeForm; $('d-cancel2').onclick = closeForm;
   $('d-form').onsubmit = save;
   bindSite();
@@ -2145,15 +2158,35 @@ async function shrink(file) {
   }
   throw new Error('One photo is too large. Please choose a smaller photo.');
 }
+// Area wording and unit per type; stored in sq.ft (areaSqft) for every type.
+const AREA_LABEL = {apartment: 'Built-up area', villa: 'Built-up area', house: 'Built-up area', office: 'Built-up area', shop: 'Shop area', commercial: 'Built-up area', warehouse: 'Warehouse area', plot: 'Plot area', land: 'Land area', agricultural: 'Land area'};
+const AREA_UNIT = {plot: 'sqyd', land: 'acre', agricultural: 'acre'};
+const AREA_FACTOR = {sqft: 1, sqyd: 9, acre: 43560};
+const AREA_WORD = {sqft: 'sq.ft', sqyd: 'sq.yd', acre: 'acres'};
+const areaValue = () => { const v = parseFloat(String($('l-area').value).replace(/[^\d.]/g, '')); return isNaN(v) ? 0 : v; };
+const shown = (id) => !$(id).closest('[data-types]')?.hidden;
+// Type-specific details saved in "specs" (only the fields shown for the type).
+function readSpecs() {
+  const out = {};
+  document.querySelectorAll('#d-form [data-spec]').forEach(el => {
+    if (!shown(el.id)) return;
+    const k = el.id.slice(2);
+    if (el.type === 'checkbox') { if (el.checked) out[k] = true; return; }
+    const v = el.value.trim(); if (!v) return;
+    out[k] = el.inputMode === 'numeric' && /^\d+$/.test(v) ? Number(v) : v;
+  });
+  return out;
+}
 function fieldErr(id, msg) { const e = document.querySelector(`[data-err-for="${id}"]`); if (e) e.textContent = msg || ''; }
 const int = (id) => { const v = parseInt($(id).value, 10); return isNaN(v) ? null : v; };
 
 async function save(ev) {
   ev.preventDefault();
-  const type = $('l-type').value, transaction = $('l-transaction').value, price = priceRupees(), area = int('l-area');
+  const type = $('l-type').value, transaction = $('l-transaction').value, price = priceRupees();
+  const areaIn = areaValue(), areaUnit = $('l-area-unit').value, area = Math.round(areaIn * AREA_FACTOR[areaUnit]);
   const locSel = $('l-locality').value, locality = locSel === '__other' ? $('l-other').value.trim() : locSel;
   let ok = true;
-  fieldErr('l-area', area > 0 ? '' : 'Enter the area in sq.ft'); ok = ok && area > 0;
+  fieldErr('l-area', area > 0 ? '' : 'Enter the ' + (AREA_LABEL[type] || 'area').toLowerCase()); ok = ok && area > 0;
   fieldErr('l-price', price > 0 ? '' : 'Enter the price'); ok = ok && price > 0;
   fieldErr('l-locality', locSel ? '' : 'Choose the locality'); ok = ok && !!locSel;
   if (locSel === '__other') { fieldErr('l-other', locality ? '' : 'Type the locality name'); ok = ok && !!locality; }
@@ -2167,7 +2200,8 @@ async function save(ev) {
     const bhk = HAS_BHK.has(type) ? Number($('l-bhk').value) : null;
     // PropMithra decides who sees it (and the deal terms) when approving.
     const visibility = 'network';
-    const title = $('l-title').value.trim() || `${bhk ? bhk + ' BHK ' : ''}${TYPE_LABEL[type]} in ${locality}`;
+    const sizeWord = HAS_BHK.has(type) ? '' : (areaUnit === 'sqft' ? area.toLocaleString('en-IN') + ' sq.ft ' : areaIn + ' ' + AREA_WORD[areaUnit] + ' ');
+    const title = $('l-title').value.trim() || `${bhk ? bhk + ' BHK ' : sizeWord}${TYPE_LABEL[type]} in ${locality}`;
     // Photos first (kept inside Firestore — free plan).
     const urls = [], stamp = Date.now();
     for (let i = 0; i < photos.length; i++) {
@@ -2181,10 +2215,13 @@ async function save(ev) {
     const doc = {
       ownerBrokerId: uid, title, type, transaction, locality, city: $('l-city').value.trim() || 'Hyderabad', pincode: $('l-pincode').value.trim(),
       ...(known ? {lat: known[2], lng: known[3]} : {}),
-      areaSqft: area, price, bhk, bathrooms: bhk ? int('l-baths') : null, floor: int('l-floor'), totalFloors: int('l-floors'),
-      facing: $('l-facing').value || null, ageYears: int('l-age') || 0, underConstruction: $('l-uc').checked,
-      furnishing: $('l-furnishing').value, parking: int('l-parking') || 0,
-      amenities: [...document.querySelectorAll('#l-amenities input:checked')].map(i => i.value),
+      areaSqft: area, price, bhk, bathrooms: bhk ? int('l-baths') : null,
+      floor: shown('l-floor') ? int('l-floor') : null, totalFloors: shown('l-floors') ? int('l-floors') : null,
+      facing: shown('l-facing') ? ($('l-facing').value || null) : null, ageYears: shown('l-age') ? (int('l-age') || 0) : 0,
+      underConstruction: shown('l-uc') && $('l-uc').checked,
+      furnishing: shown('l-furnishing') ? $('l-furnishing').value : 'unfurnished', parking: shown('l-parking') ? (int('l-parking') || 0) : 0,
+      amenities: shown('l-amenities') ? [...document.querySelectorAll('#l-amenities input:checked')].map(i => i.value) : [],
+      areaInput: {value: areaIn, unit: areaUnit}, specs: readSpecs(),
       negotiable: true, commissionPercent: 1,
       availability: 'available', visibility, sharedWith: [], exclusive: false,
       listingSource: 'Direct from owner', description: $('l-desc').value.trim(), photos: urls,
