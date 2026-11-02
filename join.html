@@ -1752,10 +1752,13 @@ async function finish(user, phoneVerified) {
   const ref = fs.doc(db, 'brokers', uid), snap = await fs.getDoc(ref);
   const existed = snap.exists(), oldName = snap.data()?.name || '';
   const hasDetails = name.length >= 2 && corridors.length > 0 && /^\+91[6-9]\d{9}$/.test(phoneE164);
-  if (!existed && !hasDetails) {
-    // Signed in, but new to PropMithra: collect the details first.
+  const hadCorridors = ((snap.data()?.corridors) || []).length > 0;
+  if (!hasDetails && (!existed || !hadCorridors)) {
+    // Signed in, but new to PropMithra (or no corridors saved yet):
+    // collect the details and corridors before going any further.
     pendingUser = user; step(1);
-    $('j-msg1').textContent = 'Welcome! Please fill in your details to finish joining.';
+    $('j-msg1').textContent = existed ? 'Please choose the corridors you work in to continue.' : 'Welcome! Please fill in your details to finish joining.';
+    if (existed && snap.data()?.name && !$('j-name').value) $('j-name').value = snap.data().name;
     $('j-send').textContent = 'Join PropMithra';
     if (user.displayName && !$('j-name').value) $('j-name').value = user.displayName;
     return;
