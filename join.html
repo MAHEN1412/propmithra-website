@@ -1559,6 +1559,7 @@ html[lang^="te"] body, html[lang^="hi"] body { line-height: 1.65; }
           </div>
           <span class="err" data-err-for="j-corridors"></span>
         </fieldset>
+        <div class="field"><label for="j-ref">Referral code <span class="opt">Optional</span></label><input id="j-ref" autocomplete="off" autocapitalize="characters" placeholder="From the agent who invited you" style="text-transform:uppercase" maxlength="12"><span class="hint" id="j-ref-hint"></span></div>
         <label class="check"><input type="checkbox" id="j-terms"><span>I agree to the <a href="terms" target="_blank">Terms of Use</a> and <a href="privacy" target="_blank">Privacy Policy</a>.</span></label>
         <span class="err" data-err-for="j-terms"></span>
         <button class="btn btn-primary btn-block" id="j-send" type="submit">Continue</button>
@@ -1744,6 +1745,13 @@ $('j-resend').addEventListener('click', async () => {
   catch (e) { console.error(e); $('j-msg2').textContent = friendly(e); }
 });
 
+// Referral code from an invite link (?ref=CODE), kept for this visit.
+(() => {
+  let code = new URLSearchParams(location.search).get('ref') || '';
+  try { if (code) sessionStorage.setItem('pm-ref', code); else code = sessionStorage.getItem('pm-ref') || ''; } catch (e) {}
+  if (code && $('j-ref')) { $('j-ref').value = code.toUpperCase().replace(/[^A-Z0-9]/g, ''); $('j-ref-hint').textContent = 'Invited by a PropMithra agent'; }
+})();
+
 // Saves the broker profile after sign-in, then opens the registration.
 async function finish(user, phoneVerified) {
   const {fs, db} = fb, uid = user.uid;
@@ -1769,6 +1777,17 @@ async function finish(user, phoneVerified) {
     if (existed) await fs.updateDoc(ref, profile);
     else {
       await fs.setDoc(ref, {...profile, uid, city: $('j-city').value, source: 'website', createdAt: fs.serverTimestamp()});
+      // Joined with another agent's referral code: record who referred them.
+      const code = ($('j-ref').value || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+      if (code) {
+        try {
+          const c = await fs.getDoc(fs.doc(db, 'referralCodes', code));
+          if (c.exists() && c.data().uid !== uid) {
+            await fs.setDoc(fs.doc(db, 'referrals', uid), {referrerId: c.data().uid, referrerName: c.data().name || '', refereeId: uid, refereeName: name,
+              refereePhone: phoneE164, ...(user.email ? {refereeEmail: user.email} : {}), code, source: 'website', bonusStatus: 'pending', createdAt: fs.serverTimestamp()});
+          }
+        } catch (e) { console.warn('referral', e); }
+      }
       await fs.addDoc(fs.collection(db, 'activity'), {type: 'joined', actorId: uid, actorName: name,
         summary: `${name} joined PropMithra (website · ${labels.join(', ')})`, targetId: uid, targetType: 'broker', at: fs.serverTimestamp()}).catch(() => {});
     }

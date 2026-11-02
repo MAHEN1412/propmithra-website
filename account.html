@@ -502,6 +502,21 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 .price-input input { border: 0 !important; background: transparent !important; flex: 1; min-width: 0; }
 .price-input select { border: 0 !important; border-left: 1px solid var(--line) !important; border-radius: 0 !important; width: auto !important; background: var(--surface) !important; }
 #d-form [data-types][hidden], #d-form [data-bhk][hidden] { display: none !important; }
+.refer-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 20px; margin: 0 0 20px; display: grid; gap: 14px; }
+.refer-card[hidden] { display: none; }
+.rf-head { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; align-items: flex-start; }
+.rf-head h2 { margin: 0 0 4px; font-size: 1.2rem; }
+.rf-head p { margin: 0; max-width: 60ch; }
+.rf-code { display: grid; gap: 2px; padding: 10px 16px; border-radius: 12px; background: var(--mint); border: 1px dashed var(--teal); text-align: center; }
+.rf-code small { font-size: .74rem; color: var(--ink-3); }
+.rf-code b { font-size: 1.3rem; letter-spacing: .12em; color: var(--teal); }
+.rf-list h3 { font-size: .95rem; margin: 4px 0 8px; }
+.rf-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); }
+.rf-row span:first-child { display: grid; }
+.rf-row small { color: var(--ink-3); font-size: .8rem; }
+.rf-st { font-size: .8rem; font-weight: 700; padding: 4px 10px; border-radius: 99px; background: var(--canvas); color: var(--ink-2); white-space: nowrap; }
+.rf-st.ok { background: var(--mint); color: var(--teal); }
+.rf-st.wait { background: #fff4dc; color: #8a5a00; }
 .price-input:focus-within { outline: 3px solid var(--green); outline-offset: 2px; }
 .field .q { font-weight: 600; font-size: .92rem; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -1558,6 +1573,15 @@ html[lang^="te"] body, html[lang^="hi"] body { line-height: 1.65; }
       <!-- Status -->
       <div class="dash-status" id="d-status"></div>
       <p class="contact-note" id="d-contact-note" hidden></p>
+
+      <!-- Refer agents -->
+      <section class="refer-card" id="rf-card" hidden>
+        <div class="rf-head"><div><h2>Refer agents</h2><p class="muted" id="rf-text">Invite agents you know to PropMithra.</p></div>
+          <div class="rf-code"><small>Your code</small><b id="rf-code">…</b></div></div>
+        <div class="btn-row"><button class="btn btn-primary" type="button" id="rf-wa">Share on WhatsApp</button><button class="btn btn-ghost" type="button" id="rf-copy">Copy invite link</button></div>
+        <p class="muted small" id="rf-terms" hidden></p>
+        <div class="rf-list" id="rf-list"></div>
+      </section>
 
       <!-- Approved Mithras: actions + my properties / requirements -->
       <div id="d-listings-wrap" hidden>
@@ -2860,6 +2884,46 @@ function interestFlow(c) {
   };
 }
 
+
+// ── Refer agents ─────────────────────────────────────────────────────────
+const RF_STATUS = {pending: ['Pending', 'wait'], approved: ['Bonus approved', 'ok'], paid: ['Bonus paid', 'ok'], rejected: ['Not eligible', 'muted']};
+async function setupRefer() {
+  if (!$('rf-card')) return;
+  const {fs, db} = fb;
+  const st = await fs.getDoc(fs.doc(db, 'settings', 'referral')).catch(() => null);
+  const cfg = st?.exists() ? st.data() : {};
+  if (cfg.enabled === false) return;
+  let code = broker.referralCode;
+  if (!code) {
+    const name = [mithra.personal?.firstName, mithra.personal?.lastName].filter(Boolean).join(' ') || broker.name || user.displayName || 'PM';
+    const head = (name.toUpperCase().replace(/[^A-Z]/g, '') + 'PMPM').slice(0, 4), chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    for (let i = 0; i < 6 && !code; i++) {
+      const c = head + Array.from({length: 4}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+      if ((await fs.getDoc(fs.doc(db, 'referralCodes', c))).exists()) continue;
+      await fs.setDoc(fs.doc(db, 'referralCodes', c), {uid, name, createdAt: fs.serverTimestamp()});
+      await fs.setDoc(fs.doc(db, 'brokers', uid), {referralCode: c}, {merge: true});
+      code = c; broker.referralCode = c;
+    }
+  }
+  if (!code) return;
+  const link = location.origin + '/join?ref=' + code;
+  $('rf-code').textContent = code;
+  $('rf-text').textContent = cfg.bonusAmount
+    ? `Invite agents you know. When PropMithra approves an agent who joined with your code, you can get a referral bonus of ${inr(cfg.bonusAmount)}, as per the referral terms.`
+    : 'Invite agents you know. When PropMithra approves an agent who joined with your code, you may get a referral bonus, as per the referral terms.';
+  if (cfg.terms) { $('rf-terms').hidden = false; $('rf-terms').textContent = cfg.terms; }
+  $('rf-wa').onclick = () => window.open('https://wa.me/?text=' + encodeURIComponent(`Join me on PropMithra, the agent collaboration platform in Hyderabad. Use my referral code ${code} when you sign up: ${link}`), '_blank');
+  $('rf-copy').onclick = async () => { try { await navigator.clipboard.writeText(link); $('rf-copy').textContent = 'Link copied'; } catch (e) { prompt('Copy this link', link); } };
+  const snap = await fs.getDocs(fs.query(fs.collection(db, 'referrals'), fs.where('referrerId', '==', uid))).catch(() => null);
+  const rows = (snap?.docs || []).map(d => d.data()).sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+  const paid = rows.filter(r => r.bonusStatus === 'paid').reduce((a, r) => a + (r.bonusAmount || 0), 0);
+  $('rf-list').innerHTML = `<h3>Your referrals (${rows.length})${paid ? ` · paid to you ${inr(paid)}` : ''}</h3>` + (rows.length
+    ? rows.map(r => { const [lbl, cls] = RF_STATUS[r.bonusStatus] || RF_STATUS.pending; const when = r.createdAt?.toDate ? fmtDate(r.createdAt.toDate()) : '';
+        return `<div class="rf-row"><span><b>${esc(r.refereeName || 'New agent')}</b><small>${when ? 'Joined ' + esc(when) : 'Joined'}</small></span><span class="rf-st ${cls}">${esc(r.bonusStatus === 'paid' && r.bonusAmount ? 'Paid ' + inr(r.bonusAmount) : lbl)}</span></div>`; }).join('')
+    : '<p class="muted">No one has joined with your code yet.</p>');
+  $('rf-card').hidden = false;
+}
+
 // ── Start ───────────────────────────────────────────────────────────────
 (async () => {
   try {
@@ -2876,7 +2940,7 @@ function interestFlow(c) {
       mithra = m.exists() ? m.data() : {}; broker = b.exists() ? b.data() : {}; brokerExists = b.exists();
       window.pmSession?.({name: [mithra.personal?.firstName, mithra.personal?.lastName].filter(Boolean).join(' ') || broker.name || u.displayName || ''});
       await ensureProfile().catch(e => console.warn('profile', e));
-      show('d-app'); setupForm(); setupReqForm(); renderStatus();
+      show('d-app'); setupForm(); setupReqForm(); renderStatus(); setupRefer().catch(e => console.warn('refer', e));
       if (ADD_PAGE) {
         document.body.classList.add('add-page');
         document.querySelector('.dash-hero .crumb').innerHTML = `<a href="./">Home</a> / <a href="${ACCOUNT_URL}">My account</a> / Add property`;
