@@ -1623,7 +1623,7 @@ const SECTIONS = [
     ]},
     {title: 'Contact', fields: [
       {k: 'personal.mobile', label: 'Mobile number', req: 1, rx: 'mobile10'},
-      {k: 'personal.email', label: 'Email', type: 'email', req: 1, rx: 'email', ac: 'email', ph: 'name@example.com'},
+      {k: 'personal.email', label: 'Email', type: 'email', rx: 'email', ac: 'email', ph: 'name@example.com'},
     ]},
     {title: 'Address', note: 'Start with your pin code — we fill in the area, district and state for you.', fields: [
       {k: 'personal.address.pincode', label: 'Pin code', req: 1, rx: 'pincode', digits: 6, ac: 'postal-code', ph: '500076'},
@@ -2246,7 +2246,7 @@ function bindReview() {
       data.status = 'submitted';
       const name = [get(data, 'personal.firstName'), get(data, 'personal.lastName')].filter(Boolean).join(' ');
       // Keep the network profile in step (name, email, experience).
-      fs.updateDoc(fs.doc(db, 'brokers', uid), {name, email: get(data, 'personal.email') || null, experienceYears: Number(get(data, 'professional.totalYears')) || 0, lastActiveAt: fs.serverTimestamp()}).catch(() => {});
+      fs.updateDoc(fs.doc(db, 'brokers', uid), {name, ...(get(data, 'personal.email') ? {email: get(data, 'personal.email')} : {}), experienceYears: Number(get(data, 'professional.totalYears')) || 0, lastActiveAt: fs.serverTimestamp()}).catch(() => {});
       fs.addDoc(fs.collection(db, 'activity'), {type: 'mithra_submitted', actorId: uid, actorName: name, summary: `${name} submitted Mithra registration`, targetId: uid, targetType: 'mithra', at: fs.serverTimestamp()}).catch(() => {});
       applyStatus(); render(); window.scrollTo({top: 0, behavior: 'smooth'});
     } catch (e) { console.error(e); $('r-submit-msg').textContent = 'Could not submit. Please check your internet and try again.'; btn.disabled = false; btn.textContent = 'Submit for approval'; }

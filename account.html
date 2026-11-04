@@ -2712,14 +2712,14 @@ async function ensureProfile() {
     broker = {...broker, ...add};
   }
 }
-// Mobile number and email are both required so the team can reach the agent.
+// Mobile number is required so the team can reach the agent; email is optional.
 function contactRequired() {
   const needP = !curPhone(), needE = !curEmail(), dlg = document.createElement('div');
   dlg.className = 'modal-back';
   dlg.innerHTML = `<form class="modal" role="dialog" aria-modal="true" aria-labelledby="cr-title" novalidate><h3 id="cr-title">Add your contact details</h3>
-    <p class="muted">Your mobile number and email are required. The PropMithra team uses them to reach you — for example, to help you complete KYC.</p>
+    <p class="muted">Your mobile number is required. The PropMithra team uses it to reach you — for example, to help you complete KYC. Email is optional.</p>
     ${needP ? '<div class="field"><label for="cr-phone">Mobile number<span class="req">*</span></label><input id="cr-phone" inputmode="tel" autocomplete="tel" placeholder="10-digit mobile"></div>' : ''}
-    ${needE ? `<div class="field"><label for="cr-email">Email<span class="req">*</span></label><input id="cr-email" type="email" autocomplete="email" value="${esc(user.email || '')}"></div>` : ''}
+    ${needE ? `<div class="field"><label for="cr-email">Email <span class="opt">Optional</span></label><input id="cr-email" type="email" autocomplete="email" value="${esc(user.email || '')}"></div>` : ''}
     <p class="err" id="cr-err"></p>
     <div class="modal-actions"><button class="btn btn-ghost" type="button" id="cr-out">Log out</button><button class="btn btn-primary" type="submit" id="cr-go">Save and continue</button></div></form>`;
   document.body.appendChild(dlg);
@@ -2736,8 +2736,8 @@ function contactRequired() {
     }
     if (needE) {
       const e = dlg.querySelector('#cr-email').value.trim();
-      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)) { err.textContent = 'Please enter a valid email address.'; return; }
-      add.email = e;
+      if (e && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)) { err.textContent = 'Please enter a valid email address, or leave it empty.'; return; }
+      if (e) add.email = e;
     }
     go.disabled = true; go.textContent = 'Saving…'; err.textContent = '';
     try {
@@ -2945,10 +2945,10 @@ async function setupRefer() {
         document.body.classList.add('add-page');
         document.querySelector('.dash-hero .crumb').innerHTML = `<a href="./">Home</a> / <a href="${ACCOUNT_URL}">My account</a> / Add property`;
         if (approved()) { $('d-listings-wrap').hidden = true; $('d-form').hidden = false; }
-        if (!curPhone() || !curEmail()) contactRequired();
+        if (!curPhone()) contactRequired();
         return;
       }
-      if (!curPhone() || !curEmail()) contactRequired();
+      if (!curPhone()) contactRequired();
       menuHash();
       document.querySelectorAll('.tab').forEach(t => t.onclick = () => tab(t.dataset.tab));
       if (!approved() && broker.uid !== undefined) await loadCamps().catch(e => console.warn('campaigns', e));
