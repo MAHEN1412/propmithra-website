@@ -1609,7 +1609,7 @@ html[lang^="te"] body, html[lang^="hi"] body { line-height: 1.65; }
         </div>
         <div id="tm-extra"></div>
         <div data-pane="reqs" hidden>
-          <p class="muted" id="r-count">Customers you are finding a property for. Brokers with a matching property can contact you.</p>
+          <p class="muted" id="r-count">Customer requests you sent to PropMithra. Our team looks for matching properties and contacts you.</p>
           <div class="listing-grid" id="d-reqs"></div>
         </div>
 
@@ -1618,10 +1618,10 @@ html[lang^="te"] body, html[lang^="hi"] body { line-height: 1.65; }
       <!-- Customer requirement form -->
       <form class="listing-form" id="q-form" hidden novalidate>
         <div class="dash-head">
-          <div><h2>Customer requirement</h2><p class="muted">Brokers see what your customer needs — never who the customer is.</p></div>
+          <div><h2>Customer requirement</h2><p class="muted">Tell PropMithra what your customer is looking for. Our team finds matching properties for you.</p></div>
           <button class="btn btn-ghost" type="button" data-q-cancel>Cancel</button>
         </div>
-        <fieldset class="reg-group"><legend>Customer <span class="opt">Private — only you</span></legend>
+        <fieldset class="reg-group"><legend>Customer <span class="opt">Optional — only you and PropMithra</span></legend>
           <div class="reg-fields">
             <div class="field"><label for="q-cname">Customer name</label><input id="q-cname" placeholder="e.g. Suresh"></div>
             <div class="field"><label for="q-cphone">Customer mobile</label><input id="q-cphone" inputmode="tel"></div>
@@ -1643,17 +1643,12 @@ html[lang^="te"] body, html[lang^="hi"] body { line-height: 1.65; }
             <div class="field"><label for="q-purpose">Purpose</label><select id="q-purpose"><option value="residential">To live in</option><option value="investment">Investment</option><option value="commercial">Commercial</option><option value="office">Office</option><option value="retail">Retail</option></select></div>
             <div class="field"><label for="q-urgency">How soon</label><select id="q-urgency"><option value="immediate">Immediately</option><option value="days30" selected>Within 30 days</option><option value="months3">Within 3 months</option><option value="flexible">Flexible</option></select></div>
             <label class="check wide"><input type="checkbox" id="q-ready"><span>Ready to move in only</span></label>
-            <div class="field wide"><label for="q-notes">Notes for brokers</label><textarea id="q-notes" rows="3" maxlength="800" placeholder="e.g. East facing preferred, near a good school, high floor"></textarea></div>
+            <div class="field wide"><label for="q-notes">Notes for PropMithra</label><textarea id="q-notes" rows="3" maxlength="800" placeholder="e.g. East facing preferred, near a good school, high floor"></textarea></div>
           </div>
         </fieldset>
-        <fieldset class="reg-group"><legend>Who can see it</legend>
-          <div class="vis vis-2">
-            <label class="vis-opt"><input type="radio" name="qvis" value="network" checked><b>My network</b><small>Brokers with a matching property can reach you</small></label>
-            <label class="vis-opt"><input type="radio" name="qvis" value="private"><b>Private</b><small>Only you — for your own tracking</small></label>
-          </div>
-        </fieldset>
+        <p class="muted small">Only the PropMithra team sees this request. They look for a matching property and contact you.</p>
         <p class="form-msg" id="q-msg" role="alert"></p>
-        <div class="reg-foot"><button class="btn btn-ghost" type="button" data-q-cancel>Cancel</button><button class="btn btn-primary" type="submit" id="q-save">Post requirement</button></div>
+        <div class="reg-foot"><button class="btn btn-ghost" type="button" data-q-cancel>Cancel</button><button class="btn btn-primary" type="submit" id="q-save">Send to PropMithra</button></div>
       </form>
 
       <!-- Add property form -->
@@ -1748,6 +1743,7 @@ const LOCALITIES = [
   ['Shamshabad', '501218', 17.2543, 78.4298], ['Secunderabad', '500003', 17.4399, 78.4983]];
 const AMENITIES = ['Lift', 'Power backup', 'Security', 'Gated community', 'Covered parking', 'Gym', 'Swimming pool', 'Club house', 'Children play area', 'Water 24x7', 'Garden', 'Vastu compliant'];
 const AVAIL = {available: 'Available', hold: 'On hold', sold: 'Sold', rented: 'Rented', closed: 'Closed'};
+const REQ_TEAM = {new: 'Sent to PropMithra', working: 'PropMithra is searching', matched: 'Properties shared with you', closed: 'Closed by PropMithra'};
 const VIS = {network: 'My network', collaboration: 'On collaboration', private: 'Private', selected: 'Selected brokers'};
 const MAX_PHOTOS = 5, MAX_BYTES = 900 * 1024;
 
@@ -2289,7 +2285,8 @@ function renderReqs() {
         <div class="lprice">${esc(budgetText(r))}${r.transaction !== 'sale' ? '<small>/mo</small>' : ''}</div>
         <span class="muted">${esc((r.localities || []).join(', '))}</span>
         ${r.customer?.name ? `<span class="muted">Customer: ${esc(r.customer.name)}${r.customer.phone ? ' · ' + esc(r.customer.phone) : ''}</span>` : ''}
-        <div class="tags"><span class="tag ${r.active ? 'ok' : ''}">${r.active ? 'Active' : 'Closed'}</span><span class="tag">${esc(URGENCY[r.urgency] || '')}</span><span class="tag">${esc(VIS[r.visibility] || r.visibility)}</span></div>
+        ${r.teamNote ? `<span class="muted"><b>PropMithra:</b> ${esc(r.teamNote)}</span>` : ''}
+        <div class="tags"><span class="tag ${r.active ? 'ok' : ''}">${r.active ? 'Active' : 'Closed'}</span><span class="tag">${esc(URGENCY[r.urgency] || '')}</span><span class="tag">${esc(REQ_TEAM[r.teamStatus || 'new'] || 'Sent to PropMithra')}</span></div>
         <div class="lactions"><button type="button" class="link-btn" data-toggle>${r.active ? 'Mark closed' : 'Reopen'}</button><button type="button" class="link-btn danger" data-del>Delete</button></div>
       </div></article>`).join('');
   box.querySelectorAll('.rcard').forEach(card => {
@@ -2308,8 +2305,8 @@ async function loadReqs() {
 async function toggleReq(r) {
   try {
     const {fs, db} = fb, active = !r.active;
-    await fs.updateDoc(fs.doc(db, 'requirements', r.id), {active, listed: active && r.visibility !== 'private', updatedAt: fs.serverTimestamp()});
-    r.active = active; r.listed = active && r.visibility !== 'private'; renderReqs();
+    await fs.updateDoc(fs.doc(db, 'requirements', r.id), {active, listed: false, visibility: 'private', updatedAt: fs.serverTimestamp()});
+    r.active = active; r.listed = false; r.visibility = 'private'; renderReqs();
   } catch (e) { console.error(e); $('r-count').textContent = 'Could not update. Please try again.'; }
 }
 async function removeReq(r, card) {
@@ -2357,7 +2354,7 @@ async function saveReq(ev) {
     const {fs, db} = fb, ref = fs.doc(fs.collection(db, 'requirements'));
     const type = $('q-type').value, transaction = $('q-transaction').value;
     const bhk = HAS_BHK.has(type) && $('q-bhk').value ? Number($('q-bhk').value) : null;
-    const visibility = document.querySelector('input[name="qvis"]:checked').value;
+    const visibility = 'private';
     const where = locs.length > 2 ? `${locs.slice(0, 2).join(', ')} +${locs.length - 2}` : locs.join(', ');
     const title = `${bhk ? bhk + ' BHK ' : ''}${TYPE_LABEL[type]} to ${WANTS[transaction]} in ${where}`;
     const int = (id) => { const v = parseInt($(id).value, 10); return isNaN(v) ? null : v; };
@@ -2366,7 +2363,7 @@ async function saveReq(ev) {
       type, transaction, city: 'Hyderabad', localities: locs, budgetMin: bmin || 0, budgetMax: bmax,
       purpose: $('q-purpose').value, urgency: $('q-urgency').value, bhk, areaMin: int('q-amin'), areaMax: int('q-amax'),
       furnishing: $('q-furnishing').value || null, readyToMove: $('q-ready').checked, notes: $('q-notes').value.trim(),
-      visibility, active: true, listed: visibility !== 'private', source: 'website',
+      visibility, active: true, listed: false, teamStatus: 'new', brokerName: broker.name || user.displayName || '', brokerPhone: broker.phone || user.phoneNumber || '', source: 'website',
       createdAt: fs.serverTimestamp(), updatedAt: fs.serverTimestamp(),
     };
     await fs.setDoc(ref, doc);
@@ -2376,12 +2373,12 @@ async function saveReq(ev) {
     fs.addDoc(fs.collection(db, 'activity'), {type: 'requirement_posted', actorId: uid, actorName: who, summary: `${who} posted a requirement: ${title} (website)`, targetId: ref.id, targetType: 'requirement', at: fs.serverTimestamp()}).catch(() => {});
     reqs.unshift({id: ref.id, ...doc, customer, createdAt: null});
     closeReq(); tab('reqs'); renderReqs();
-    $('r-count').textContent = '✓ Requirement posted — brokers with a matching property can reach you.';
+    $('r-count').textContent = '✓ Request sent — the PropMithra team will look for matching properties and contact you.';
     window.scrollTo({top: $('d-listings-wrap').offsetTop - 90, behavior: 'smooth'});
   } catch (e) {
     console.error(e);
     $('q-msg').textContent = (e.code || '').includes('permission') ? 'Posting requirements is not unlocked for your account yet. Please contact PropMithra.' : 'Could not post the requirement. Please check your internet and try again.';
-  } finally { btn.disabled = false; btn.textContent = 'Post requirement'; }
+  } finally { btn.disabled = false; btn.textContent = 'Send to PropMithra'; }
 }
 
 
